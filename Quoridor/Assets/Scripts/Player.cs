@@ -13,7 +13,7 @@ public class Player : MonoBehaviour
     Vector2 touchPosition;
 
     [SerializeField]
-    List<Vector2Int> playerMovablePositions = new List<Vector2Int>();
+    List<Vector2Int> playerMovablePositions = new List<Vector2Int>(); // 플레이어의 가능한 이동 좌표들
     [SerializeField]
     GameObject playerPreviewPrefab; // 플레이어 위치 미리보기
     List<GameObject> playerPreviews = new List<GameObject>();
@@ -178,25 +178,22 @@ public class Player : MonoBehaviour
     void SetPreviewPlayer()
     {
         for(int i = 0; i < playerMovablePositions.Count; i++){
-            // Debug.Log(playerMovablePositions.Count);
-            // Debug.Log($"index={i}, Vector={(Vector2)playerMovablePositions[i] * GameManager.gridSize}");
             Debug.DrawRay(transform.position, (Vector2)playerMovablePositions[i] * GameManager.gridSize, Color.red, 0.1f);
-            RaycastHit2D wallHit = Physics2D.Raycast(transform.position, playerMovablePositions[i], GameManager.gridSize, LayerMask.GetMask("Wall"));
-            RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, playerMovablePositions[i], GameManager.gridSize, LayerMask.GetMask("SemiWall"));
+            RaycastHit2D wallHit = Physics2D.Raycast(transform.position, playerMovablePositions[i], GameManager.gridSize, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
+            RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, playerMovablePositions[i], GameManager.gridSize, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
             bool fullBlock= false;
-            Debug.Log($"direction:{playerMovablePositions[i]}, Hit:{(bool)wallHit}");
-            if(!wallHit) {
-                for(int j = 0; j < semiWallHit.Length; j++){
+            if(!wallHit) { // 벽에 의해 완전히 막히지 않았고
+                for(int j = 0; j < semiWallHit.Length; j++){ // 반벽이 2개가 겹쳐있을 경우에
                     for(int k = j + 1; k < semiWallHit.Length; k++){
                         Debug.Log($"1: {semiWallHit[j].distance}, 2: {semiWallHit[k].distance}, 1==2: {Mathf.Abs(semiWallHit[j].distance - semiWallHit[k].distance) < 0.000001f}");
                         if(Mathf.Abs(semiWallHit[j].distance - semiWallHit[k].distance) < 0.000001f){
-                            fullBlock = true;
+                            fullBlock = true; // 완전 막힘으로 처리
                             break;
                         }
                     }
                     if(fullBlock) break;
                 }
-                if(!fullBlock){
+                if(!fullBlock){ // 완전 막히지 않았다면 플레이어 미리보기 활성화
                     playerPreviews[i].transform.position = transform.position + GameManager.gridSize * (Vector3)(Vector2)playerMovablePositions[i];
                     playerPreviews[i].SetActive(true);
                 }
