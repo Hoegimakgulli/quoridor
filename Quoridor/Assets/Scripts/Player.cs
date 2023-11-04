@@ -12,7 +12,8 @@ public class Player : MonoBehaviour
     public ETouchState touchState = ETouchState.None;
     Vector2 touchPosition;
 
-
+    [SerializeField]
+    List<Vector2Int> playerMovablePositions = new List<Vector2Int>();
     [SerializeField]
     GameObject playerPreviewPrefab; // 플레이어 위치 미리보기
     List<GameObject> playerPreviews = new List<GameObject>();
@@ -32,7 +33,7 @@ public class Player : MonoBehaviour
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         transform.position = GameManager.gridSize * gameManager.playerPosition; //플레이어 위치 초기화 (처음위치는 게임메니저에서 설정)
-        for (int i = 0; i < 4; i++) // 플레이어 미리보기 -> 미리소환하여 비활성화 해놓기
+        for (int i = 0; i < playerMovablePositions.Count; i++) // 플레이어 미리보기 -> 미리소환하여 비활성화 해놓기
         {
             playerPreviews.Add(Instantiate(playerPreviewPrefab, transform.position, Quaternion.identity));
             playerPreviews[i].SetActive(false);
@@ -76,7 +77,7 @@ public class Player : MonoBehaviour
         else // 플레이어 차례가 아니면
         {
             // 미리보기들 비활성화
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < playerPreviews.Count; i++)
             {
                 playerPreviews[i].SetActive(false);
             }
@@ -176,40 +177,30 @@ public class Player : MonoBehaviour
     // 플레이어 미리보기 설정
     void SetPreviewPlayer()
     {
-        // 레이를 상하좌우로 쏴 벽에 막히지 않으면 그좌표에 벽 미리보기 활성화
-        // Debug.DrawRay(transform.position, Vector2.down * GameManager.gridSize, Color.red, 0.1f);
-        RaycastHit2D upHit = Physics2D.Raycast(transform.position, Vector2.up, GameManager.gridSize, LayerMask.GetMask("Wall"));
-        RaycastHit2D downHit = Physics2D.Raycast(transform.position, Vector2.down, GameManager.gridSize, LayerMask.GetMask("Wall"));
-        RaycastHit2D leftHit = Physics2D.Raycast(transform.position, Vector2.left, GameManager.gridSize, LayerMask.GetMask("Wall"));
-        RaycastHit2D rightHit = Physics2D.Raycast(transform.position, Vector2.right, GameManager.gridSize, LayerMask.GetMask("Wall"));
-        // Debug.Log((bool)downHit);
-        if (!upHit)
-        {
-            playerPreviews[0].transform.position = transform.position + GameManager.gridSize * Vector3.up;
-            playerPreviews[0].SetActive(true);
+        for(int i = 0; i < playerMovablePositions.Count; i++){
+            // Debug.Log(playerMovablePositions.Count);
+            // Debug.Log($"index={i}, Vector={(Vector2)playerMovablePositions[i] * GameManager.gridSize}");
+            Debug.DrawRay(transform.position, (Vector2)playerMovablePositions[i] * GameManager.gridSize, Color.red, 0.1f);
+            RaycastHit2D wallHit = Physics2D.Raycast(transform.position, playerMovablePositions[i], GameManager.gridSize, LayerMask.GetMask("Wall"));
+            RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, playerMovablePositions[i], GameManager.gridSize, LayerMask.GetMask("SemiWall"));
+            bool fullBlock= false;
+            Debug.Log($"direction:{playerMovablePositions[i]}, Hit:{(bool)wallHit}");
+            if(!wallHit) {
+                for(int j = 0; j < semiWallHit.Length; j++){
+                    for(int k = j + 1; k < semiWallHit.Length; k++){
+                        Debug.Log($"1: {semiWallHit[j].distance}, 2: {semiWallHit[k].distance}, 1==2: {Mathf.Abs(semiWallHit[j].distance - semiWallHit[k].distance) < 0.000001f}");
+                        if(Mathf.Abs(semiWallHit[j].distance - semiWallHit[k].distance) < 0.000001f){
+                            fullBlock = true;
+                            break;
+                        }
+                    }
+                    if(fullBlock) break;
+                }
+                if(!fullBlock){
+                    playerPreviews[i].transform.position = transform.position + GameManager.gridSize * (Vector3)(Vector2)playerMovablePositions[i];
+                    playerPreviews[i].SetActive(true);
+                }
+            }
         }
-        else
-            playerPreviews[0].SetActive(false);
-        if (!downHit)
-        {
-            playerPreviews[1].transform.position = transform.position + GameManager.gridSize * Vector3.down;
-            playerPreviews[1].SetActive(true);
-        }
-        else
-            playerPreviews[1].SetActive(false);
-        if (!leftHit)
-        {
-            playerPreviews[2].transform.position = transform.position + GameManager.gridSize * Vector3.left;
-            playerPreviews[2].SetActive(true);
-        }
-        else
-            playerPreviews[2].SetActive(false);
-        if (!rightHit)
-        {
-            playerPreviews[3].transform.position = transform.position + GameManager.gridSize * Vector3.right;
-            playerPreviews[3].SetActive(true);
-        }
-        else
-            playerPreviews[3].SetActive(false);
     }
 }
