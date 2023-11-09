@@ -178,14 +178,14 @@ public class Player : MonoBehaviour
     void SetPreviewPlayer()
     {
         for(int i = 0; i < playerMovablePositions.Count; i++){
-            Debug.DrawRay(transform.position, (Vector2)playerMovablePositions[i] * GameManager.gridSize, Color.red, 0.1f);
-            RaycastHit2D wallHit = Physics2D.Raycast(transform.position, playerMovablePositions[i], GameManager.gridSize, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
-            RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, playerMovablePositions[i], GameManager.gridSize, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
+            RaycastHit2D wallHit = Physics2D.Raycast(transform.position, ((Vector2)playerMovablePositions[i]).normalized, GameManager.gridSize * playerMovablePositions[i].magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
+            RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, ((Vector2)playerMovablePositions[i]).normalized, GameManager.gridSize * playerMovablePositions[i].magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
+            RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, ((Vector2)playerMovablePositions[i]).normalized, GameManager.gridSize * playerMovablePositions[i].magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
             bool fullBlock= false;
+            Debug.Log($"{(bool)tokenHit} - {(tokenHit ? tokenHit.collider.gameObject.name : i)}");
             if(!wallHit) { // 벽에 의해 완전히 막히지 않았고
                 for(int j = 0; j < semiWallHit.Length; j++){ // 반벽이 2개가 겹쳐있을 경우에
                     for(int k = j + 1; k < semiWallHit.Length; k++){
-                        Debug.Log($"1: {semiWallHit[j].distance}, 2: {semiWallHit[k].distance}, 1==2: {Mathf.Abs(semiWallHit[j].distance - semiWallHit[k].distance) < 0.000001f}");
                         if(Mathf.Abs(semiWallHit[j].distance - semiWallHit[k].distance) < 0.000001f){
                             fullBlock = true; // 완전 막힘으로 처리
                             break;
@@ -194,10 +194,17 @@ public class Player : MonoBehaviour
                     if(fullBlock) break;
                 }
                 if(!fullBlock){ // 완전 막히지 않았다면 플레이어 미리보기 활성화
-                    playerPreviews[i].transform.position = transform.position + GameManager.gridSize * (Vector3)(Vector2)playerMovablePositions[i];
-                    playerPreviews[i].SetActive(true);
+                    if(!tokenHit){
+                        Debug.DrawRay(transform.position, (Vector2)playerMovablePositions[i] * GameManager.gridSize, Color.green, 0.1f);
+                        playerPreviews[i].transform.position = transform.position + GameManager.gridSize * (Vector3)(Vector2)playerMovablePositions[i];
+                        playerPreviews[i].SetActive(true);
+                    }
+                    else{
+                        Debug.DrawRay(transform.position, (Vector2)playerMovablePositions[i] * GameManager.gridSize, Color.yellow, 0.1f);
+                    }
                 }
             }
+            else Debug.DrawRay(transform.position, (Vector2)playerMovablePositions[i] * GameManager.gridSize, Color.red, 0.1f);
         }
     }
 }
