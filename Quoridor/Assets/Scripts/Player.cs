@@ -15,6 +15,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     List<Vector2Int> playerMovablePositions = new List<Vector2Int>(); // 플레이어의 가능한 이동 좌표들
     [SerializeField]
+    List<Vector2Int> playerAttackablePositions = new List<Vector2Int>(); // 플레이어의 가능한 공격 좌표들
+    [SerializeField]
     GameObject playerPreviewPrefab; // 플레이어 위치 미리보기
     List<GameObject> playerPreviews = new List<GameObject>();
     [SerializeField]
@@ -50,29 +52,9 @@ public class Player : MonoBehaviour
         if (GameManager.Turn % 2 == playerOrder) // 플레이어 차례인지 확인
         {
             touchPosition = Camera.main.ScreenToWorldPoint(touchPosition); //카메라에 찍힌 좌표를 월드좌표로
-            SetPreviewPlayer();
-            SetPreviewWall();
-            if (touchState == ETouchState.Began) //화면 클릭시
-            {
-                if (!playerWallPreview.GetComponent<PreviewWall>().isBlock && playerWallPreview.tag != "CantBuild" && playerWallPreview.activeInHierarchy) //갇혀있거나 겹쳐있거나 비활성화 되어있지않다면
-                {
-                    Instantiate(playerWallPrefab, playerWallPreview.transform.position, playerWallPreview.transform.rotation); // 벽설치
-                    gameManager.playerPosition = transform.position / GameManager.gridSize;
-                    tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
-                    GameManager.Turn++; // 턴 넘기기
-                    return;
-                }
-                RaycastHit2D hit = Physics2D.Raycast(touchPosition, transform.forward, 15f, LayerMask.GetMask("Preview"));
-                if (hit == false) return;
-                if (hit.transform.CompareTag("PlayerPreview")) // 클릭좌표에 플레이어미리보기가 있다면
-                {
-                    transform.position = hit.transform.position; //플레이어 위치 이동
-                    gameManager.playerPosition = transform.position / GameManager.gridSize; //플레이어 위치정보 저장
-                    GameManager.Turn++; // 턴 넘기기
-                    return;
-                }
-
-            }
+            MovePlayer();
+            BuildWall();
+            Attack();
         }
         else // 플레이어 차례가 아니면
         {
@@ -105,6 +87,37 @@ public class Player : MonoBehaviour
             touchPosition = touch.position;
         }else touchState = ETouchState.None;
 #endif
+    }
+    void MovePlayer(){
+        SetPreviewPlayer();
+        if (touchState == ETouchState.Began) //화면 클릭시
+        {
+            RaycastHit2D previewHit = Physics2D.Raycast(touchPosition, transform.forward, 15f, LayerMask.GetMask("Preview"));
+            if (previewHit){
+                if (previewHit.transform.CompareTag("PlayerPreview")) // 클릭좌표에 플레이어미리보기가 있다면
+                {
+                    transform.position = previewHit.transform.position; //플레이어 위치 이동
+                    gameManager.playerPosition = transform.position / GameManager.gridSize; //플레이어 위치정보 저장
+                    GameManager.Turn++; // 턴 넘기기
+                    return;
+                }
+            }
+        }
+    }
+    void BuildWall(){
+        SetPreviewWall();
+        if (touchState == ETouchState.Began) //화면 클릭시
+        {
+            if (!playerWallPreview.GetComponent<PreviewWall>().isBlock && playerWallPreview.tag != "CantBuild" && playerWallPreview.activeInHierarchy) //갇혀있거나 겹쳐있거나 비활성화 되어있지않다면
+            {
+                Instantiate(playerWallPrefab, playerWallPreview.transform.position, playerWallPreview.transform.rotation); // 벽설치
+                gameManager.playerPosition = transform.position / GameManager.gridSize;
+                tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
+                GameManager.Turn++; // 턴 넘기기
+                return;
+            }
+                
+        }
     }
     // 미리보기 벽 설치
     void SetPreviewWall()
@@ -182,7 +195,7 @@ public class Player : MonoBehaviour
             RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, ((Vector2)playerMovablePositions[i]).normalized, GameManager.gridSize * playerMovablePositions[i].magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
             RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, ((Vector2)playerMovablePositions[i]).normalized, GameManager.gridSize * playerMovablePositions[i].magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
             bool fullBlock= false;
-            Debug.Log($"{(bool)tokenHit} - {(tokenHit ? tokenHit.collider.gameObject.name : i)}");
+            // Debug.Log($"{(bool)tokenHit} - {(tokenHit ? tokenHit.collider.gameObject.name : i)}");
             if(!wallHit) { // 벽에 의해 완전히 막히지 않았고
                 for(int j = 0; j < semiWallHit.Length; j++){ // 반벽이 2개가 겹쳐있을 경우에
                     for(int k = j + 1; k < semiWallHit.Length; k++){
@@ -206,5 +219,51 @@ public class Player : MonoBehaviour
             }
             else Debug.DrawRay(transform.position, (Vector2)playerMovablePositions[i] * GameManager.gridSize, Color.red, 0.1f);
         }
+    }
+    // 공격 미리보기
+    void SetPreviewAttack(){
+        for(int i = 0; i < playerAttackablePositions.Count; i++){
+            RaycastHit2D wallHit = Physics2D.Raycast(transform.position, ((Vector2)playerAttackablePositions[i]).normalized, GameManager.gridSize * playerAttackablePositions[i].magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
+            RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, ((Vector2)playerAttackablePositions[i]).normalized, GameManager.gridSize * playerAttackablePositions[i].magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
+            RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, ((Vector2)playerAttackablePositions[i]).normalized, GameManager.gridSize * playerAttackablePositions[i].magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
+            bool fullBlock= false;
+            // Debug.Log($"{(bool)tokenHit} - {(tokenHit ? tokenHit.collider.gameObject.name : i)}");
+            if(!wallHit) { // 벽에 의해 완전히 막히지 않았고
+                for(int j = 0; j < semiWallHit.Length; j++){ // 반벽이 2개가 겹쳐있을 경우에
+                    for(int k = j + 1; k < semiWallHit.Length; k++){
+                        if(Mathf.Abs(semiWallHit[j].distance - semiWallHit[k].distance) < 0.000001f){
+                            fullBlock = true; // 완전 막힘으로 처리
+                            break;
+                        }
+                    }
+                    if(fullBlock) break;
+                }
+                if(!fullBlock){ // 완전 막히지 않았고 적이 공격 범주에 있다면 공격한다.
+                    if(!tokenHit){
+                        /*
+                            대충 공격 범위 보이게 해주는 효과
+                        */
+                    }
+                }
+            }
+        }
+    }
+    void Attack(){
+        SetPreviewAttack();
+        if (touchState == ETouchState.Began) //화면 클릭시
+        {
+            RaycastHit2D tokenHit = Physics2D.Raycast(touchPosition, transform.forward, 15f, LayerMask.GetMask("Token"));
+            if (tokenHit){
+                if(tokenHit.transform.tag == "Enemy"){
+                    GameObject enemy = tokenHit.collider.gameObject;
+                    Vector3 enemyPosition = enemy.transform.position / GameManager.gridSize;
+                    /*
+                        대충 데미지 관리
+                        enemy.GetComponent<Enemy>().Health -= damage;
+                    */
+                }
+            }
+        }
+        
     }
 }
