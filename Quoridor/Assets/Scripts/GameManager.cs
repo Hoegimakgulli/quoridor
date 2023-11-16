@@ -16,7 +16,6 @@ public class GameManager : MonoBehaviour
     GameObject player;
 
     public GameObject playerPrefab;
-    public List<GameObject> enemyPrefabs;
 
     void Awake()
     {
@@ -44,21 +43,6 @@ public class GameManager : MonoBehaviour
         }
         // DebugMap();
         player = Instantiate(playerPrefab, playerPosition * gridSize, Quaternion.identity);
-
-        int enemyCost = currentStage + 2;
-        while(enemyCost != 0){
-            int randomNumber = Random.Range(0, enemyPrefabs.Count);
-            int cost = enemyPrefabs[randomNumber].GetComponent<Enemy>().cost;
-            if(enemyCost - cost >= 0){
-                Vector3 enemyPosition;
-                do
-                    {enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0);}
-                while(Enemy.enemyPositions.Contains(enemyPosition) && Enemy.enemyPositions.Count != 0);
-                Enemy.enemyPositions.Add(enemyPosition);
-                Enemy.enemyObjects.Add(Instantiate(enemyPrefabs[randomNumber], gridSize * Enemy.enemyPositions[Enemy.enemyPositions.Count - 1], Quaternion.identity));
-                enemyCost -= cost;
-            }
-        }
     }
     void Update()
     {

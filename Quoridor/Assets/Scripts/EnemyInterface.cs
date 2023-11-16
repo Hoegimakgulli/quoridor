@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface IMove
 {
-    void GetShortRoad();
+    void GetShortRoad(List<Path> path);
     void GetBackRoad();
     void GetHoldRoad();
 }
