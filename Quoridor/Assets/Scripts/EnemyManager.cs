@@ -69,7 +69,7 @@ public class EnemyManager : MonoBehaviour
                     enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0); }
                 while (Enemy.enemyPositions.Contains(enemyPosition) && Enemy.enemyPositions.Count != 0); // 이미 소환된 적의 위치랑 안 겹칠때
                 Enemy.enemyPositions.Add(enemyPosition);
-                Enemy.enemyObjects.Add(Instantiate(enemyPrefabs[randomNumber], gridSize * Enemy.enemyPositions[Enemy.enemyPositions.Count - 1], Quaternion.identity));
+                Enemy.enemyObjects.Add(Instantiate(enemyPrefabs[randomNumber], GameManager.gridSize * Enemy.enemyPositions[Enemy.enemyPositions.Count - 1], Quaternion.identity));
                 enemyCost -= cost;
             }
         }
@@ -100,9 +100,9 @@ public class EnemyManager : MonoBehaviour
 
         // startPos, endPos 기존 position을 girdSize로 나눠서 정수화 시켜준 다음 좌표계 (0, 0)을 왼쪽 아래 가장자리로 바꿔줌
         Vector2 trimPos;
-        trimPos = startObj.transform.position / gridSize;
+        trimPos = startObj.transform.position / GameManager.gridSize;
         startPos = new Vector2Int(Mathf.FloorToInt(trimPos.x) + 4, Mathf.FloorToInt(trimPos.y) + 4);
-        trimPos = endObj.transform.position / gridSize;
+        trimPos = endObj.transform.position / GameManager.gridSize;
         targetPos = new Vector2Int(Mathf.FloorToInt(trimPos.x) + 4, Mathf.FloorToInt(trimPos.y) + 4);
 
         StartNode = PathArray[startPos.x - bottomLeft.x, startPos.y - bottomLeft.y];
@@ -129,7 +129,6 @@ public class EnemyManager : MonoBehaviour
             // 마지막
             if (CurNode == TargetNode)
             {   
-                Debug.Log("Found TargetNode");
                 Path TargetCurNode = TargetNode;
                 while (TargetCurNode != StartNode)
                 {
@@ -139,7 +138,7 @@ public class EnemyManager : MonoBehaviour
                 FinalPathList.Add(StartNode);
                 FinalPathList.Reverse();
 
-                for (int i = 0; i < FinalPathList.Count; i++) print(i + "번째는 " + FinalPathList[i].x + ", " + FinalPathList[i].y);
+                //for (int i = 0; i < FinalPathList.Count; i++) print(i + "번째는 " + FinalPathList[i].x + ", " + FinalPathList[i].y);
                 return;
             }
 
@@ -163,8 +162,9 @@ public class EnemyManager : MonoBehaviour
     public GameManager gameManager;
     void OpenListAdd(int checkX, int checkY)
     {
-        int startGraphPosition = (int)((8 - CurNode.y) * 9 + CurNode.x);
-        int endGraphPosition = (int)((8 - checkY) * 9 + checkX);
+        // graph 상 (0,0) == 0과 같음
+        int startGraphPosition = (int)(CurNode.y * 9 + CurNode.x);
+        int endGraphPosition = (int)(checkY * 9 + checkX);
         // 상하좌우 범위를 벗어나지 않고, 벽이 아니면서, 닫힌리스트에 없다면
         if (checkX >= bottomLeft.x && checkX < topRight.x + 1 && checkY >= bottomLeft.y && checkY < topRight.y + 1 && !ClosedList.Contains(PathArray[checkX - bottomLeft.x, checkY - bottomLeft.y]))
         {
@@ -177,11 +177,11 @@ public class EnemyManager : MonoBehaviour
                 {
                     if (checkY - CurNode.y == 1)
                     {
-                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition - 9] == 0) return;
+                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition + 9] == 0) return; // 아래에서 위로 올라가는 경우
                     }
                     else if (checkY - CurNode.y == -1)
                     {
-                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition + 9] == 0) return;
+                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition - 9] == 0) return; // 위에서 아래로 내려가는 경우
                     }
                 }
             }
@@ -222,19 +222,19 @@ public class EnemyManager : MonoBehaviour
         for (count = 0; count < Enemy.enemyObjects.Count; count++)
         {
             currentEnemyState = Enemy.enemyObjects[count].GetComponent<Enemy>();
-            Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
             currentEnemyState.moveCtrl[1] += Random.Range(0, 3); // 랜덤으로 들어오는 무작위 행동력 0 ~ 2
-            Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
 
             if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
             {
                 GameObject currenEnemy = Enemy.enemyObjects[count];
                 GameObject player = GameObject.Find("Player(Clone)");
-                Debug.Log(Enemy.enemyObjects[count] + " ready move"); // 이부분에서 현재 오브젝트의 State를 Move로 바꾸고 매 순간 Move함수 전체 실행
+                //Debug.Log(Enemy.enemyObjects[count] + " ready move"); // 이부분에서 현재 오브젝트의 State를 Move로 바꾸고 매 순간 Move함수 전체 실행
                 currentEnemyState.state = Enemy.EState.Move;
                 PathFinding(currenEnemy, player);
-                //currentEnemyState.EnemyMove(FinalPathList);
-                //currentEnemyState.moveCtrl[1] = 0; // 현재 행동력 초기화
+                currentEnemyState.EnemyMove(FinalPathList);
+                currentEnemyState.moveCtrl[1] = 0; // 현재 행동력 초기화
             }
         }
     }
