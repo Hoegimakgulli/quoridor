@@ -284,9 +284,22 @@ MonoBehaviour:
   cost: 2
   hp: 3
   moveCtrl: 0a00000000000000
-  characteristic: 0
-  unitMoveVector: 0100000001000000010000000100000000000000000000000000000000000000
+  moveablePoints:
+  - {x: 1, y: 0}
+  - {x: -1, y: 0}
+  - {x: 0, y: 1}
+  - {x: 0, y: -1}
+  attackablePoints:
+  - {x: 1, y: 1}
+  - {x: 2, y: 2}
+  - {x: -1, y: -1}
+  - {x: -2, y: -2}
+  - {x: -1, y: 1}
+  - {x: -2, y: 2}
+  - {x: 1, y: -1}
+  - {x: 2, y: -2}
   state: 0
+  characteristic: 0
 --- !u!50 &7355812584547581597
 Rigidbody2D:
   serializedVersion: 4

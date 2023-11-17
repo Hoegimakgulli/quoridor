@@ -11,8 +11,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public int cost;                                  // 소환 시 필요한 비용
     public int hp;                                    // 받아야하는 총 체력
     public int[] moveCtrl = new int[2];               // 0 = 요구 행동력, 1 = 현재 채워져 있는 행동력
-    public int[] unitMoveVector = new int[8];         // 0 = 위, 1 = 오른쪽, 2 = 아래, 3 = 왼쪽, 4 = 왼쪽위, 5 = 오른쪽위, 6 = 오른쪽아래, 7 = 왼쪽아래
-    //public int[] unitMoveVector = new int[2];         // 0 = + , 1 = x
+    public Vector2Int[] moveablePoints;
+    public Vector2Int[] attackablePoints;
     public enum EState { Idle, Move, Attack, Dead };
     public enum ECharacteristic { Forward, BackWard, Hold }; // 0 - 전진해 player를 공격, 1 - 뒤 포지션을 잡으면서 플레이어 공격, 2 - 자기 구역을 사수하면서 플레이어를 공격
     //------------------------------------------//
@@ -42,92 +42,46 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         }
     }
 
+    
     // A* 알고리즘
     public void GetShortRoad(List<Path> path)
     {
-        int anchor = 0;
-        Vector2 unitPos = transform.position / GameManager.gridSize;
-        Vector2 fixPos = new Vector2(0, 0);
-        unitPos = new Vector2Int(Mathf.FloorToInt(unitPos.x) + 4, Mathf.FloorToInt(unitPos.y) + 4);
-
-        for(int count = 1; count < path.Count; count++)
+        if (!AttackCanEnemy())
         {
-            Vector2Int movePath = new Vector2Int(Mathf.FloorToInt(path[count].x - unitPos.x), Mathf.FloorToInt(path[count].y - unitPos.y));
-            if(movePath.x == 0 && (anchor == 0 || anchor == 1)) // 위 아래
+            Vector2 unitPos = transform.position / GameManager.gridSize;
+            Vector2 fixPos = new Vector2(0, 0);
+            unitPos = new Vector2Int(Mathf.FloorToInt(unitPos.x) + 4, Mathf.FloorToInt(unitPos.y) + 4);
+
+            for (int count = 1; count < path.Count; count++)
             {
-                if(movePath.y < 0) // 아래
+                Vector2 pathPoint = new Vector2(path[count].x, path[count].y);
+                int moveCount;
+                for (moveCount = 0; moveCount < moveablePoints.Length; ++moveCount)
                 {
-                    if(Mathf.Abs(movePath.y) <= unitMoveVector[2])
+                    Vector2 currentMovePoint = unitPos + moveablePoints[moveCount];
+                    if (pathPoint == currentMovePoint)
                     {
-                        fixPos = new Vector2(path[count].x, path[count].y);
-                        anchor = 1;
-                    }
-                    else
-                    {
+                        fixPos = currentMovePoint;
                         break;
                     }
                 }
-                else // 위
+                if (moveCount == moveablePoints.Length)
                 {
-                    if (Mathf.Abs(movePath.y) <= unitMoveVector[0])
-                    {
-                        fixPos = new Vector2(path[count].x, path[count].y);
-                        anchor = 1;
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    break;
                 }
             }
 
-            else if(movePath.y == 0 && (anchor == 0 || anchor == 2)) // 좌 우
-            {
-                if(movePath.x < 0) // 왼쪽
-                {
-                    if (Mathf.Abs(movePath.x) <= unitMoveVector[3])
-                    {
-                        fixPos = new Vector2(path[count].x, path[count].y);
-                        anchor = 2;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                
-                else // 오른쪽
-                {
-                    if (Mathf.Abs(movePath.y) <= unitMoveVector[1])
-                    {
-                        fixPos = new Vector2(path[count].x, path[count].y);
-                        anchor = 2;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-
-            else if(anchor == 0 || anchor == 3) // 대각
-            {
-                Debug.Log("대각 이동");
-            }
-
-            else // 방향이 바뀌거나 범위 밖일경우
-            {
-                break;
-            }
+            transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+            state = EState.Attack;
+            AttackPlayer();
         }
-
-        transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
-        if (canAttack == true)
+        else
         {
             state = EState.Attack;
             AttackPlayer();
         }
     }
+    
     // 아직 미정
     public void GetBackRoad()
     {
@@ -153,11 +107,10 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     //--------------- Die 종료 ---------------//
 
     //--------------- Attack 시작 ---------------//
-    private bool canAttack = false;
     // playerAttack 함수 Raycast사용
     public void AttackPlayer()
     {
-        if (canAttack && state == EState.Attack)
+        if (AttackCanEnemy() && state == EState.Attack)
         {
             Vector2 playerPos = GameObject.Find("Player").transform.position;
             RaycastHit2D hit = Physics2D.Raycast(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Player")); // enemy 위치에서 player까지 ray쏘기
@@ -167,22 +120,31 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 Destroy(hit.transform.gameObject);
             }
         }
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.transform.name == "Player")
+        else
         {
-            canAttack = true;
+            state = EState.Idle;
         }
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
+    public bool AttackCanEnemy()
     {
-        if (collision.transform.name == "Player")
+        int attackCount;
+        Vector2 currentAttackPoint;
+        Vector2 playerPos = GameObject.Find("Player(Clone)").transform.position / GameManager.gridSize;
+        playerPos = new Vector2Int(Mathf.FloorToInt(playerPos.x), Mathf.FloorToInt(playerPos.y));
+        Vector2 enemyPos = transform.position / GameManager.gridSize;
+        enemyPos = new Vector2Int(Mathf.FloorToInt(enemyPos.x), Mathf.FloorToInt(enemyPos.y));
+
+        for (attackCount = 0; attackCount < attackablePoints.Length; ++attackCount)
         {
-            canAttack = false;
+            currentAttackPoint = enemyPos + attackablePoints[attackCount];
+            if(playerPos == currentAttackPoint)
+            {
+                Debug.Log("공격 가능");
+                return true;
+            }
         }
+        return false;
     }
     //--------------- Attack 종료 ---------------//
 }
