@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public enum EPlayerControlStatus { None, Move, Build, Attack };
+    public EPlayerControlStatus playerControlStatus = EPlayerControlStatus.None;
+
     public static int Turn = 1; // 현재 턴
     public const float gridSize = 1.3f; // 그리드의 크기
 
@@ -56,7 +59,7 @@ public class GameManager : MonoBehaviour
     {
         bool[] visited = new bool[81];
         int playerGraphPosition = (int)((playerPosition.y + 4) * 9 + playerPosition.x + 4);
-        
+
         void DFS(int now)
         {
             visited[now] = true;
@@ -74,7 +77,7 @@ public class GameManager : MonoBehaviour
         foreach(Vector3 enemyPosition in Enemy.enemyPositions)
         {
             int enemyGraphPosition = (int)((enemyPosition.y + 4) * 9 + enemyPosition.x + 4);
-            if(!visited[enemyGraphPosition]) return false;
+            if (!visited[enemyGraphPosition]) return false;
         }
         return true;
     }
