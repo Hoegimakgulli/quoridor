@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public enum EPlayerControlStatus { None, Move, Build, Attack };
+    public EPlayerControlStatus playerControlStatus = EPlayerControlStatus.None;
+
     public static int Turn = 1; // 현재 턴
     public const float gridSize = 1.3f; // 그리드의 크기
 
@@ -47,14 +50,16 @@ public class GameManager : MonoBehaviour
         // DebugMap();
         player = Instantiate(playerPrefab, playerPosition * gridSize, Quaternion.identity);
         int enemyCost = currentStage + 2;
-        while(enemyCost != 0){
+        while (enemyCost != 0)
+        {
             int randomNumber = Random.Range(0, enemyPrefabs.Count);
             int cost = enemyPrefabs[randomNumber].GetComponent<Enemy>().cost;
-            if(enemyCost - cost >= 0){
+            if (enemyCost - cost >= 0)
+            {
                 Vector3 enemyPosition;
                 do
-                    {enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0);}
-                while(enemyPositions.Contains(enemyPosition) && enemyPositions.Count != 0);
+                { enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0); }
+                while (enemyPositions.Contains(enemyPosition) && enemyPositions.Count != 0);
                 enemyPositions.Add(enemyPosition);
                 enemy.Add(Instantiate(enemyPrefabs[randomNumber], gridSize * enemyPositions[enemyPositions.Count - 1], Quaternion.identity));
                 enemyCost -= cost;
@@ -73,7 +78,7 @@ public class GameManager : MonoBehaviour
     {
         bool[] visited = new bool[81];
         int playerGraphPosition = (int)((playerPosition.y + 4) * 9 + playerPosition.x + 4);
-        
+
         void DFS(int now)
         {
             visited[now] = true;
@@ -88,9 +93,10 @@ public class GameManager : MonoBehaviour
         }
         DFS(playerGraphPosition);
         // Debug.Log(visited[enemyGraphPosition]);
-        foreach(Vector3 enemyPosition in enemyPositions){
+        foreach (Vector3 enemyPosition in enemyPositions)
+        {
             int enemyGraphPosition = (int)((enemyPosition.y + 4) * 9 + enemyPosition.x + 4);
-            if(!visited[enemyGraphPosition]) return false;
+            if (!visited[enemyGraphPosition]) return false;
         }
         return true;
     }
