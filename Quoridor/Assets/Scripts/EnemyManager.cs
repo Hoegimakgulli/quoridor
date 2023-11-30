@@ -30,6 +30,7 @@ public class Path
 public class EnemyManager : MonoBehaviour
 {
     public List<GameObject> enemyPrefabs;
+    public List<GameObject> loyalEnemyPrefabs;
     public int currentStage = 0;
     public const float gridSize = 1.3f; // 그리드의 크기
 
@@ -51,6 +52,12 @@ public class EnemyManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.W))
         {
             MoveCtrlUpdate();
+        }
+
+        if(GameManager.Turn % 2 == 0)
+        {
+            MoveCtrlUpdate();
+            //GameManager.Turn++;
         }
     }
 
@@ -235,6 +242,12 @@ public class EnemyManager : MonoBehaviour
                 PathFinding(currenEnemy, player);
                 currentEnemyState.EnemyMove(FinalPathList);
                 currentEnemyState.moveCtrl[1] = 0; // 현재 행동력 초기화
+                GameManager.Turn++;
+            }
+
+            else
+            {
+                GameManager.Turn++;
             }
         }
     }

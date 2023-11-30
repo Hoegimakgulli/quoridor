@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c2e931e34c5eab45aa00d6638d215c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerControlStatus: 0
   playerPosition: {x: 0, y: -4, z: 0}
   currentStage: 0
   playerPrefab: {fileID: 5098181600813880054, guid: 292c15a3cc637f44cbf46380a44037e5, type: 3}
