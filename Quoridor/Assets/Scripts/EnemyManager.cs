@@ -247,12 +247,12 @@ public class EnemyManager : MonoBehaviour
                 PathFinding(currenEnemy, player);
                 currentEnemyState.EnemyMove(FinalPathList);
                 currentEnemyState.moveCtrl[1] = 0; // 현재 행동력 초기화
-                GameManager.Turn++;
+                //GameManager.Turn++;
             }
 
             else
             {
-                GameManager.Turn++;
+                //GameManager.Turn++;
             }
         }
     }
