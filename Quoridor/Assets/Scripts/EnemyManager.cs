@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 [System.Serializable]
@@ -34,6 +35,8 @@ public class EnemyManager : MonoBehaviour
     public int currentStage = 0;
     public const float gridSize = 1.3f; // 그리드의 크기
 
+    private bool enemyTurnAnchor = true;
+
     private void Awake()
     {
         gameManager = transform.gameObject.GetComponent<GameManager>();
@@ -54,10 +57,10 @@ public class EnemyManager : MonoBehaviour
             MoveCtrlUpdate();
         }
 
-        if(GameManager.Turn % 2 == 0)
+        if(GameManager.Turn % 2 == 0 && enemyTurnAnchor)
         {
-            MoveCtrlUpdate();
-            //GameManager.Turn++;
+            enemyTurnAnchor = false;
+            StartCoroutine(StartEnemyTurn());
         }
     }
 
@@ -230,8 +233,10 @@ public class EnemyManager : MonoBehaviour
         {
             currentEnemyState = Enemy.enemyObjects[count].GetComponent<Enemy>();
             //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
-            currentEnemyState.moveCtrl[1] += Random.Range(0, 3); // 랜덤으로 들어오는 무작위 행동력 0 ~ 2
+            //currentEnemyState.moveCtrl[1] += Random.Range(0, currentEnemyState.moveCtrl[2]); // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
             //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
+
+            currentEnemyState.moveCtrl[1] += 10; // test 용 추가
 
             if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
             {
@@ -267,5 +272,12 @@ public class EnemyManager : MonoBehaviour
             Debug.Log("NodePos : " + path[i].x + "," + path[i].y + " | G : " + path[i].G + " | H : " + path[i].H + " | F : " + path[i].F);
         }
         Debug.Log("End Check --------------------------------------------------");
+    }
+
+     IEnumerator StartEnemyTurn()
+    {
+        yield return new WaitForSeconds(2);
+        MoveCtrlUpdate();
+        enemyTurnAnchor = true;
     }
 }
