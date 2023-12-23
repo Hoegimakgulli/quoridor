@@ -28,6 +28,7 @@ public class PlayerUI : MonoBehaviour
     }
     public void OnTurnClick()
     {
+        EnemyManager.turnCheck = false;
         GameManager.Turn++;
     }
 }

@@ -114,7 +114,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     {
         if (AttackCanEnemy() && state == EState.Attack)
         {
-            Vector2 playerPos = GameObject.Find("Player").transform.position;
+            Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
             RaycastHit2D hit = Physics2D.Raycast(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Player")); // enemy 위치에서 player까지 ray쏘기
             if(hit != false) // 벽과 부딪치치 않았다면
             {
@@ -132,7 +132,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     {
         int attackCount;
         Vector2 currentAttackPoint;
-        Vector2 playerPos = GameObject.Find("Player(Clone)").transform.position / GameManager.gridSize;
+        Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position / GameManager.gridSize;
         playerPos = new Vector2Int(Mathf.FloorToInt(playerPos.x), Mathf.FloorToInt(playerPos.y));
         Vector2 enemyPos = transform.position / GameManager.gridSize;
         enemyPos = new Vector2Int(Mathf.FloorToInt(enemyPos.x), Mathf.FloorToInt(enemyPos.y));

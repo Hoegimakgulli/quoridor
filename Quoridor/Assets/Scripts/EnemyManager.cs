@@ -225,6 +225,7 @@ public class EnemyManager : MonoBehaviour
                 Gizmos.DrawLine(new Vector2(FinalPathList[i].x, FinalPathList[i].y), new Vector2(FinalPathList[i + 1].x, FinalPathList[i + 1].y));
     }
     */
+    static public bool turnCheck = false;
     void MoveCtrlUpdate()
     {
         Enemy currentEnemyState;
@@ -247,12 +248,21 @@ public class EnemyManager : MonoBehaviour
                 PathFinding(currenEnemy, player);
                 currentEnemyState.EnemyMove(FinalPathList);
                 currentEnemyState.moveCtrl[1] = 0; // 현재 행동력 초기화
-                GameManager.Turn++;
+                if (!turnCheck)
+                {
+                    turnCheck = true;
+                    GameManager.Turn++;
+                }
             }
 
             else
             {
-                GameManager.Turn++;
+                if (!turnCheck)
+                {
+                    turnCheck = true;
+                    GameManager.Turn++;
+
+                }
             }
         }
     }
