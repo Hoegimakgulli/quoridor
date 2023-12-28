@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
+using UnityEngine.UI;
 
 [System.Serializable]
 public class Path
@@ -30,9 +32,11 @@ public class Path
 
 public class EnemyManager : MonoBehaviour
 {
-    public List<GameObject> enemyPrefabs;
-    public List<GameObject> loyalEnemyPrefabs;
+    public List<GameObject> enemyPrefabs; // 기본 유닛 오브젝트들 리스트 넣어두기
+    public List<GameObject> loyalEnemyPrefabs; // 상위 고급 유닛 오브젝트들 리스트 넣어두기
+
     public int currentStage = 0;
+    public GameObject enemyStatePrefab; // 적 기물 상태 판넬안에 들어가는 기본 빵틀 이라고 생각.
     public const float gridSize = 1.3f; // 그리드의 크기
 
     private bool enemyTurnAnchor = true;
@@ -42,6 +46,10 @@ public class EnemyManager : MonoBehaviour
         gameManager = transform.gameObject.GetComponent<GameManager>();
         Enemy.enemyObjects.Clear(); // 적 위치 및 객체 정보 초기화
         Enemy.enemyPositions.Clear();
+    }
+
+    private void Start()
+    {
         SpawnEnemy(); // 적 코스트에 따라 소환
     }
 
@@ -79,8 +87,19 @@ public class EnemyManager : MonoBehaviour
                     enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0); }
                 while (Enemy.enemyPositions.Contains(enemyPosition) && Enemy.enemyPositions.Count != 0); // 이미 소환된 적의 위치랑 안 겹칠때
                 Enemy.enemyPositions.Add(enemyPosition);
-                Enemy.enemyObjects.Add(Instantiate(enemyPrefabs[randomNumber], GameManager.gridSize * Enemy.enemyPositions[Enemy.enemyPositions.Count - 1], Quaternion.identity));
+                GameObject currentEnemyObj = Instantiate(enemyPrefabs[randomNumber], GameManager.gridSize * Enemy.enemyPositions[Enemy.enemyPositions.Count - 1], Quaternion.identity);
+                Enemy.enemyObjects.Add(currentEnemyObj);
                 enemyCost -= cost;
+
+                // 유닛 판넬안에 보드위에 있는 적들 데이터 정보를 넣는 부분
+                Enemy currentEnemey = currentEnemyObj.GetComponent<Enemy>();
+
+                GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("EnemyStateContent").transform);
+                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = enemyPrefabs[randomNumber].GetComponent<SpriteRenderer>().sprite;
+                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().color = enemyPrefabs[randomNumber].GetComponent<SpriteRenderer>().color;
+                currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "행동력 " + currentEnemey.cost + " / 10";
+                currentEnemey.maxHp = currentEnemey.hp;
+                currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "체력 " + currentEnemey.hp + " / " + currentEnemey.maxHp;
             }
         }
     }
@@ -242,8 +261,7 @@ public class EnemyManager : MonoBehaviour
             if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
             {
                 GameObject currenEnemy = Enemy.enemyObjects[count];
-                GameObject player = GameObject.Find("Player(Clone)");
-                //Debug.Log(Enemy.enemyObjects[count] + " ready move"); // 이부분에서 현재 오브젝트의 State를 Move로 바꾸고 매 순간 Move함수 전체 실행
+                GameObject player = GameObject.FindWithTag("Player");
                 currentEnemyState.state = Enemy.EState.Move;
                 PathFinding(currenEnemy, player);
                 currentEnemyState.EnemyMove(FinalPathList);

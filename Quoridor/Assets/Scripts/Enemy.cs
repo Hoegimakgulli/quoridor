@@ -10,6 +10,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     //-------------- Enemy Values --------------//
     public int cost;                                  // 소환 시 필요한 비용
     public int hp;                                    // 받아야하는 총 체력
+    public int maxHp;
     public int[] moveCtrl = new int[3];               // 0 = 요구 행동력, 1 = 현재 채워져 있는 행동력, 2 = 랜덤 행동력 충전 최대치
     public Vector2Int[] moveablePoints;
     public Vector2Int[] attackablePoints;
