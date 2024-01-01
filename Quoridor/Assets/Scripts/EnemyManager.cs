@@ -1,7 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -37,9 +35,11 @@ public class EnemyManager : MonoBehaviour
 
     public int currentStage = 0;
     public GameObject enemyStatePrefab; // 적 기물 상태 판넬안에 들어가는 기본 빵틀 이라고 생각.
+    public GameObject warningSignBox; // 경고 표기 담아두는 박스
     public const float gridSize = 1.3f; // 그리드의 크기
 
     private bool enemyTurnAnchor = true;
+    private bool enemyWarningSignAnchor = true;
 
     private void Awake()
     {
@@ -50,6 +50,7 @@ public class EnemyManager : MonoBehaviour
 
     private void Start()
     {
+        Instantiate(warningSignBox);
         SpawnEnemy(); // 적 코스트에 따라 소환
     }
 
@@ -65,10 +66,30 @@ public class EnemyManager : MonoBehaviour
             MoveCtrlUpdate();
         }
 
+        // 적 턴일때 (이동 및 공격확인)
         if(GameManager.Turn % 2 == 0 && enemyTurnAnchor)
         {
+            enemyWarningSignAnchor = true;
             enemyTurnAnchor = false;
+            // 경고sign 초기화
+            foreach(Transform child in GameObject.FindWithTag("WarningBox").transform)
+            {
+                Destroy(child.gameObject);
+            }
+            // 오브젝트 카운트 초기화
+            for(int count = 0; count < Enemy.enemyObjects.Count; count++)
+            {
+                Enemy.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
+            }
+
             StartCoroutine(StartEnemyTurn());
+        }
+
+        // 플레이어 턴일때 (적 움직임 경고)
+        if(GameManager.Turn % 2 == 1 && enemyWarningSignAnchor)
+        {
+            enemyWarningSignAnchor = false;
+            WarningEnemy();
         }
     }
 
@@ -94,6 +115,7 @@ public class EnemyManager : MonoBehaviour
                 // 유닛 판넬안에 보드위에 있는 적들 데이터 정보를 넣는 부분
                 Enemy currentEnemey = currentEnemyObj.GetComponent<Enemy>();
 
+                // 적 정보 UI 판넬에 표시하는 부분
                 GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("EnemyStateContent").transform);
                 currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = enemyPrefabs[randomNumber].GetComponent<SpriteRenderer>().sprite;
                 currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().color = enemyPrefabs[randomNumber].GetComponent<SpriteRenderer>().color;
@@ -113,6 +135,7 @@ public class EnemyManager : MonoBehaviour
     Path StartNode, TargetNode, CurNode;
     List<Path> OpenList, ClosedList;
 
+    // A* 알고리즘
     public void PathFinding(GameObject startObj, GameObject endObj)
     {
         sizeX = topRight.x - bottomLeft.x + 1;
@@ -199,6 +222,7 @@ public class EnemyManager : MonoBehaviour
         {
             // start 지점으로 부터 end 지점 사이에 벽이 있는지 확인
             if (gameManager.mapGraph[startGraphPosition, endGraphPosition] == 0) return;
+            if (CheckEnemyPos(new Vector2(checkX, checkY))) return;
             // 대각선 허용시, 벽 사이로 통과 안됨
             if (allowDiagonal)
             {
@@ -237,6 +261,18 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+    private bool CheckEnemyPos(Vector2 currentPos)
+    {
+        foreach(Vector2 enemyPos in Enemy.enemyPositions)
+        {
+            if(currentPos == enemyPos)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /*
     void OnDrawGizmos()
     {
@@ -252,11 +288,12 @@ public class EnemyManager : MonoBehaviour
         for (count = 0; count < Enemy.enemyObjects.Count; count++)
         {
             currentEnemyState = Enemy.enemyObjects[count].GetComponent<Enemy>();
-            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
-            //currentEnemyState.moveCtrl[1] += Random.Range(0, currentEnemyState.moveCtrl[2]); // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
-            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
 
-            currentEnemyState.moveCtrl[1] += 10; // test 용 추가
+            Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            currentEnemyState.moveCtrl[1] += Random.Range(0, (currentEnemyState.moveCtrl[2] + 1)); // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
+            Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
+
+            //currentEnemyState.moveCtrl[1] += 10; // test 용 추가
 
             if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
             {
@@ -266,6 +303,16 @@ public class EnemyManager : MonoBehaviour
                 PathFinding(currenEnemy, player);
                 currentEnemyState.EnemyMove(FinalPathList);
                 currentEnemyState.moveCtrl[1] = 0; // 현재 행동력 초기화
+                /*
+                foreach(Transform child in GameObject.FindWithTag("WarningBox").transform)
+                {
+                    if(child.GetComponent<Text>().text == Enemy.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text)
+                    {
+                        child
+                    }
+                }
+                Enemy.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
+                */
                 if (!turnCheck)
                 {
                     turnCheck = true;
@@ -281,6 +328,53 @@ public class EnemyManager : MonoBehaviour
                     GameManager.Turn++;
 
                 }
+            }
+        }
+    }
+
+    public GameObject enemyWarningPrefab;
+    public void WarningEnemy()
+    {
+        int count;
+        int index = 1;
+        GameObject player = GameObject.FindWithTag("Player");
+        Vector2 playerPos = player.transform.position / GameManager.gridSize;
+
+        for (count = 0; count < Enemy.enemyObjects.Count; count++)
+        {
+            Enemy currentEnemy = Enemy.enemyObjects[count].GetComponent<Enemy>();
+            GameObject currentEnemyObj = Enemy.enemyObjects[count];
+            if (currentEnemy.moveCtrl[1] + currentEnemy.moveCtrl[2] >= 10)
+            {
+                currentEnemyObj.transform.GetChild(0).GetComponent<TextMesh>().text = "" + index;
+                PathFinding(currentEnemyObj, player);
+
+                Vector2 unitPos = currentEnemyObj.transform.position / GameManager.gridSize;
+                Vector2 fixPos = new Vector2(0, 0);
+                unitPos = new Vector2Int(Mathf.FloorToInt(unitPos.x) + 4, Mathf.FloorToInt(unitPos.y) + 4);
+
+                for (int pathCount = 1; pathCount < FinalPathList.Count; pathCount++)
+                {
+                    Vector2 pathPoint = new Vector2(FinalPathList[pathCount].x, FinalPathList[pathCount].y);
+                    int moveCount;
+                    for (moveCount = 0; moveCount < currentEnemy.moveablePoints.Length; ++moveCount)
+                    {
+                        Vector2 currentMovePoint = unitPos + currentEnemy.moveablePoints[moveCount];
+                        if (pathPoint == currentMovePoint && currentMovePoint != playerPos)
+                        {
+                            fixPos = currentMovePoint;
+                            break;
+                        }
+                    }
+                    if (moveCount == currentEnemy.moveablePoints.Length)
+                    {
+                        break;
+                    }
+                }
+             
+                GameObject sign = Instantiate(enemyWarningPrefab, new Vector2((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize), Quaternion.identity, GameObject.FindWithTag("WarningBox").transform);
+                sign.transform.GetChild(0).GetComponent<TextMesh>().text = "" + index;
+                index++;
             }
         }
     }

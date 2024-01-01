@@ -1601,14 +1601,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6551029922462568091, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
-      propertyPath: EnemyStatePanel
-      value: 
-      objectReference: {fileID: 5240648681889013594, guid: 9fd3a5773f8515a44b814c93a3733bed, type: 3}
     - target: {fileID: 8153990614069101066, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
-      propertyPath: enemyStatePrefab
+      propertyPath: warningSignBox
       value: 
-      objectReference: {fileID: 4699710257723076532, guid: d61468c5d18f0fa45b216e140a86f967, type: 3}
+      objectReference: {fileID: 7065647469601570882, guid: 9c77cdc7e21904e44ba865c5c97eaba7, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
 --- !u!1001 &7471301693427537263
@@ -1695,6 +1691,18 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7471301692746399821, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7471301692746399821, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7471301692746399821, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7471301692746399821, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -1742,9 +1750,37 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7471301692746399822, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 519420031}
+    - target: {fileID: 7471301692746399822, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
+      propertyPath: m_RenderMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7471301692746399823, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
+      propertyPath: m_UiScaleMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7471301692746399823, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7471301692746399823, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
+      propertyPath: m_ReferenceResolution.x
+      value: 1920
+      objectReference: {fileID: 0}
+    - target: {fileID: 7471301692746399823, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
+      propertyPath: m_ReferenceResolution.y
+      value: 1080
+      objectReference: {fileID: 0}
     - target: {fileID: 7471301692746399857, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
       propertyPath: m_Name
       value: Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 7471301693407787833, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7471301693546555952, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target

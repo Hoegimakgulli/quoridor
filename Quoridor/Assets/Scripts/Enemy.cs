@@ -49,6 +49,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     // A* 알고리즘
     public void GetShortRoad(List<Path> path)
     {
+        Vector2 playerPos = GameObject.FindWithTag("Player").transform.position / GameManager.gridSize;
         if (!AttackCanEnemy())
         {
             Vector2 unitPos = transform.position / GameManager.gridSize;
@@ -62,7 +63,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 for (moveCount = 0; moveCount < moveablePoints.Length; ++moveCount)
                 {
                     Vector2 currentMovePoint = unitPos + moveablePoints[moveCount];
-                    if (pathPoint == currentMovePoint)
+                    if (pathPoint == currentMovePoint && currentMovePoint != playerPos)
                     {
                         fixPos = currentMovePoint;
                         break;
@@ -116,8 +117,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         if (AttackCanEnemy() && state == EState.Attack)
         {
             Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Player")); // enemy 위치에서 player까지 ray쏘기
-            if(hit != false) // 벽과 부딪치치 않았다면
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")); // enemy 위치에서 player까지 ray쏘기
+            if(hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
             {
                 Debug.Log("Player Dead");
                 Destroy(hit.transform.gameObject);
@@ -150,4 +151,9 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         return false;
     }
     //--------------- Attack 종료 ---------------//
+
+    public void ShakeTokenAction()
+    {
+
+    }
 }
