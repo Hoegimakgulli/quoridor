@@ -7,6 +7,8 @@ TagManager:
   - PlayerPreview
   - Wall
   - CantBuild
+  - Enemy
+  - PlayerAttackPreview
   layers:
   - Default
   - TransparentFX
@@ -16,9 +18,9 @@ TagManager:
   - UI
   - Wall
   - Token
+  - Player
   - Preview
-  - 
-  - 
+  - SemiWall
   - 
   - 
   - 
