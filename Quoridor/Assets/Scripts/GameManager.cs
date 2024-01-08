@@ -11,17 +11,14 @@ public class GameManager : MonoBehaviour
     public const float gridSize = 1.3f; // 그리드의 크기
 
     public Vector3 playerPosition = new Vector3(0, -4, 0); // 플레이어의 위치
-    public List<Vector3> enemyPositions = new List<Vector3>(); // 적들의 위치 정보 저장
 
     public int[,] mapGraph = new int[81, 81]; //DFS용 맵 그래프
 
     public int currentStage;
 
     GameObject player;
-    List<GameObject> enemy = new List<GameObject>();
 
     public GameObject playerPrefab;
-    public List<GameObject> enemyPrefabs;
 
     void Awake()
     {
@@ -49,22 +46,6 @@ public class GameManager : MonoBehaviour
         }
         // DebugMap();
         player = Instantiate(playerPrefab, playerPosition * gridSize, Quaternion.identity);
-        int enemyCost = currentStage + 2;
-        while (enemyCost != 0)
-        {
-            int randomNumber = Random.Range(0, enemyPrefabs.Count);
-            int cost = enemyPrefabs[randomNumber].GetComponent<Enemy>().cost;
-            if (enemyCost - cost >= 0)
-            {
-                Vector3 enemyPosition;
-                do
-                { enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0); }
-                while (enemyPositions.Contains(enemyPosition) && enemyPositions.Count != 0);
-                enemyPositions.Add(enemyPosition);
-                enemy.Add(Instantiate(enemyPrefabs[randomNumber], gridSize * enemyPositions[enemyPositions.Count - 1], Quaternion.identity));
-                enemyCost -= cost;
-            }
-        }
     }
     void Update()
     {
@@ -93,7 +74,7 @@ public class GameManager : MonoBehaviour
         }
         DFS(playerGraphPosition);
         // Debug.Log(visited[enemyGraphPosition]);
-        foreach (Vector3 enemyPosition in enemyPositions)
+        foreach(Vector3 enemyPosition in Enemy.enemyPositions)
         {
             int enemyGraphPosition = (int)((enemyPosition.y + 4) * 9 + enemyPosition.x + 4);
             if (!visited[enemyGraphPosition]) return false;

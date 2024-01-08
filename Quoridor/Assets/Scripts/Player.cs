@@ -29,6 +29,8 @@ public class Player : MonoBehaviour
     GameObject playerWallPreview;
     [SerializeField]
     GameObject playerWallPrefab; // 플레이어 설치벽
+    [SerializeField]
+    GameObject historyIndexPrefab; // history 형식으로 저장되는 글 양식
 
     public int playerOrder = 1; // 플레이어 차례
 
