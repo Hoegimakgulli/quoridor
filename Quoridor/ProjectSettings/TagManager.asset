@@ -47,3 +47,12 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Effect
+    uniqueID: 206915881
+    locked: 0
+  - name: Token
+    uniqueID: 2256166963
+    locked: 0
+  - name: Text
+    uniqueID: 834845183
+    locked: 0

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 {
@@ -22,6 +23,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     public EState state = EState.Idle;
     public ECharacteristic characteristic = ECharacteristic.Forward;
+
 
     //--------------- Move 시작 ---------------//
     // 모든 enemy 객체 동시에 움직임 실시
@@ -45,7 +47,6 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         }
     }
 
-    
     // A* 알고리즘
     public void GetShortRoad(List<Path> path)
     {
@@ -152,8 +153,30 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     }
     //--------------- Attack 종료 ---------------//
 
+    public void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            ShakeTokenAction();
+        }
+    }
+
+    public GameObject fadeObj;
     public void ShakeTokenAction()
     {
-
+        // 다음 턴에 행동 가능성이 있는 기물
+        if (transform.GetComponent<Enemy>().moveCtrl[2] >= 10 - transform.GetComponent<Enemy>().moveCtrl[1])
+        {
+            Material tmpObj = Instantiate(fadeObj, transform.position, Quaternion.identity, transform).GetComponent<SpriteRenderer>().material;
+            Sequence shakeSequence = DOTween.Sequence();
+            shakeSequence.Append(tmpObj.DOFade(0, 1));
+            shakeSequence.Append(tmpObj.DOFade(0.7f, 1));
+            shakeSequence.Append(tmpObj.DOFade(0, 1));
+            shakeSequence.Play();
+            if(GameManager.Turn % 2 == 1)
+            {
+                
+            }
+        }
     }
 }

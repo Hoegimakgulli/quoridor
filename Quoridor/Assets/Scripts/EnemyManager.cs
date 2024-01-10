@@ -63,11 +63,11 @@ public class EnemyManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.W))
         {
-            MoveCtrlUpdate();
+            testMove();
         }
 
         // 적 턴일때 (이동 및 공격확인)
-        if(GameManager.Turn % 2 == 0 && enemyTurnAnchor)
+        if (GameManager.Turn % 2 == 0 && enemyTurnAnchor)
         {
             enemyWarningSignAnchor = true;
             enemyTurnAnchor = false;
@@ -92,7 +92,7 @@ public class EnemyManager : MonoBehaviour
             WarningEnemy();
         }
     }
-
+    
     void SpawnEnemy()
     {
         int enemyCost = currentStage + 2;
@@ -114,12 +114,13 @@ public class EnemyManager : MonoBehaviour
 
                 // 유닛 판넬안에 보드위에 있는 적들 데이터 정보를 넣는 부분
                 Enemy currentEnemey = currentEnemyObj.GetComponent<Enemy>();
+                currentEnemey.moveCtrl[1] = Random.Range(0, 3);
 
                 // 적 정보 UI 판넬에 표시하는 부분
                 GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("EnemyStateContent").transform);
                 currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = enemyPrefabs[randomNumber].GetComponent<SpriteRenderer>().sprite;
                 currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().color = enemyPrefabs[randomNumber].GetComponent<SpriteRenderer>().color;
-                currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "행동력 " + currentEnemey.cost + " / 10";
+                currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "행동력 " + currentEnemey.moveCtrl[1] + " / 10";
                 currentEnemey.maxHp = currentEnemey.hp;
                 currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "체력 " + currentEnemey.hp + " / " + currentEnemey.maxHp;
             }
@@ -222,7 +223,7 @@ public class EnemyManager : MonoBehaviour
         {
             // start 지점으로 부터 end 지점 사이에 벽이 있는지 확인
             if (gameManager.mapGraph[startGraphPosition, endGraphPosition] == 0) return;
-            if (CheckEnemyPos(new Vector2(checkX, checkY))) return;
+            if (CheckEnemyPos(new Vector2(checkX * GameManager.gridSize, checkY * GameManager.gridSize))) return;
             // 대각선 허용시, 벽 사이로 통과 안됨
             if (allowDiagonal)
             {
@@ -329,6 +330,20 @@ public class EnemyManager : MonoBehaviour
 
                 }
             }
+        }
+    }
+
+    void testMove()
+    {
+        Enemy currentEnemyState;
+        int count;
+        for (count = 0; count < Enemy.enemyObjects.Count; count++)
+        {
+            currentEnemyState = Enemy.enemyObjects[count].GetComponent<Enemy>();
+
+            Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            currentEnemyState.moveCtrl[1] += Random.Range(0, (currentEnemyState.moveCtrl[2] + 1)); // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
+            Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
         }
     }
 
