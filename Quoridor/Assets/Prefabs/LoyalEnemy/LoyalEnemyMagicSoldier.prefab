@@ -101,7 +101,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cost: 4
   hp: 2
-  moveCtrl: 0a00000000000000
+  maxHp: 0
+  moveCtrl: 0a0000000000000002000000
   moveablePoints:
   - {x: 1, y: 0}
   - {x: -1, y: 0}
