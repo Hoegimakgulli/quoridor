@@ -86,11 +86,13 @@ public class EnemyManager : MonoBehaviour
         }
 
         // 플레이어 턴일때 (적 움직임 경고)
+        /*
         if(GameManager.Turn % 2 == 1 && enemyWarningSignAnchor)
         {
             enemyWarningSignAnchor = false;
-            WarningEnemy();
+           WarningEnemy();
         }
+        */
     }
     
     void SpawnEnemy()
@@ -291,7 +293,7 @@ public class EnemyManager : MonoBehaviour
             currentEnemyState = Enemy.enemyObjects[count].GetComponent<Enemy>();
 
             Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
-            currentEnemyState.moveCtrl[1] += Random.Range(0, (currentEnemyState.moveCtrl[2] + 1)); // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
+            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
             Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
 
             //currentEnemyState.moveCtrl[1] += 10; // test 용 추가
@@ -342,11 +344,11 @@ public class EnemyManager : MonoBehaviour
             currentEnemyState = Enemy.enemyObjects[count].GetComponent<Enemy>();
 
             Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
-            currentEnemyState.moveCtrl[1] += Random.Range(0, (currentEnemyState.moveCtrl[2] + 1)); // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
+            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // 회복하는 적 행동력
             Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
         }
     }
-
+    /*
     public GameObject enemyWarningPrefab;
     public void WarningEnemy()
     {
@@ -392,7 +394,7 @@ public class EnemyManager : MonoBehaviour
                 index++;
             }
         }
-    }
+    }*/
 
     void CheckEnemyInfo()
     {
@@ -400,15 +402,6 @@ public class EnemyManager : MonoBehaviour
         {
             Debug.Log((count + 1) + "iter - enemyPos : " + Enemy.enemyPositions[count] + " - enemyObj : " + Enemy.enemyObjects[count]);
         }
-    }
-
-    void CheckPlayerFromEnemy(List<Path> path)
-    {
-        for(int i = 0; i < path.Count; i++)
-        {
-            Debug.Log("NodePos : " + path[i].x + "," + path[i].y + " | G : " + path[i].G + " | H : " + path[i].H + " | F : " + path[i].F);
-        }
-        Debug.Log("End Check --------------------------------------------------");
     }
 
      IEnumerator StartEnemyTurn()

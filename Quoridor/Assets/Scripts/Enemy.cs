@@ -153,30 +153,38 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     }
     //--------------- Attack 종료 ---------------//
 
+    Sequence shakeSequence;
+    public GameObject fadeObj;
+    public bool useShake = true;
+
+    public void Start()
+    {
+        Material tmpObj = Instantiate(fadeObj, transform.position, Quaternion.identity, transform).GetComponent<SpriteRenderer>().material;
+        shakeSequence = DOTween.Sequence()
+            .SetAutoKill(false)
+            .OnStart(() => {
+                tmpObj.color = new Color(1, 1, 1, 0);
+        });
+        //shakeSequence.Append(tmpObj.DOFade(0, 1).SetEase(Ease.Linear));
+        shakeSequence.Append(tmpObj.DOFade(1f, 1).SetEase(Ease.Linear));
+        shakeSequence.Append(tmpObj.DOFade(0, 1).SetEase(Ease.Linear));
+        //shakeSequence.Append(tmpObj.DOFade(1f, 1).SetEase(Ease.Linear));
+    }
+
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.S))
+        if (useShake && GameManager.Turn % 2 == 1 && moveCtrl[1] + moveCtrl[2] >= 10)
         {
-            ShakeTokenAction();
+            Debug.Log("Start shake");
+            useShake = false;
+            StartCoroutine(ShakeTokenAction());
         }
     }
 
-    public GameObject fadeObj;
-    public void ShakeTokenAction()
+    IEnumerator ShakeTokenAction()
     {
-        // 다음 턴에 행동 가능성이 있는 기물
-        if (transform.GetComponent<Enemy>().moveCtrl[2] >= 10 - transform.GetComponent<Enemy>().moveCtrl[1])
-        {
-            Material tmpObj = Instantiate(fadeObj, transform.position, Quaternion.identity, transform).GetComponent<SpriteRenderer>().material;
-            Sequence shakeSequence = DOTween.Sequence();
-            shakeSequence.Append(tmpObj.DOFade(0, 1));
-            shakeSequence.Append(tmpObj.DOFade(0.7f, 1));
-            shakeSequence.Append(tmpObj.DOFade(0, 1));
-            shakeSequence.Play();
-            if(GameManager.Turn % 2 == 1)
-            {
-                
-            }
-        }
+        shakeSequence.Restart();
+        yield return new WaitForSeconds(shakeSequence.Duration());
+        useShake = true;
     }
 }
