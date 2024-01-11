@@ -59,7 +59,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             Vector2 fixPos = new Vector2(0, 0);
             unitPos = new Vector2Int(Mathf.FloorToInt(unitPos.x) + 4, Mathf.FloorToInt(unitPos.y) + 4);
 
-            for (int count = 1; count < path.Count; count++)
+            int count;
+            for (count = 1; count < path.Count; count++)
             {
                 Vector2 pathPoint = new Vector2(path[count].x, path[count].y);
                 int moveCount;
@@ -78,7 +79,10 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 }
             }
 
-            transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+            if(count != 1)
+            {
+                transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+            }
             state = EState.Attack;
             AttackPlayer();
         }

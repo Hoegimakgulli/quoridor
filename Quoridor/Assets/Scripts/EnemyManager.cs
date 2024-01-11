@@ -277,7 +277,7 @@ public class EnemyManager : MonoBehaviour
         foreach (GameObject enemy in Enemy.enemyObjects)
         {
             Vector2 enemyPos = enemy.transform.position;
-            if (currentPos == enemyPos)
+            if (currentPos == enemyPos && currentPos != new Vector2((TargetNode.x - 4) * GameManager.gridSize, (TargetNode.y - 4) * GameManager.gridSize))
             {
                 blockEmemyObj = enemy;
                 return true;
