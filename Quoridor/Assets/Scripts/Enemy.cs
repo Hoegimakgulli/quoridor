@@ -76,9 +76,9 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 }
             }
 
-            if(count != 1)
+            if (count != 1)
             {
-                for(int posCount = 0; count < GameManager.enemyPositions.Count; count++)
+                for (int posCount = 0; count < GameManager.enemyPositions.Count; count++)
                 {
                     if (GameManager.enemyPositions[posCount] == transform.position)
                     {
@@ -116,12 +116,13 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         state = EState.Dead;
         if (state == EState.Dead)
         {
-            foreach(GameObject child in GameManager.enemyObjects)
+            foreach (GameObject child in GameManager.enemyObjects)
             {
-                if(child == gameObject)
+                if (child == gameObject)
                 {
-                    GameManager.enemyObjects.Remove(child);
                     GameManager.enemyPositions.Remove(child.transform.position);
+                    GameManager.enemyObjects.Remove(child);
+                    break;
                 }
             }
             Debug.Log("Enemy Dead : " + transform.name);
