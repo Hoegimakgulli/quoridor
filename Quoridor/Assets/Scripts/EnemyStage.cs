@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,14 +6,19 @@ using UnityEngine;
 // 스테이지마다 등급에 따라 유닛의 수를 정해두기
 public class SpawnList
 {
-    public int normal, champion, named, boss;
+    public int[] values = new int[3]; // 0 = normal, 1 = champion, 2 = named, 3 = boss;
 
     public SpawnList(int Normal, int Champion, int Named, int Boss)
     {
-        normal = Normal;
-        champion = Champion;
-        named = Named;
-        boss = Boss;
+        values[0] = Normal;
+        values[1] = Champion;
+        values[2] = Named;
+        values[3] = Boss;
+    }
+
+    public int TotalReturn()
+    {
+        return (values[0] + values[1] + values[2] + values[3]);
     }
 }
 
@@ -89,6 +95,35 @@ public class EnemyStage : MonoBehaviour
                 case 3:
                     bossEnemys.Add(child);
                     break;
+            }
+        }
+    }
+
+    public void SpawnEnemyUnit()
+    {
+        int[] tmpValues = stageEnemySettig[EnemyManager.currentStage].values;
+        for (int count = 0; count < tmpValues.Length; count++)
+        {
+            List<GameObject> tmpValueEnemys;
+            switch (count)
+            {
+                case 0:
+                    tmpValueEnemys = normalEnemys;
+                    break;
+                case 1:
+                    tmpValueEnemys = championEnemys;
+                    break;
+                case 2:
+                    tmpValueEnemys = namedEnemys;
+                    break;
+                case 3:
+                    tmpValueEnemys = bossEnemys;
+                    break;
+            }
+
+            for (int unitCount = 0; unitCount < tmpValues[count]; unitCount++)
+            {
+                
             }
         }
     }

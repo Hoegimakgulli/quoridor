@@ -85,7 +85,14 @@ MonoBehaviour:
   - {fileID: 5098181600813880054, guid: 6c99decf9e645414e84f44135403f774, type: 3}
   - {fileID: 5098181600813880054, guid: c53b27d8158dcf24ea6cd23326b9c773, type: 3}
   - {fileID: 5098181600813880054, guid: 22d7fab92bc1f83418fabd41b3d4f122, type: 3}
-  loyalEnemyPrefabs: []
+  loyalEnemyPrefabs:
+  - {fileID: 5098181600813880054, guid: d5715f11d18ac0e4fa7329b5110addd2, type: 3}
+  - {fileID: 5098181600813880054, guid: 3eb86d1434972a643aeb3fb514298e00, type: 3}
+  - {fileID: 5098181600813880054, guid: f1a2ca39495352c44afbdb3931318bf7, type: 3}
+  - {fileID: 5098181600813880054, guid: 048fbceac64cdbc40aa61c056763b4dc, type: 3}
+  - {fileID: 5098181600813880054, guid: c50fb871971ce1e458f5f134b40ad790, type: 3}
+  - {fileID: 5098181600813880054, guid: 99761d4bae87a9e4f91fd0a4909efc40, type: 3}
+  - {fileID: 5098181600813880054, guid: 0e0fb8e97028bca46abdab99d0bc84c2, type: 3}
   currentStage: 0
   enemyStatePrefab: {fileID: 4699710257723076532, guid: d61468c5d18f0fa45b216e140a86f967, type: 3}
   warningSignBox: {fileID: 7065647469601570882, guid: 9c77cdc7e21904e44ba865c5c97eaba7, type: 3}

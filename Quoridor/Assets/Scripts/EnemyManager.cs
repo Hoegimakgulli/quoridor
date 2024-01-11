@@ -33,7 +33,7 @@ public class EnemyManager : MonoBehaviour
     public List<GameObject> enemyPrefabs; // 기본 유닛 오브젝트들 리스트 넣어두기
     public List<GameObject> loyalEnemyPrefabs; // 상위 고급 유닛 오브젝트들 리스트 넣어두기
 
-    public int currentStage = 0;
+    public static int currentStage = 0;
     public GameObject enemyStatePrefab; // 적 기물 상태 판넬안에 들어가는 기본 빵틀 이라고 생각.
     public GameObject warningSignBox; // 경고 표기 담아두는 박스
     public const float gridSize = 1.3f; // 그리드의 크기
@@ -348,6 +348,7 @@ public class EnemyManager : MonoBehaviour
             Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
         }
     }
+
     /*
     public GameObject enemyWarningPrefab;
     public void WarningEnemy()

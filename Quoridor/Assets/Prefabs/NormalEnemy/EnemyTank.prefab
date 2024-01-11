@@ -223,4 +223,6 @@ MonoBehaviour:
   - {x: 0, y: -1}
   state: 0
   characteristic: 0
+  value: 2
   fadeObj: {fileID: 7248978748911905669, guid: 0a81cd17b60d94c4f980f09fb5e1515d, type: 3}
+  useShake: 1

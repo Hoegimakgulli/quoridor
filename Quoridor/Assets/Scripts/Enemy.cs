@@ -177,7 +177,6 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     {
         if (useShake && GameManager.Turn % 2 == 1 && moveCtrl[1] + moveCtrl[2] >= 10)
         {
-            Debug.Log("Start shake");
             useShake = false;
             StartCoroutine(ShakeTokenAction());
         }
