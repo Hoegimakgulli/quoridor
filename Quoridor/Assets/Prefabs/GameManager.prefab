@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6551029922462568089}
   - component: {fileID: 6551029922462568091}
   - component: {fileID: 8153990614069101066}
+  - component: {fileID: 1664343263}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -87,6 +88,7 @@ MonoBehaviour:
   loyalEnemyPrefabs: []
   currentStage: 0
   enemyStatePrefab: {fileID: 4699710257723076532, guid: d61468c5d18f0fa45b216e140a86f967, type: 3}
+  warningSignBox: {fileID: 7065647469601570882, guid: 9c77cdc7e21904e44ba865c5c97eaba7, type: 3}
   FinalPathList: []
   bottomLeft: {x: 0, y: 0}
   topRight: {x: 8, y: 8}
@@ -97,4 +99,16 @@ MonoBehaviour:
   allowDiagonal: 1
   dontCrossCorner: 0
   gameManager: {fileID: 0}
-  enemyWarningPrefab: {fileID: 3946850747803572305, guid: e63a2fcd554c9044f980cda48c94916d, type: 3}
+--- !u!114 &1664343263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6551029922462568088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c0d9f9142f1d3b449cdda97849f1232, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EM: {fileID: 8153990614069101066}

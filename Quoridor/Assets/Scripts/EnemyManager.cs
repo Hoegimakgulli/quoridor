@@ -39,7 +39,7 @@ public class EnemyManager : MonoBehaviour
     public const float gridSize = 1.3f; // 그리드의 크기
 
     private bool enemyTurnAnchor = true;
-    private bool enemyWarningSignAnchor = true;
+    //private bool enemyWarningSignAnchor = true;
 
     private void Awake()
     {
@@ -69,7 +69,7 @@ public class EnemyManager : MonoBehaviour
         // 적 턴일때 (이동 및 공격확인)
         if (GameManager.Turn % 2 == 0 && enemyTurnAnchor)
         {
-            enemyWarningSignAnchor = true;
+            //enemyWarningSignAnchor = true;
             enemyTurnAnchor = false;
             // 경고sign 초기화
             foreach(Transform child in GameObject.FindWithTag("WarningBox").transform)

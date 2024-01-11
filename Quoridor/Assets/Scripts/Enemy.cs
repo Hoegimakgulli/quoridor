@@ -16,6 +16,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public Vector2Int[] moveablePoints;
     public Vector2Int[] attackablePoints;
     public enum EState { Idle, Move, Attack, Dead };
+    public enum EValue { Normal = 0, Champion = 1, Named = 2, Boss = 3 }; // 0 = Normal, 1 = Champion, 2 = Named, 3 = Boss
     // 0 - 전진해 player를 공격, 1 - 뒤 포지션을 잡으면서 플레이어 공격, 2 - 자기 구역을 사수하면서 플레이어를 공격 
     // 추후 유닛 특성 상속받을 때 사용 현재 미사용.
     public enum ECharacteristic { Forward, BackWard, Hold };
@@ -23,6 +24,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     public EState state = EState.Idle;
     public ECharacteristic characteristic = ECharacteristic.Forward;
+    public EValue value = EValue.Normal;
 
 
     //--------------- Move 시작 ---------------//
