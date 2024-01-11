@@ -213,6 +213,18 @@ public class EnemyManager : MonoBehaviour
             OpenListAdd(CurNode.x, CurNode.y - 1); // ¾Æ·¡
             OpenListAdd(CurNode.x - 1, CurNode.y); // ¿ÞÂÊ
         }
+        
+        if(FinalPathList.Count == 0)
+        {
+            Path TargetCurNode = TargetNode;
+            while (TargetCurNode != StartNode)
+            {
+                FinalPathList.Add(TargetCurNode);
+                TargetCurNode = TargetCurNode.ParentNode;
+            }
+            FinalPathList.Add(StartNode);
+            FinalPathList.Reverse();
+        }
     }
 
     public GameManager gameManager;
