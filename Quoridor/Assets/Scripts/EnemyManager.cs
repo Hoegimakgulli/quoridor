@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -216,14 +217,7 @@ public class EnemyManager : MonoBehaviour
         
         if(FinalPathList.Count == 0)
         {
-            Path TargetCurNode = TargetNode;
-            while (TargetCurNode != StartNode)
-            {
-                FinalPathList.Add(TargetCurNode);
-                TargetCurNode = TargetCurNode.ParentNode;
-            }
-            FinalPathList.Add(StartNode);
-            FinalPathList.Reverse();
+            PathFinding(startObj, blockEmemyObj);
         }
     }
 
@@ -277,6 +271,7 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+    private GameObject blockEmemyObj;
     private bool CheckEnemyPos(Vector2 currentPos)
     {
         foreach (GameObject enemy in Enemy.enemyObjects)
@@ -284,6 +279,7 @@ public class EnemyManager : MonoBehaviour
             Vector2 enemyPos = enemy.transform.position;
             if (currentPos == enemyPos)
             {
+                blockEmemyObj = enemy;
                 return true;
             }
         }
