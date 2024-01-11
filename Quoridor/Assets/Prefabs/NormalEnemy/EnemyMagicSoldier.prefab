@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &631975417545978797
+--- !u!1 &3408650788633689697
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,23 +8,23 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 3241236955071402560}
-  - component: {fileID: 6507745533227970281}
-  - component: {fileID: 5278275070307671052}
-  m_Layer: 0
+  - component: {fileID: 3106778977953293245}
+  - component: {fileID: 6930223046535253494}
+  - component: {fileID: 6219521089615621958}
+  m_Layer: 5
   m_Name: WarningNum
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &3241236955071402560
+--- !u!4 &3106778977953293245
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 631975417545978797}
+  m_GameObject: {fileID: 3408650788633689697}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -33,13 +33,13 @@ Transform:
   m_Father: {fileID: 8806073846704660360}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &6507745533227970281
+--- !u!23 &6930223046535253494
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 631975417545978797}
+  m_GameObject: {fileID: 3408650788633689697}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -75,14 +75,14 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!102 &5278275070307671052
+--- !u!102 &6219521089615621958
 TextMesh:
   serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 631975417545978797}
+  m_GameObject: {fileID: 3408650788633689697}
   m_Text: 
   m_OffsetZ: 0
   m_CharacterSize: 0.1
@@ -129,7 +129,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3241236955071402560}
+  - {fileID: 3106778977953293245}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -217,6 +217,9 @@ MonoBehaviour:
   - {x: 2, y: -2}
   state: 0
   characteristic: 0
+  value: 1
+  fadeObj: {fileID: 7248978748911905669, guid: 0a81cd17b60d94c4f980f09fb5e1515d, type: 3}
+  useShake: 1
 --- !u!50 &7355812584547581597
 Rigidbody2D:
   serializedVersion: 4

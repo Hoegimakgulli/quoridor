@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &2803650647833661450
+--- !u!1 &3669617823973891208
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,24 +8,24 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2943848672496681689}
-  - component: {fileID: 8172722078546679806}
-  - component: {fileID: 5110501275120513471}
-  m_Layer: 0
+  - component: {fileID: 8563877217406766323}
+  - component: {fileID: 7633559411876289534}
+  - component: {fileID: 205373643232941633}
+  m_Layer: 5
   m_Name: WarningNum
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2943848672496681689
+--- !u!4 &8563877217406766323
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2803650647833661450}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_GameObject: {fileID: 3669617823973891208}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -33,13 +33,13 @@ Transform:
   m_Father: {fileID: 8806073846704660360}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &8172722078546679806
+--- !u!23 &7633559411876289534
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2803650647833661450}
+  m_GameObject: {fileID: 3669617823973891208}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -75,14 +75,14 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!102 &5110501275120513471
+--- !u!102 &205373643232941633
 TextMesh:
   serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2803650647833661450}
+  m_GameObject: {fileID: 3669617823973891208}
   m_Text: 
   m_OffsetZ: 0
   m_CharacterSize: 0.1
@@ -129,7 +129,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2943848672496681689}
+  - {fileID: 8563877217406766323}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -217,6 +217,7 @@ MonoBehaviour:
   - {x: 0, y: -1}
   state: 0
   characteristic: 0
+  fadeObj: {fileID: 7248978748911905669, guid: 0a81cd17b60d94c4f980f09fb5e1515d, type: 3}
 --- !u!50 &-4979223248444574124
 Rigidbody2D:
   serializedVersion: 4

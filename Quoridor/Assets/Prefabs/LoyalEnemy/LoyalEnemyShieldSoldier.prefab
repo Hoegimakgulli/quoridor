@@ -73,8 +73,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -2038800333
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 0, g: 0.46105242, b: 1, a: 1}
@@ -113,6 +113,9 @@ MonoBehaviour:
   - {x: 0, y: 1}
   state: 0
   characteristic: 0
+  value: 2
+  fadeObj: {fileID: 7248978748911905669, guid: 0a81cd17b60d94c4f980f09fb5e1515d, type: 3}
+  useShake: 1
 --- !u!50 &8609711813910035792
 Rigidbody2D:
   serializedVersion: 4

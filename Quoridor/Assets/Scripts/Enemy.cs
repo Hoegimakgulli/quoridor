@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 {
@@ -15,6 +16,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public Vector2Int[] moveablePoints;
     public Vector2Int[] attackablePoints;
     public enum EState { Idle, Move, Attack, Dead };
+    public enum EValue { Normal = 0, Champion = 1, Named = 2, Boss = 3 }; // 0 = Normal, 1 = Champion, 2 = Named, 3 = Boss
     // 0 - 전진해 player를 공격, 1 - 뒤 포지션을 잡으면서 플레이어 공격, 2 - 자기 구역을 사수하면서 플레이어를 공격 
     // 추후 유닛 특성 상속받을 때 사용 현재 미사용.
     public enum ECharacteristic { Forward, BackWard, Hold };
@@ -22,6 +24,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     public EState state = EState.Idle;
     public ECharacteristic characteristic = ECharacteristic.Forward;
+    public EValue value = EValue.Normal;
+
 
     //--------------- Move 시작 ---------------//
     // 모든 enemy 객체 동시에 움직임 실시
@@ -45,7 +49,6 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         }
     }
 
-    
     // A* 알고리즘
     public void GetShortRoad(List<Path> path)
     {
@@ -152,8 +155,37 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     }
     //--------------- Attack 종료 ---------------//
 
-    public void ShakeTokenAction()
-    {
+    Sequence shakeSequence;
+    public GameObject fadeObj;
+    public bool useShake = true;
 
+    public void Start()
+    {
+        Material tmpObj = Instantiate(fadeObj, transform.position, Quaternion.identity, transform).GetComponent<SpriteRenderer>().material;
+        shakeSequence = DOTween.Sequence()
+            .SetAutoKill(false)
+            .OnStart(() => {
+                tmpObj.color = new Color(1, 1, 1, 0);
+        });
+        //shakeSequence.Append(tmpObj.DOFade(0, 1).SetEase(Ease.Linear));
+        shakeSequence.Append(tmpObj.DOFade(1f, 1).SetEase(Ease.Linear));
+        shakeSequence.Append(tmpObj.DOFade(0, 1).SetEase(Ease.Linear));
+        //shakeSequence.Append(tmpObj.DOFade(1f, 1).SetEase(Ease.Linear));
+    }
+
+    public void Update()
+    {
+        if (useShake && GameManager.Turn % 2 == 1 && moveCtrl[1] + moveCtrl[2] >= 10)
+        {
+            useShake = false;
+            StartCoroutine(ShakeTokenAction());
+        }
+    }
+
+    IEnumerator ShakeTokenAction()
+    {
+        shakeSequence.Restart();
+        yield return new WaitForSeconds(shakeSequence.Duration());
+        useShake = true;
     }
 }
