@@ -31,6 +31,7 @@ public class Path
 
 public class EnemyManager : MonoBehaviour
 {
+
     public List<GameObject> enemyPrefabs; // 기본 유닛 오브젝트들 리스트 넣어두기
     public List<GameObject> loyalEnemyPrefabs; // 상위 고급 유닛 오브젝트들 리스트 넣어두기
 
@@ -45,8 +46,8 @@ public class EnemyManager : MonoBehaviour
     private void Awake()
     {
         gameManager = transform.gameObject.GetComponent<GameManager>();
-        Enemy.enemyObjects.Clear(); // 적 위치 및 객체 정보 초기화
-        Enemy.enemyPositions.Clear();
+        GameManager.enemyObjects.Clear(); // 적 위치 및 객체 정보 초기화
+        GameManager.enemyPositions.Clear();
     }
 
     private void Start()
@@ -78,9 +79,9 @@ public class EnemyManager : MonoBehaviour
                 Destroy(child.gameObject);
             }
             // 오브젝트 카운트 초기화
-            for (int count = 0; count < Enemy.enemyObjects.Count; count++)
+            for (int count = 0; count < GameManager.enemyObjects.Count; count++)
             {
-                Enemy.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
+                GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
             }
 
             StartCoroutine(StartEnemyTurn());
@@ -110,10 +111,10 @@ public class EnemyManager : MonoBehaviour
                 {
                     enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0);
                 }
-                while (Enemy.enemyPositions.Contains(enemyPosition) && Enemy.enemyPositions.Count != 0); // 이미 소환된 적의 위치랑 안 겹칠때
-                Enemy.enemyPositions.Add(enemyPosition);
-                GameObject currentEnemyObj = Instantiate(enemyPrefabs[randomNumber], GameManager.gridSize * Enemy.enemyPositions[Enemy.enemyPositions.Count - 1], Quaternion.identity);
-                Enemy.enemyObjects.Add(currentEnemyObj);
+                while (GameManager.enemyPositions.Contains(enemyPosition) && GameManager.enemyPositions.Count != 0); // 이미 소환된 적의 위치랑 안 겹칠때
+                GameManager.enemyPositions.Add(enemyPosition);
+                GameObject currentEnemyObj = Instantiate(enemyPrefabs[randomNumber], GameManager.gridSize * GameManager.enemyPositions[GameManager.enemyPositions.Count - 1], Quaternion.identity);
+                GameManager.enemyObjects.Add(currentEnemyObj);
                 enemyCost -= cost;
 
                 // 유닛 판넬안에 보드위에 있는 적들 데이터 정보를 넣는 부분
@@ -186,7 +187,7 @@ public class EnemyManager : MonoBehaviour
             // 마지막
             if (CurNode == TargetNode)
             {
-                Path TargetCurNode = TargetNode;
+                Path TargetCurNode = TargetNode.ParentNode;
                 while (TargetCurNode != StartNode)
                 {
                     FinalPathList.Add(TargetCurNode);
@@ -274,7 +275,7 @@ public class EnemyManager : MonoBehaviour
     private GameObject blockEmemyObj;
     private bool CheckEnemyPos(Vector2 currentPos)
     {
-        foreach (GameObject enemy in Enemy.enemyObjects)
+        foreach (GameObject enemy in GameManager.enemyObjects)
         {
             Vector2 enemyPos = enemy.transform.position;
             if (currentPos == enemyPos && currentPos != new Vector2((TargetNode.x - 4) * GameManager.gridSize, (TargetNode.y - 4) * GameManager.gridSize))
@@ -298,19 +299,19 @@ public class EnemyManager : MonoBehaviour
     {
         Enemy currentEnemyState;
         int count;
-        for (count = 0; count < Enemy.enemyObjects.Count; count++)
+        for (count = 0; count < GameManager.enemyObjects.Count; count++)
         {
-            currentEnemyState = Enemy.enemyObjects[count].GetComponent<Enemy>();
+            currentEnemyState = GameManager.enemyObjects[count].GetComponent<Enemy>();
 
-            Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
             currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
-            Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
 
             //currentEnemyState.moveCtrl[1] += 10; // test 용 추가
 
             if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
             {
-                GameObject currenEnemy = Enemy.enemyObjects[count];
+                GameObject currenEnemy = GameManager.enemyObjects[count];
                 GameObject player = GameObject.FindWithTag("Player");
                 currentEnemyState.state = Enemy.EState.Move;
                 PathFinding(currenEnemy, player);
@@ -319,12 +320,12 @@ public class EnemyManager : MonoBehaviour
                 /*
                 foreach(Transform child in GameObject.FindWithTag("WarningBox").transform)
                 {
-                    if(child.GetComponent<Text>().text == Enemy.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text)
+                    if(child.GetComponent<Text>().text == GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text)
                     {
                         child
                     }
                 }
-                Enemy.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
+                GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
                 */
                 if (!turnCheck)
                 {
@@ -349,13 +350,13 @@ public class EnemyManager : MonoBehaviour
     {
         Enemy currentEnemyState;
         int count;
-        for (count = 0; count < Enemy.enemyObjects.Count; count++)
+        for (count = 0; count < GameManager.enemyObjects.Count; count++)
         {
-            currentEnemyState = Enemy.enemyObjects[count].GetComponent<Enemy>();
+            currentEnemyState = GameManager.enemyObjects[count].GetComponent<Enemy>();
 
-            Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
             currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // 회복하는 적 행동력
-            Debug.Log("iter " + count + " : " + Enemy.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
         }
     }
 
@@ -368,10 +369,10 @@ public class EnemyManager : MonoBehaviour
         GameObject player = GameObject.FindWithTag("Player");
         Vector2 playerPos = player.transform.position / GameManager.gridSize;
 
-        for (count = 0; count < Enemy.enemyObjects.Count; count++)
+        for (count = 0; count < GameManager.enemyObjects.Count; count++)
         {
-            Enemy currentEnemy = Enemy.enemyObjects[count].GetComponent<Enemy>();
-            GameObject currentEnemyObj = Enemy.enemyObjects[count];
+            Enemy currentEnemy = GameManager.enemyObjects[count].GetComponent<Enemy>();
+            GameObject currentEnemyObj = GameManager.enemyObjects[count];
             if (currentEnemy.moveCtrl[1] + currentEnemy.moveCtrl[2] >= 10)
             {
                 currentEnemyObj.transform.GetChild(0).GetComponent<TextMesh>().text = "" + index;
@@ -409,9 +410,9 @@ public class EnemyManager : MonoBehaviour
 
     void CheckEnemyInfo()
     {
-        for (int count = 0; count < Enemy.enemyPositions.Count; count++)
+        for (int count = 0; count < GameManager.enemyPositions.Count; count++)
         {
-            Debug.Log((count + 1) + "iter - enemyPos : " + Enemy.enemyPositions[count] + " - enemyObj : " + Enemy.enemyObjects[count]);
+            Debug.Log((count + 1) + "iter - enemyPos : " + GameManager.enemyPositions[count] + " - enemyObj : " + GameManager.enemyObjects[count]);
         }
     }
 

@@ -5,9 +5,6 @@ using DG.Tweening;
 
 public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 {
-    public static List<Vector3> enemyPositions = new List<Vector3>();    // 모든 적들 위치 정보 저장
-    public static List<GameObject> enemyObjects = new List<GameObject>(); // 모든 적 기물 오브젝트 저장
-
     //-------------- Enemy Values --------------//
     public int cost;                                  // 소환 시 필요한 비용
     public int hp;                                    // 받아야하는 총 체력
@@ -81,6 +78,13 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
             if(count != 1)
             {
+                for(int posCount = 0; count < GameManager.enemyPositions.Count; count++)
+                {
+                    if (GameManager.enemyPositions[posCount] == transform.position)
+                    {
+                        GameManager.enemyPositions[posCount] = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+                    }
+                }
                 transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
             }
             state = EState.Attack;
@@ -112,6 +116,14 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         state = EState.Dead;
         if (state == EState.Dead)
         {
+            foreach(GameObject child in GameManager.enemyObjects)
+            {
+                if(child == gameObject)
+                {
+                    GameManager.enemyObjects.Remove(child);
+                    GameManager.enemyPositions.Remove(child.transform.position);
+                }
+            }
             Debug.Log("Enemy Dead : " + transform.name);
             Destroy(transform.gameObject);
         }
