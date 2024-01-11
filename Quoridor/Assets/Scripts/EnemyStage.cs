@@ -6,7 +6,7 @@ using UnityEngine;
 // 스테이지마다 등급에 따라 유닛의 수를 정해두기
 public class SpawnList
 {
-    public int[] values = new int[3]; // 0 = normal, 1 = champion, 2 = named, 3 = boss;
+    public int[] values = new int[4]; // 0 = normal, 1 = champion, 2 = named, 3 = boss;
 
     public SpawnList(int Normal, int Champion, int Named, int Boss)
     {
@@ -34,8 +34,11 @@ public class EnemyStage : MonoBehaviour
 
     public EnemyManager EM;
 
+    GameManager gameManager;
+
     public void Start()
     {
+        gameManager = transform.gameObject.GetComponent<GameManager>();
         stageEnemySettig.Clear();
         SpawnSettingStart();
     }
@@ -58,7 +61,7 @@ public class EnemyStage : MonoBehaviour
     // 노말 유닛, 정예 유닛들 enemy스크립트에서 등급별로 리스트에 넣어두는 함수
     public void ShareEnemys()
     {
-        foreach(GameObject child in EM.enemyPrefabs)
+        foreach (GameObject child in EM.enemyPrefabs)
         {
             int enemyValue = (int)child.GetComponent<Enemy>().value;
             switch (enemyValue)
@@ -78,7 +81,7 @@ public class EnemyStage : MonoBehaviour
             }
         }
 
-        foreach(GameObject child in EM.loyalEnemyPrefabs)
+        foreach (GameObject child in EM.loyalEnemyPrefabs)
         {
             int enemyValue = (int)child.GetComponent<Enemy>().value;
             switch (enemyValue)
@@ -101,7 +104,7 @@ public class EnemyStage : MonoBehaviour
 
     public void SpawnEnemyUnit()
     {
-        int[] tmpValues = stageEnemySettig[EnemyManager.currentStage].values;
+        int[] tmpValues = stageEnemySettig[gameManager.currentStage].values;
         for (int count = 0; count < tmpValues.Length; count++)
         {
             List<GameObject> tmpValueEnemys;
@@ -123,7 +126,7 @@ public class EnemyStage : MonoBehaviour
 
             for (int unitCount = 0; unitCount < tmpValues[count]; unitCount++)
             {
-                
+
             }
         }
     }

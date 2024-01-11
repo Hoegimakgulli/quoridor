@@ -5,7 +5,7 @@ using DG.Tweening;
 
 public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 {
-    public static List<Vector3> enemyPositions  = new List<Vector3>();    // 모든 적들 위치 정보 저장
+    public static List<Vector3> enemyPositions = new List<Vector3>();    // 모든 적들 위치 정보 저장
     public static List<GameObject> enemyObjects = new List<GameObject>(); // 모든 적 기물 오브젝트 저장
 
     //-------------- Enemy Values --------------//
@@ -34,7 +34,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         // enemy가 Move 상태일 때 유닛의 특징에 따라 움직이는 범위 조정
         if (state == EState.Move)
         {
-            if(characteristic == ECharacteristic.Forward)
+            if (characteristic == ECharacteristic.Forward)
             {
                 GetShortRoad(path);
             }
@@ -88,7 +88,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             AttackPlayer();
         }
     }
-    
+
     // 아직 미정
     public void GetBackRoad()
     {
@@ -105,6 +105,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     // Attack 받았을 때 실행하는 함수
     public void DieEnemy()
     {
+        state = EState.Dead;
         if (state == EState.Dead)
         {
             Debug.Log("Enemy Dead : " + transform.name);
@@ -121,7 +122,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         {
             Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
             RaycastHit2D hit = Physics2D.Raycast(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")); // enemy 위치에서 player까지 ray쏘기
-            if(hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
+            if (hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
             {
                 Debug.Log("Player Dead");
                 Destroy(hit.transform.gameObject);
@@ -145,7 +146,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         for (attackCount = 0; attackCount < attackablePoints.Length; ++attackCount)
         {
             currentAttackPoint = enemyPos + attackablePoints[attackCount];
-            if(playerPos == currentAttackPoint)
+            if (playerPos == currentAttackPoint)
             {
                 Debug.Log("공격 가능");
                 return true;
@@ -164,9 +165,10 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         Material tmpObj = Instantiate(fadeObj, transform.position, Quaternion.identity, transform).GetComponent<SpriteRenderer>().material;
         shakeSequence = DOTween.Sequence()
             .SetAutoKill(false)
-            .OnStart(() => {
+            .OnStart(() =>
+            {
                 tmpObj.color = new Color(1, 1, 1, 0);
-        });
+            });
         //shakeSequence.Append(tmpObj.DOFade(0, 1).SetEase(Ease.Linear));
         shakeSequence.Append(tmpObj.DOFade(1f, 1).SetEase(Ease.Linear));
         shakeSequence.Append(tmpObj.DOFade(0, 1).SetEase(Ease.Linear));

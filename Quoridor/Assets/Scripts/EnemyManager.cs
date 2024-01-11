@@ -33,7 +33,7 @@ public class EnemyManager : MonoBehaviour
     public List<GameObject> enemyPrefabs; // 기본 유닛 오브젝트들 리스트 넣어두기
     public List<GameObject> loyalEnemyPrefabs; // 상위 고급 유닛 오브젝트들 리스트 넣어두기
 
-    public static int currentStage = 0;
+    // public static int gameManager.currentStage = 0;
     public GameObject enemyStatePrefab; // 적 기물 상태 판넬안에 들어가는 기본 빵틀 이라고 생각.
     public GameObject warningSignBox; // 경고 표기 담아두는 박스
     public const float gridSize = 1.3f; // 그리드의 크기
@@ -72,12 +72,12 @@ public class EnemyManager : MonoBehaviour
             //enemyWarningSignAnchor = true;
             enemyTurnAnchor = false;
             // 경고sign 초기화
-            foreach(Transform child in GameObject.FindWithTag("WarningBox").transform)
+            foreach (Transform child in GameObject.FindWithTag("WarningBox").transform)
             {
                 Destroy(child.gameObject);
             }
             // 오브젝트 카운트 초기화
-            for(int count = 0; count < Enemy.enemyObjects.Count; count++)
+            for (int count = 0; count < Enemy.enemyObjects.Count; count++)
             {
                 Enemy.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
             }
@@ -94,10 +94,10 @@ public class EnemyManager : MonoBehaviour
         }
         */
     }
-    
+
     void SpawnEnemy()
     {
-        int enemyCost = currentStage + 2;
+        int enemyCost = gameManager.currentStage + 2;
         while (enemyCost != 0) // enemyCost = totalCost 0이 되기 전까지 계속 확인 후 소환
         {
             int randomNumber = Random.Range(0, enemyPrefabs.Count);
@@ -106,8 +106,9 @@ public class EnemyManager : MonoBehaviour
             {
                 Vector3 enemyPosition;
                 do
-                { 
-                    enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0); }
+                {
+                    enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0);
+                }
                 while (Enemy.enemyPositions.Contains(enemyPosition) && Enemy.enemyPositions.Count != 0); // 이미 소환된 적의 위치랑 안 겹칠때
                 Enemy.enemyPositions.Add(enemyPosition);
                 GameObject currentEnemyObj = Instantiate(enemyPrefabs[randomNumber], GameManager.gridSize * Enemy.enemyPositions[Enemy.enemyPositions.Count - 1], Quaternion.identity);
@@ -183,7 +184,7 @@ public class EnemyManager : MonoBehaviour
 
             // 마지막
             if (CurNode == TargetNode)
-            {   
+            {
                 Path TargetCurNode = TargetNode;
                 while (TargetCurNode != StartNode)
                 {
@@ -225,11 +226,11 @@ public class EnemyManager : MonoBehaviour
         {
             // start 지점으로 부터 end 지점 사이에 벽이 있는지 확인
             if (gameManager.mapGraph[startGraphPosition, endGraphPosition] == 0) return;
-            if (CheckEnemyPos(new Vector2(checkX * GameManager.gridSize, checkY * GameManager.gridSize))) return;
+            if (CheckEnemyPos(new Vector2((checkX - 4) * GameManager.gridSize, (checkY - 4) * GameManager.gridSize))) return;
             // 대각선 허용시, 벽 사이로 통과 안됨
             if (allowDiagonal)
             {
-                if(gameManager.mapGraph[startGraphPosition, startGraphPosition + (checkX - CurNode.x)] == 0)
+                if (gameManager.mapGraph[startGraphPosition, startGraphPosition + (checkX - CurNode.x)] == 0)
                 {
                     if (checkY - CurNode.y == 1)
                     {
@@ -266,9 +267,10 @@ public class EnemyManager : MonoBehaviour
 
     private bool CheckEnemyPos(Vector2 currentPos)
     {
-        foreach(Vector2 enemyPos in Enemy.enemyPositions)
+        foreach (GameObject enemy in Enemy.enemyObjects)
         {
-            if(currentPos == enemyPos)
+            Vector2 enemyPos = enemy.transform.position;
+            if (currentPos == enemyPos)
             {
                 return true;
             }
@@ -405,7 +407,7 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-     IEnumerator StartEnemyTurn()
+    IEnumerator StartEnemyTurn()
     {
         yield return new WaitForSeconds(2);
         MoveCtrlUpdate();

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8806073846704660360}
   - component: {fileID: 1097988394392388499}
   - component: {fileID: -4235617525571225675}
-  m_Layer: 8
+  m_Layer: 9
   m_Name: PlayerAttackPreview
   m_TagString: PlayerAttackPreview
   m_Icon: {fileID: 0}
