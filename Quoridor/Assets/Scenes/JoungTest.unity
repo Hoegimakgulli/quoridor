@@ -1553,9 +1553,17 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1664343263, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
+      propertyPath: enemyStatePrefab
+      value: 
+      objectReference: {fileID: 4699710257723076532, guid: d61468c5d18f0fa45b216e140a86f967, type: 3}
     - target: {fileID: 6551029922462568088, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
       propertyPath: m_Name
       value: GameManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 6551029922462568089, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
+      propertyPath: currentStage
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6551029922462568090, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
       propertyPath: m_RootOrder

@@ -2,6 +2,7 @@ using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 // 스테이지마다 등급에 따라 유닛의 수를 정해두기
 public class SpawnList
@@ -26,21 +27,30 @@ public class SpawnList
 public class EnemyStage : MonoBehaviour
 {
     // key == 현재 스테이지, value == 지금 생성해야하는 유닛 클래스
-    public static Dictionary<int, SpawnList> stageEnemySettig = new Dictionary<int, SpawnList>();
-    public static List<GameObject> normalEnemys;
-    public static List<GameObject> championEnemys;
-    public static List<GameObject> namedEnemys;
-    public static List<GameObject> bossEnemys;
+    public Dictionary<int, SpawnList> stageEnemySettig = new Dictionary<int, SpawnList>();
+    public List<GameObject> normalEnemys;
+    public List<GameObject> championEnemys;
+    public List<GameObject> namedEnemys;
+    public List<GameObject> bossEnemys;
 
     public EnemyManager EM;
-
-    GameManager gameManager;
+    public GameManager gameManager;
 
     public void Start()
     {
-        gameManager = transform.gameObject.GetComponent<GameManager>();
+        gameManager = transform.GetComponent<GameManager>();
         stageEnemySettig.Clear();
         SpawnSettingStart();
+        ShareEnemys();
+
+        if (stageEnemySettig.ContainsKey(gameManager.currentStage))
+        {
+            StageEnemySpawn();
+        }
+        else
+        {
+            Debug.LogError("지정된 스테이지가 아닙니다 다시 확인해주세요");
+        }
     }
 
     // 스테이지에 소환되는 유닛이 변경될때 건드리면 되는 함수
@@ -102,31 +112,58 @@ public class EnemyStage : MonoBehaviour
         }
     }
 
-    public void SpawnEnemyUnit()
+    public GameObject enemyStatePrefab; // 적 기물 상태 판넬안에 들어가는 기본 빵틀 이라고 생각.
+    public void StageEnemySpawn()
     {
-        int[] tmpValues = stageEnemySettig[gameManager.currentStage].values;
-        for (int count = 0; count < tmpValues.Length; count++)
+        SpawnList currentSpawn = stageEnemySettig[gameManager.currentStage];
+        List<GameObject> currentValues;
+
+        for (int spawnCount = 0; spawnCount < currentSpawn.values.Length; spawnCount++)
         {
-            List<GameObject> tmpValueEnemys;
-            switch (count)
+            int enemyValue = spawnCount;
+            switch (enemyValue)
             {
                 case 0:
-                    tmpValueEnemys = normalEnemys;
+                    currentValues = normalEnemys;
                     break;
                 case 1:
-                    tmpValueEnemys = championEnemys;
+                    currentValues = championEnemys;
                     break;
                 case 2:
-                    tmpValueEnemys = namedEnemys;
+                    currentValues = namedEnemys;
                     break;
                 case 3:
-                    tmpValueEnemys = bossEnemys;
+                    currentValues = bossEnemys;
+                    break;
+                default:
+                    Debug.LogError("적들 소환시 아무것도 할당 받지 못했습니다. / error : EnemyStage");
+                    currentValues = normalEnemys;
                     break;
             }
 
-            for (int unitCount = 0; unitCount < tmpValues[count]; unitCount++)
+            for(int count = 0; count < currentSpawn.values[spawnCount]; count++)
             {
+                Vector3 enemyPosition;
+                do
+                {
+                    enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0);
+                }
+                while (GameManager.enemyPositions.Contains(enemyPosition) && GameManager.enemyPositions.Count != 0); // 이미 소환된 적의 위치랑 안 겹칠때
+                GameManager.enemyPositions.Add(enemyPosition);
+                GameObject currentEnemyObj = Instantiate(currentValues[Random.Range(0, currentValues.Count)], GameManager.gridSize * GameManager.enemyPositions[GameManager.enemyPositions.Count - 1], Quaternion.identity);
+                GameManager.enemyObjects.Add(currentEnemyObj);
 
+                // 유닛 판넬안에 보드위에 있는 적들 데이터 정보를 넣는 부분
+                Enemy currentEnemey = currentEnemyObj.GetComponent<Enemy>();
+                currentEnemey.moveCtrl[1] = Random.Range(0, 3);
+
+                // 적 정보 UI 판넬에 표시하는 부분
+                GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("EnemyStateContent").transform);
+                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = currentEnemyObj.GetComponent<SpriteRenderer>().sprite;
+                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().color = currentEnemyObj.GetComponent<SpriteRenderer>().color;
+                currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "행동력 " + currentEnemey.moveCtrl[1] + " / 10";
+                currentEnemey.maxHp = currentEnemey.hp;
+                currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "체력 " + currentEnemey.hp + " / " + currentEnemey.maxHp;
             }
         }
     }
