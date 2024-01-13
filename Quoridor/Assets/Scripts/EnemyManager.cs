@@ -36,6 +36,7 @@ public class EnemyManager : MonoBehaviour
 
     // public static int gameManager.currentStage = 0;
     public GameObject warningSignBox; // 경고 표기 담아두는 박스
+    public GameObject enemyUiCanvas;
     public const float gridSize = 1.3f; // 그리드의 크기
 
     private bool enemyTurnAnchor = true;
@@ -43,6 +44,7 @@ public class EnemyManager : MonoBehaviour
 
     private void Awake()
     {
+        Instantiate(enemyUiCanvas);
         gameManager = transform.gameObject.GetComponent<GameManager>();
         GameManager.enemyObjects.Clear(); // 적 위치 및 객체 정보 초기화
         GameManager.enemyPositions.Clear();

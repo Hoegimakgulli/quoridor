@@ -26,6 +26,8 @@ public class SpawnList
 // 스테이지 적 관련해서 변수 관리 스크립트
 public class EnemyStage : MonoBehaviour
 {
+    public static int totalEnemyCount = 0;
+
     // key == 현재 스테이지, value == 지금 생성해야하는 유닛 클래스
     public Dictionary<int, SpawnList> stageEnemySettig = new Dictionary<int, SpawnList>();
     public List<GameObject> normalEnemys;
@@ -40,16 +42,27 @@ public class EnemyStage : MonoBehaviour
     {
         gameManager = transform.GetComponent<GameManager>();
         stageEnemySettig.Clear();
-        SpawnSettingStart();
-        ShareEnemys();
+        SpawnSettingStart(); // 스테이지마다 등급별 소환 유닛 수 설정
+        ShareEnemys(); // enemy 스크립트 안에 있는 value에 따라 등급 리스트 저장
 
         if (stageEnemySettig.ContainsKey(gameManager.currentStage))
         {
+            totalEnemyCount = stageEnemySettig[gameManager.currentStage].TotalReturn();
             StageEnemySpawn();
         }
         else
         {
+            // 딕셔너리에 값이 존재하지 않을때 ( key == 현재 스테이지 )
             Debug.LogError("지정된 스테이지가 아닙니다 다시 확인해주세요");
+        }
+    }
+
+    public void Update()
+    {
+        // 모든 적 유닛이 사망했을때
+        if (totalEnemyCount == 0)
+        {
+
         }
     }
 

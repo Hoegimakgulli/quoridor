@@ -127,6 +127,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             }
             Debug.Log("Enemy Dead : " + transform.name);
             Destroy(transform.gameObject);
+            EnemyStage.totalEnemyCount--;
         }
     }
     //--------------- Die Á¾·á ---------------//
