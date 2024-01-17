@@ -62,7 +62,16 @@ public class EnemyStage : MonoBehaviour
         // 모든 적 유닛이 사망했을때
         if (totalEnemyCount == 0)
         {
-
+            GameManager.enemyPositions.Clear();
+            GameManager.enemyObjects.Clear();
+            Debug.Log(GameManager.enemyPositions.Count);
+            Debug.Log(GameManager.enemyObjects.Count);
+            gameManager.currentStage++;
+            gameManager.playerPosition = new Vector3(0, -4, 0);
+            GameObject.FindWithTag("Player").transform.position = GameManager.gridSize * gameManager.playerPosition;
+            StageEnemySpawn();
+            GameManager.Turn = 1;
+            totalEnemyCount = stageEnemySettig[gameManager.currentStage].TotalReturn();
         }
     }
 
@@ -125,7 +134,8 @@ public class EnemyStage : MonoBehaviour
         }
     }
 
-    public GameObject enemyStatePrefab; // 적 기물 상태 판넬안에 들어가는 기본 빵틀 이라고 생각.
+    public GameObject enemyStatePrefab; // 적 기물 상태 판넬안에 들어가는 기본 빵틀 이라고 생각;
+
     public void StageEnemySpawn()
     {
         SpawnList currentSpawn = stageEnemySettig[gameManager.currentStage];

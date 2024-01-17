@@ -78,10 +78,11 @@ public class EnemyManager : MonoBehaviour
                 Destroy(child.gameObject);
             }
             // 오브젝트 카운트 초기화
+            /*
             for (int count = 0; count < GameManager.enemyObjects.Count; count++)
             {
                 GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
-            }
+            }*/
 
             StartCoroutine(StartEnemyTurn());
         }
@@ -113,7 +114,7 @@ public class EnemyManager : MonoBehaviour
         sizeY = topRight.y - bottomLeft.y + 1;
         PathArray = new Path[sizeX, sizeY];
 
-        for (int i = 0; i < sizeX; i++)
+        for (int i = 0; i < sizeX; i++) 
         {
             for (int j = 0; j < sizeY; j++)
             {
