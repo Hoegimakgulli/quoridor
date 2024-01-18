@@ -7,8 +7,8 @@ using UnityEngine.UI;
 [System.Serializable]
 public class Path
 {
-    // Áß¾Ó ÁÂÇ¥»ó (0, 0) ½ÃÀÛÀ¸·Î x, y ÁÂÇ¥
-    // G = ½ÃÀÛÀ¸·ÎºÎÅÍ ÀÌµ¿ÇÑ °Å¸®, H = °¡·Î, ¼¼·Î·Î º®À» ¹«½ÃÇÏ°í Player±îÁö ÀÌµ¿ÇÑ °Å¸®
+    // ï¿½ß¾ï¿½ ï¿½ï¿½Ç¥ï¿½ï¿½ (0, 0) ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ x, y ï¿½ï¿½Ç¥
+    // G = ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îºï¿½ï¿½ï¿½ ï¿½Ìµï¿½ï¿½ï¿½ ï¿½Å¸ï¿½, H = ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½Î·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ Playerï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ï¿½ï¿½ ï¿½Å¸ï¿½
     public int x, y, G, H;
 
     public Path(int _x, int _y)
@@ -19,7 +19,7 @@ public class Path
 
     public Path ParentNode;
 
-    // F = G, H ÃÑ ÇÕ»ê°ª
+    // F = G, H ï¿½ï¿½ ï¿½Õ»ê°ª
     public int F
     {
         get
@@ -31,26 +31,35 @@ public class Path
 
 public class EnemyManager : MonoBehaviour
 {
-    public List<GameObject> enemyPrefabs; // ±âº» À¯´Ö ¿ÀºêÁ§Æ®µé ¸®½ºÆ® ³Ö¾îµÎ±â
-    public List<GameObject> loyalEnemyPrefabs; // »óÀ§ °í±Þ À¯´Ö ¿ÀºêÁ§Æ®µé ¸®½ºÆ® ³Ö¾îµÎ±â
+    public List<GameObject> enemyPrefabs; // ï¿½âº» ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Ö¾ï¿½Î±ï¿½
+    public List<GameObject> loyalEnemyPrefabs; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Ö¾ï¿½Î±ï¿½
 
     // public static int gameManager.currentStage = 0;
-    public GameObject warningSignBox; // °æ°í Ç¥±â ´ã¾ÆµÎ´Â ¹Ú½º
+    public GameObject warningSignBox; // ï¿½ï¿½ï¿½ Ç¥ï¿½ï¿½ ï¿½ï¿½ÆµÎ´ï¿½ ï¿½Ú½ï¿½
     public GameObject enemyUiCanvas;
-    public const float gridSize = 1.3f; // ±×¸®µåÀÇ Å©±â
+    public const float gridSize = 1.3f; // ï¿½×¸ï¿½ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½
 
     private bool enemyTurnAnchor = true;
     //private bool enemyWarningSignAnchor = true;
 
+//ï¿½Ì±Ôºï¿½ ï¿½ß°ï¿½
+    private int sortingNum = 0; //ï¿½ï¿½ï¿½ï¿½ï¿½Ò¶ï¿½ ï¿½ï¿½ï¿½ï¿½ int
+    public List<int> sortingList = new List<int>(); //ï¿½ï¿½ï¿½ï¿½ï¿½Ò¶ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®
+
+    private UiManager uiM;
     public GameObject EnemyStatePanel;
 
     private void Awake()
     {
+        sortingNum = 0;
+        gameManager = transform.gameObject.GetComponent<GameManager>();
+        uiM = GetComponent<UiManager>();
+        Enemy.enemyObjects.Clear(); // ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
+        Enemy.enemyPositions.Clear();
         GameObject enemyUi = Instantiate(enemyUiCanvas);
         Instantiate(EnemyStatePanel, enemyUi.transform);
-        Debug.Log("ui Spawned");
         gameManager = transform.gameObject.GetComponent<GameManager>();
-        GameManager.enemyObjects.Clear(); // Àû À§Ä¡ ¹× °´Ã¼ Á¤º¸ ÃÊ±âÈ­
+        GameManager.enemyObjects.Clear(); // ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
         GameManager.enemyPositions.Clear();
     }
 
@@ -71,17 +80,17 @@ public class EnemyManager : MonoBehaviour
             testMove();
         }
 
-        // Àû ÅÏÀÏ¶§ (ÀÌµ¿ ¹× °ø°ÝÈ®ÀÎ)
+        // ï¿½ï¿½ ï¿½ï¿½ï¿½Ï¶ï¿½ (ï¿½Ìµï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È®ï¿½ï¿½)
         if (GameManager.Turn % 2 == 0 && enemyTurnAnchor)
         {
             //enemyWarningSignAnchor = true;
             enemyTurnAnchor = false;
-            // °æ°ísign ÃÊ±âÈ­
+            // ï¿½ï¿½ï¿½sign ï¿½Ê±ï¿½È­
             foreach (Transform child in GameObject.FindWithTag("WarningBox").transform)
             {
                 Destroy(child.gameObject);
             }
-            // ¿ÀºêÁ§Æ® Ä«¿îÆ® ÃÊ±âÈ­
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® Ä«ï¿½ï¿½Æ® ï¿½Ê±ï¿½È­
             /*
             for (int count = 0; count < GameManager.enemyObjects.Count; count++)
             {
@@ -91,7 +100,7 @@ public class EnemyManager : MonoBehaviour
             StartCoroutine(StartEnemyTurn());
         }
 
-        // ÇÃ·¹ÀÌ¾î ÅÏÀÏ¶§ (Àû ¿òÁ÷ÀÓ °æ°í)
+        // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½Ï¶ï¿½ (ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½)
         /*
         if(GameManager.Turn % 2 == 1 && enemyWarningSignAnchor)
         {
@@ -99,6 +108,67 @@ public class EnemyManager : MonoBehaviour
            WarningEnemy();
         }
         */
+    }
+
+    void SpawnEnemy()
+    {
+        sortingNum = 0;
+        int enemyCost = currentStage + 10;
+        while (enemyCost != 0) // enemyCost = totalCost 0ï¿½ï¿½ ï¿½Ç±ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ È®ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½È¯
+        {
+            int randomNumber = Random.Range(0, enemyPrefabs.Count);
+            int cost = enemyPrefabs[randomNumber].GetComponent<Enemy>().cost;
+            if (enemyCost - cost >= 0)
+            {
+                Vector3 enemyPosition;
+                do
+                { 
+                    enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0); }
+                while (Enemy.enemyPositions.Contains(enemyPosition) && Enemy.enemyPositions.Count != 0); // ï¿½Ì¹ï¿½ ï¿½ï¿½È¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½Ä¥ï¿½ï¿½
+                Enemy.enemyPositions.Add(enemyPosition);
+                GameObject currentEnemyObj = Instantiate(enemyPrefabs[randomNumber], GameManager.gridSize * Enemy.enemyPositions[Enemy.enemyPositions.Count - 1], Quaternion.identity);
+                Enemy.enemyObjects.Add(currentEnemyObj);
+                enemyCost -= cost;
+
+                // ï¿½ï¿½ï¿½ï¿½ ï¿½Ç³Ú¾È¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½Îºï¿½
+                Enemy currentEnemey = currentEnemyObj.GetComponent<Enemy>();
+
+                // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ UI ï¿½Ç³Ú¿ï¿½ Ç¥ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Îºï¿½
+                GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("EnemyStateContent").transform);
+                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = enemyPrefabs[randomNumber].GetComponent<SpriteRenderer>().sprite;
+                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().color = enemyPrefabs[randomNumber].GetComponent<SpriteRenderer>().color;
+                currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "ï¿½àµ¿ï¿½ï¿½ " + currentEnemey.cost + " / 10";
+                currentEnemey.maxHp = currentEnemey.hp;
+                currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "Ã¼ï¿½ï¿½ " + currentEnemey.hp + " / " + currentEnemey.maxHp;
+
+                //ï¿½ï¿½ ï¿½Æ·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì±Ôºï¿½ ï¿½Û¼ï¿½ï¿½ï¿½Æ®
+                sortingList.Add(sortingNum);
+                sortingNum++;
+                if(enemyCost == 0)
+                {
+                    EnemyStateSort();
+                    uiM.EnemyStateSetting();
+                   // currentEnemyState.transform.parent.parent.parent.parent.gameObject.SetActive(false);
+                }
+            }
+        }
+    }
+    
+    //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã¢ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ sortingListï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public void EnemyStateSort()
+    {
+        for (int i = 1; i < Enemy.enemyObjects.Count; i++)
+        {
+            int key = sortingList[i];
+            int j = i - 1;
+
+            while (j >= 0 && Enemy.enemyObjects[sortingList[j]].GetComponent<Enemy>().moveCtrl[1] < Enemy.enemyObjects[key].GetComponent<Enemy>().moveCtrl[1])
+            {
+                sortingList[j + 1] = sortingList[j];
+                j--;
+            }
+            sortingList[j + 1] = key;
+        }
     }
 
     public List<Path> FinalPathList;
@@ -111,7 +181,7 @@ public class EnemyManager : MonoBehaviour
     Path StartNode, TargetNode, CurNode;
     List<Path> OpenList, ClosedList;
 
-    // A* ¾Ë°í¸®Áò
+    // A* ï¿½Ë°ï¿½ï¿½ï¿½ï¿½ï¿½
     public void PathFinding(GameObject startObj, GameObject endObj)
     {
         sizeX = topRight.x - bottomLeft.x + 1;
@@ -126,7 +196,7 @@ public class EnemyManager : MonoBehaviour
             }
         }
 
-        // startPos, endPos ±âÁ¸ positionÀ» girdSize·Î ³ª´²¼­ Á¤¼öÈ­ ½ÃÄÑÁØ ´ÙÀ½ ÁÂÇ¥°è (0, 0)À» ¿ÞÂÊ ¾Æ·¡ °¡ÀåÀÚ¸®·Î ¹Ù²ãÁÜ
+        // startPos, endPos ï¿½ï¿½ï¿½ï¿½ positionï¿½ï¿½ girdSizeï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥ï¿½ï¿½ (0, 0)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½ï¿½
         Vector2 trimPos;
         trimPos = startObj.transform.position / GameManager.gridSize;
         startPos = new Vector2Int(Mathf.FloorToInt(trimPos.x) + 4, Mathf.FloorToInt(trimPos.y) + 4);
@@ -136,14 +206,14 @@ public class EnemyManager : MonoBehaviour
         StartNode = PathArray[startPos.x - bottomLeft.x, startPos.y - bottomLeft.y];
         TargetNode = PathArray[targetPos.x - bottomLeft.x, targetPos.y - bottomLeft.y];
 
-        // ½ÃÀÛ°ú ³¡ ³ëµå, ¿­¸°¸®½ºÆ®¿Í ´ÝÈù¸®½ºÆ®, ¸¶Áö¸·¸®½ºÆ® ÃÊ±âÈ­
+        // ï¿½ï¿½ï¿½Û°ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Ê±ï¿½È­
         OpenList = new List<Path>() { StartNode };
         ClosedList = new List<Path>();
         FinalPathList = new List<Path>();
 
         while (OpenList.Count > 0)
         {
-            // ¿­¸°¸®½ºÆ® Áß °¡Àå F°¡ ÀÛ°í F°¡ °°´Ù¸é H°¡ ÀÛÀº °É ÇöÀç³ëµå·Î ÇÏ°í ¿­¸°¸®½ºÆ®¿¡¼­ ´ÝÈù¸®½ºÆ®·Î ¿Å±â±â
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Fï¿½ï¿½ ï¿½Û°ï¿½ Fï¿½ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½ Hï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Å±ï¿½ï¿½
             CurNode = OpenList[0];
             for (int i = 1; i < OpenList.Count; i++)
             {
@@ -154,7 +224,7 @@ public class EnemyManager : MonoBehaviour
             ClosedList.Add(CurNode);
 
 
-            // ¸¶Áö¸·
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             if (CurNode == TargetNode)
             {
                 Path TargetCurNode = TargetNode.ParentNode;
@@ -166,24 +236,24 @@ public class EnemyManager : MonoBehaviour
                 FinalPathList.Add(StartNode);
                 FinalPathList.Reverse();
 
-                //for (int i = 0; i < FinalPathList.Count; i++) print(i + "¹øÂ°´Â " + FinalPathList[i].x + ", " + FinalPathList[i].y);
+                //for (int i = 0; i < FinalPathList.Count; i++) print(i + "ï¿½ï¿½Â°ï¿½ï¿½ " + FinalPathList[i].x + ", " + FinalPathList[i].y);
                 return;
             }
 
             if (allowDiagonal)
             {
-                // ´ÙÀ½¿¡ µé¾î°¥ ÁÂÇ¥ Àü´Þ
-                OpenListAdd(CurNode.x + 1, CurNode.y + 1); // ¿À¸¥ÂÊ À§
-                OpenListAdd(CurNode.x - 1, CurNode.y + 1); // ¿ÞÂÊ À§
-                OpenListAdd(CurNode.x - 1, CurNode.y - 1); // ¿ÞÂÊ ¾Æ·¡
-                OpenListAdd(CurNode.x + 1, CurNode.y - 1); // ¿À¸¥ÂÊ ¾Æ·¡
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½î°¥ ï¿½ï¿½Ç¥ ï¿½ï¿½ï¿½ï¿½
+                OpenListAdd(CurNode.x + 1, CurNode.y + 1); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
+                OpenListAdd(CurNode.x - 1, CurNode.y + 1); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
+                OpenListAdd(CurNode.x - 1, CurNode.y - 1); // ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½
+                OpenListAdd(CurNode.x + 1, CurNode.y - 1); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½
             }
 
-            // ¡è ¡æ ¡é ¡ç
-            OpenListAdd(CurNode.x, CurNode.y + 1); // À§
-            OpenListAdd(CurNode.x + 1, CurNode.y); // ¿À¸¥ÂÊ
-            OpenListAdd(CurNode.x, CurNode.y - 1); // ¾Æ·¡
-            OpenListAdd(CurNode.x - 1, CurNode.y); // ¿ÞÂÊ
+            // ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½
+            OpenListAdd(CurNode.x, CurNode.y + 1); // ï¿½ï¿½
+            OpenListAdd(CurNode.x + 1, CurNode.y); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            OpenListAdd(CurNode.x, CurNode.y - 1); // ï¿½Æ·ï¿½
+            OpenListAdd(CurNode.x - 1, CurNode.y); // ï¿½ï¿½ï¿½ï¿½
         }
 
         if (FinalPathList.Count == 0)
@@ -195,42 +265,42 @@ public class EnemyManager : MonoBehaviour
     public GameManager gameManager;
     void OpenListAdd(int checkX, int checkY)
     {
-        // graph »ó (0,0) == 0°ú °°À½
+        // graph ï¿½ï¿½ (0,0) == 0ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         int startGraphPosition = (int)(CurNode.y * 9 + CurNode.x);
         int endGraphPosition = (int)(checkY * 9 + checkX);
-        // »óÇÏÁÂ¿ì ¹üÀ§¸¦ ¹þ¾î³ªÁö ¾Ê°í, º®ÀÌ ¾Æ´Ï¸é¼­, ´ÝÈù¸®½ºÆ®¿¡ ¾ø´Ù¸é
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½î³ªï¿½ï¿½ ï¿½Ê°ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½Æ´Ï¸é¼­, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½
         if (checkX >= bottomLeft.x && checkX < topRight.x + 1 && checkY >= bottomLeft.y && checkY < topRight.y + 1 && !ClosedList.Contains(PathArray[checkX - bottomLeft.x, checkY - bottomLeft.y]))
         {
-            // start ÁöÁ¡À¸·Î ºÎÅÍ end ÁöÁ¡ »çÀÌ¿¡ º®ÀÌ ÀÖ´ÂÁö È®ÀÎ
+            // start ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ end ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ È®ï¿½ï¿½
             if (gameManager.mapGraph[startGraphPosition, endGraphPosition] == 0) return;
             if (CheckEnemyPos(new Vector2((checkX - 4) * GameManager.gridSize, (checkY - 4) * GameManager.gridSize))) return;
-            // ´ë°¢¼± Çã¿ë½Ã, º® »çÀÌ·Î Åë°ú ¾ÈµÊ
+            // ï¿½ë°¢ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ ï¿½ï¿½ï¿½Ì·ï¿½ ï¿½ï¿½ï¿½ ï¿½Èµï¿½
             if (allowDiagonal)
             {
                 if (gameManager.mapGraph[startGraphPosition, startGraphPosition + (checkX - CurNode.x)] == 0)
                 {
                     if (checkY - CurNode.y == 1)
                     {
-                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition + 9] == 0) return; // ¾Æ·¡¿¡¼­ À§·Î ¿Ã¶ó°¡´Â °æ¿ì
+                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition + 9] == 0) return; // ï¿½Æ·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã¶ó°¡´ï¿½ ï¿½ï¿½ï¿½
                     }
                     else if (checkY - CurNode.y == -1)
                     {
-                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition - 9] == 0) return; // À§¿¡¼­ ¾Æ·¡·Î ³»·Á°¡´Â °æ¿ì
+                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition - 9] == 0) return; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
                     }
                 }
             }
 
-            // ÄÚ³Ê¸¦ °¡·ÎÁú·¯ °¡Áö ¾ÊÀ»½Ã, ÀÌµ¿ Áß¿¡ ¼öÁ÷¼öÆò Àå¾Ö¹°ÀÌ ÀÖÀ¸¸é ¾ÈµÊ
+            // ï¿½Ú³Ê¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½Ìµï¿½ ï¿½ß¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Èµï¿½
             if (dontCrossCorner)
             {
                 //if (PathArray[CurNode.x - bottomLeft.x, checkY - bottomLeft.y].isWall || PathArray[checkX - bottomLeft.x, CurNode.y - bottomLeft.y].isWall) return;
             }
 
-            // ÀÌ¿ô³ëµå¿¡ ³Ö°í, Á÷¼±Àº 10, ´ë°¢¼±Àº 14ºñ¿ë
+            // ï¿½Ì¿ï¿½ï¿½ï¿½å¿¡ ï¿½Ö°ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 10, ï¿½ë°¢ï¿½ï¿½ï¿½ï¿½ 14ï¿½ï¿½ï¿½
             Path NeighborNode = PathArray[checkX - bottomLeft.x, checkY - bottomLeft.y];
             int MoveCost = CurNode.G + (CurNode.x - checkX == 0 || CurNode.y - checkY == 0 ? 10 : 14);
 
-            // ÀÌµ¿ºñ¿ëÀÌ ÀÌ¿ô³ëµåGº¸´Ù ÀÛ°Å³ª ¶Ç´Â ¿­¸°¸®½ºÆ®¿¡ ÀÌ¿ô³ëµå°¡ ¾ø´Ù¸é G, H, ParentNode¸¦ ¼³Á¤ ÈÄ ¿­¸°¸®½ºÆ®¿¡ Ãß°¡
+            // ï¿½Ìµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¿ï¿½ï¿½ï¿½ï¿½Gï¿½ï¿½ï¿½ï¿½ ï¿½Û°Å³ï¿½ ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Ì¿ï¿½ï¿½ï¿½å°¡ ï¿½ï¿½ï¿½Ù¸ï¿½ G, H, ParentNodeï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ß°ï¿½
             if (MoveCost < NeighborNode.G || !OpenList.Contains(NeighborNode))
             {
                 NeighborNode.G = MoveCost;
@@ -265,6 +335,15 @@ public class EnemyManager : MonoBehaviour
     }
     */
     static public bool turnCheck = false;
+
+
+
+
+
+
+
+
+    /*
     void MoveCtrlUpdate()
     {
         Enemy currentEnemyState;
@@ -273,11 +352,11 @@ public class EnemyManager : MonoBehaviour
         {
             currentEnemyState = GameManager.enemyObjects[count].GetComponent<Enemy>();
 
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ÀÇ Çàµ¿·ÂÀº ¡æ " + currentEnemyState.moveCtrl[1]);
-            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // ·£´ýÀ¸·Î µé¾î¿À´Â ¹«ÀÛÀ§ Çàµ¿·Â 0 ~ Àû Çàµ¿·Â È¸º¹ ÃÖ´ëÄ¡
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ÀÇ º¯µ¿ Çàµ¿·ÂÀº ¡æ " + currentEnemyState.moveCtrl[1]);
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ " + currentEnemyState.moveCtrl[1]);
+            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½ 0 ~ ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½ È¸ï¿½ï¿½ ï¿½Ö´ï¿½Ä¡
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ " + currentEnemyState.moveCtrl[1]);
 
-            //currentEnemyState.moveCtrl[1] += 10; // test ¿ë Ãß°¡
+            //currentEnemyState.moveCtrl[1] += 10; // test ï¿½ï¿½ ï¿½ß°ï¿½
 
             if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
             {
@@ -286,7 +365,7 @@ public class EnemyManager : MonoBehaviour
                 currentEnemyState.state = Enemy.EState.Move;
                 PathFinding(currenEnemy, player);
                 currentEnemyState.EnemyMove(FinalPathList);
-                currentEnemyState.moveCtrl[1] = 0; // ÇöÀç Çàµ¿·Â ÃÊ±âÈ­
+                currentEnemyState.moveCtrl[1] = 0; // ï¿½ï¿½ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½ ï¿½Ê±ï¿½È­
                 /*
                 foreach(Transform child in GameObject.FindWithTag("WarningBox").transform)
                 {
@@ -297,7 +376,7 @@ public class EnemyManager : MonoBehaviour
                 }
                 GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
                 */
-                if (!turnCheck)
+  /*              if (!turnCheck)
                 {
                     turnCheck = true;
                     GameManager.Turn++;
@@ -315,6 +394,15 @@ public class EnemyManager : MonoBehaviour
             }
         }
     }
+ */
+
+
+
+
+
+
+
+
 
     void testMove()
     {
@@ -324,9 +412,9 @@ public class EnemyManager : MonoBehaviour
         {
             currentEnemyState = GameManager.enemyObjects[count].GetComponent<Enemy>();
 
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ÀÇ Çàµ¿·ÂÀº ¡æ " + currentEnemyState.moveCtrl[1]);
-            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // È¸º¹ÇÏ´Â Àû Çàµ¿·Â
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ÀÇ º¯µ¿ Çàµ¿·ÂÀº ¡æ " + currentEnemyState.moveCtrl[1]);
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ " + currentEnemyState.moveCtrl[1]);
+            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // È¸ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ " + currentEnemyState.moveCtrl[1]);
         }
     }
 
@@ -388,8 +476,77 @@ public class EnemyManager : MonoBehaviour
 
     IEnumerator StartEnemyTurn()
     {
+        StartCoroutine(MoveCtrlUpdate());
         yield return new WaitForSeconds(2);
-        MoveCtrlUpdate();
+        //MoveCtrlUpdate();
         enemyTurnAnchor = true;
+    }
+
+
+
+
+
+    IEnumerator MoveCtrlUpdate()
+    {
+        uiM.popLock = true; //////////////////////////////////////////////////////////// ï¿½Ó½ï¿½
+        List<int> originSortingList = new List<int>();
+        int originCost;  //ï¿½ï¿½ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½. ï¿½Ú½ï¿½Æ®ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+        for(int i = 0; i < sortingList.Count; i++)
+        {
+            originSortingList.Add(sortingList[i]);
+        }
+        Enemy currentEnemyState;
+        int count;
+        for (count = 0; count < Enemy.enemyObjects.Count; count++)
+        {
+            currentEnemyState = Enemy.enemyObjects[originSortingList[count]].GetComponent<Enemy>();
+            originCost = currentEnemyState.moveCtrl[1];
+
+            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ " + currentEnemyState.moveCtrl[1]);
+            currentEnemyState.moveCtrl[1] += Random.Range(1, (currentEnemyState.moveCtrl[2] + 1)); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½ 0 ~ ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½ È¸ï¿½ï¿½ ï¿½Ö´ï¿½Ä¡
+            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ " + currentEnemyState.moveCtrl[1]);
+
+            EnemyStateSort();
+            yield return StartCoroutine(uiM.MovectrlCountAnim(originSortingList[count], originCost, currentEnemyState.moveCtrl[1]));
+            originCost = currentEnemyState.moveCtrl[1]; //ï¿½ï¿½ï¿½â¼­ï¿½ï¿½ï¿½ï¿½ originCostï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½
+
+            originCost = currentEnemyState.moveCtrl[1]; //ï¿½ï¿½ï¿½â¼­ï¿½ï¿½ï¿½ï¿½ originCostï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½
+
+            if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
+            {
+                GameObject currenEnemy = Enemy.enemyObjects[originSortingList[count]];
+                GameObject player = GameObject.FindWithTag("Player");
+                currentEnemyState.state = Enemy.EState.Move;
+                PathFinding(currenEnemy, player);
+                currentEnemyState.EnemyMove(FinalPathList);
+                //currentEnemyState.moveCtrl[1] = 0; // ï¿½ï¿½ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½ ï¿½Ê±ï¿½È­
+                Debug.Log("ï¿½Ù²ï¿½ï¿½ ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½"+currentEnemyState.moveCtrl[1]);
+                //currentEnemyState.moveCtrl[1] -= currentEnemyState.moveCtrl[0]; //ï¿½àµ¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+                Debug.Log("ï¿½ï¿½ï¿½Òµï¿½ ï¿½àµ¿ï¿½ï¿½ " + currentEnemyState.moveCtrl[0]);
+                Debug.Log("ï¿½Ù²ï¿½ ï¿½ï¿½ ï¿½àµ¿ï¿½Â·ï¿½   "+ currentEnemyState.moveCtrl[1]);
+                currentEnemyState.moveCtrl[1] = -1;
+                EnemyStateSort();
+                currentEnemyState.moveCtrl[1] = originCost - currentEnemyState.moveCtrl[0];
+                yield return StartCoroutine(uiM.ReloadState(originSortingList[count], currentEnemyState.moveCtrl[1]));
+
+                if (!turnCheck)
+                {
+                    turnCheck = true;
+                    GameManager.Turn++;
+                }
+            }
+
+            else
+            {
+                if (!turnCheck)
+                {
+                    turnCheck = true;
+                    GameManager.Turn++;
+
+                }
+            }
+        }
+
+        uiM.popLock = false; /////////////////////////////////////////ï¿½Ó½ï¿½
     }
 }
