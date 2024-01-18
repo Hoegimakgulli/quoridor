@@ -42,9 +42,13 @@ public class EnemyManager : MonoBehaviour
     private bool enemyTurnAnchor = true;
     //private bool enemyWarningSignAnchor = true;
 
+    public GameObject EnemyStatePanel;
+
     private void Awake()
     {
-        Instantiate(enemyUiCanvas);
+        GameObject enemyUi = Instantiate(enemyUiCanvas);
+        Instantiate(EnemyStatePanel, enemyUi.transform);
+        Debug.Log("ui Spawned");
         gameManager = transform.gameObject.GetComponent<GameManager>();
         GameManager.enemyObjects.Clear(); // 적 위치 및 객체 정보 초기화
         GameManager.enemyPositions.Clear();
@@ -114,7 +118,7 @@ public class EnemyManager : MonoBehaviour
         sizeY = topRight.y - bottomLeft.y + 1;
         PathArray = new Path[sizeX, sizeY];
 
-        for (int i = 0; i < sizeX; i++) 
+        for (int i = 0; i < sizeX; i++)
         {
             for (int j = 0; j < sizeY; j++)
             {
@@ -181,8 +185,8 @@ public class EnemyManager : MonoBehaviour
             OpenListAdd(CurNode.x, CurNode.y - 1); // 아래
             OpenListAdd(CurNode.x - 1, CurNode.y); // 왼쪽
         }
-        
-        if(FinalPathList.Count == 0)
+
+        if (FinalPathList.Count == 0)
         {
             PathFinding(startObj, blockEmemyObj);
         }

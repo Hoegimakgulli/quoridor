@@ -10,11 +10,11 @@ public class UiManager : MonoBehaviour
     public static GameObject[] historyBox = new GameObject[2]; // 0 - player, 2 - enemy
     public static int turnAnchor = 0; // GameManager에 있는 Turn과 비교하는 비교군
 
-    public GameObject EnemyStatePanel;
+
 
     private void Awake()
     {
-        Instantiate(EnemyStatePanel, GameObject.Find("Canvas(Clone)").transform);
+
     }
 
     private void Start()
