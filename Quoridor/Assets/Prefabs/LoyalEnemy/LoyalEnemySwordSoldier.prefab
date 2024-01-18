@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1534513802194879074}
   - component: {fileID: -4979223248444574124}
   - component: {fileID: -3027553962488877384}
+  - component: {fileID: 3553181121551284931}
   m_Layer: 7
   m_Name: LoyalEnemySwordSoldier
   m_TagString: Enemy
@@ -99,7 +100,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8158980e98240324ca207c078297073b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cost: 2
   hp: 2
   maxHp: 0
   moveCtrl: 0a0000000000000003000000
@@ -163,3 +163,19 @@ CompositeCollider2D:
     m_Paths: []
   m_VertexDistance: 0.0005
   m_OffsetDistance: 0.00005
+--- !u!58 &3553181121551284931
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5098181600813880054}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 0.5
