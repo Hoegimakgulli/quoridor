@@ -146,7 +146,7 @@ public class EnemyManager : MonoBehaviour
                 {
                     EnemyStateSort();
                     uiM.EnemyStateSetting();
-                    currentEnemyState.transform.parent.parent.parent.parent.gameObject.SetActive(false);
+                   // currentEnemyState.transform.parent.parent.parent.parent.gameObject.SetActive(false);
                 }
             }
         }
@@ -488,7 +488,7 @@ public class EnemyManager : MonoBehaviour
     {
         uiM.popLock = true; //////////////////////////////////////////////////////////// �ӽ�
         List<int> originSortingList = new List<int>();
-        int originCost;
+        int originCost;  //���� �ൿ��. �ڽ�Ʈ�� �ൿ������ ������.
         for(int i = 0; i < sortingList.Count; i++)
         {
             originSortingList.Add(sortingList[i]);
@@ -506,6 +506,7 @@ public class EnemyManager : MonoBehaviour
 
             EnemyStateSort();
             yield return StartCoroutine(uiM.MovectrlCountAnim(originSortingList[count], originCost, currentEnemyState.moveCtrl[1]));
+            originCost = currentEnemyState.moveCtrl[1]; //���⼭���� originCost�� ���� �ൿ��
 
             originCost = currentEnemyState.moveCtrl[1]; //���⼭���� originCost�� ���� �ൿ��
 
