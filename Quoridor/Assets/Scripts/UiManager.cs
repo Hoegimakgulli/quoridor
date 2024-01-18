@@ -7,21 +7,21 @@ using UnityEngine.UI;
 
 public class UiManager : MonoBehaviour
 {
-    // panel °ü¸®¿ë º¯¼ö
+    // panel ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     public static GameObject[] panelBox = new GameObject[2]; // 0 - Turn, 1 - history
     public static GameObject[] historyBox = new GameObject[2]; // 0 - player, 2 - enemy
-    public static int turnAnchor = 0; // GameManager¿¡ ÀÖ´Â Turn°ú ºñ±³ÇÏ´Â ºñ±³±º
+    public static int turnAnchor = 0; // GameManagerï¿½ï¿½ ï¿½Ö´ï¿½ Turnï¿½ï¿½ ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ñ±³±ï¿½
 
-    // ÀÌ±Ôºó »ý¼º º¯¼öµé
+    // ï¿½Ì±Ôºï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     public GameObject enemyStatePre;
     public EnemyManager enemyManager;
     private List<RectTransform> enemyStates = new List<RectTransform>();
     private GameObject canvas;
     private List<GameObject> enemies = new List<GameObject>();
     private List<Enemy> enemiesScript = new List<Enemy>();
-    public float uiMoveTime = 0.2f; //Àû »óÅÂÃ¢ ¿òÁ÷ÀÌ´Â ½Ã°£ 
-    public bool popLock = false; //ÀÓ½Ã º¯¼ö. ÇÃ·¹ÀÌ¾î ¹× ÀûÅÏ ¾Ë·ÁÁÖ´Â ÆË¾÷ ÅëÁ¦¿ë.
-    //private List<int> sortingList = new List<int>(); //Çàµ¿·Â ¼ø¼­·Î EnemyState¸¦ Á¤·ÄÇÑ ¸®½ºÆ®. °¢ ¹è¿­ÀÇ ¼ýÀÚ´Â enemyState ¸®½ºÆ®ÀÇ ¸î¹øÂ° ¹è¿­ÀÎÁö¸¦ ³ªÅ¸³¿
+    public float uiMoveTime = 0.2f; //ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã¢ ï¿½ï¿½ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½Ã°ï¿½ 
+    public bool popLock = false; //ï¿½Ó½ï¿½ ï¿½ï¿½ï¿½ï¿½. ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ë·ï¿½ï¿½Ö´ï¿½ ï¿½Ë¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+    //private List<int> sortingList = new List<int>(); //ï¿½àµ¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ EnemyStateï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®. ï¿½ï¿½ ï¿½è¿­ï¿½ï¿½ ï¿½ï¿½ï¿½Ú´ï¿½ enemyState ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½Â° ï¿½è¿­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½
 
     public GameObject EnemyStatePanel;
 
@@ -29,20 +29,20 @@ public class UiManager : MonoBehaviour
     {
         canvas = GameObject.Find("Canvas");
         enemyManager = GetComponent<EnemyManager>();
-        Instantiate(EnemyStatePanel, GameObject.Find("Canvas").transform);
+        Instantiate(EnemyStatePanel, GameObject.Find("Canvas(Clone)").transform);
     }
 
     private void Start()
     {
         panelBox[0] = GameObject.Find("TurnPanel");
         panelBox[1] = GameObject.Find("HistoryPanel");
-        historyBox[0] = panelBox[1].transform.GetChild(0).transform.GetChild(0).gameObject; // History -> playerBox Á¢±Ù
-        historyBox[1] = panelBox[1].transform.GetChild(0).transform.GetChild(1).gameObject; // History -> enemyBox Á¢±Ù
+        historyBox[0] = panelBox[1].transform.GetChild(0).transform.GetChild(0).gameObject; // History -> playerBox ï¿½ï¿½ï¿½ï¿½
+        historyBox[1] = panelBox[1].transform.GetChild(0).transform.GetChild(1).gameObject; // History -> enemyBox ï¿½ï¿½ï¿½ï¿½
     }
 
     private void Update()
     {
-        if (GameManager.Turn % 2 == 0) // ÆÐ³Î °ü¸® ÆÄÆ®
+        if (GameManager.Turn % 2 == 0) // ï¿½Ð³ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®
         {
             StartCoroutine(EnemyPanelPop());
         }
@@ -70,7 +70,7 @@ public class UiManager : MonoBehaviour
         yield return new WaitForSeconds(1);
     }
 
-    public void HistoryPanelPop() // history panel ¿­°í ´Ý±â ÇÔ¼ö
+    public void HistoryPanelPop() // history panel ï¿½ï¿½ï¿½ï¿½ ï¿½Ý±ï¿½ ï¿½Ô¼ï¿½
     {
         if (!panelBox[1].transform.GetChild(0).gameObject.activeSelf) // History Panel Active == false
         {
@@ -85,35 +85,35 @@ public class UiManager : MonoBehaviour
     public static void InputPlayerMoveHistory(Vector3 beforePos, Vector3 currentPos, GameObject historyIndex)
     {
         GameObject playerHistoryContent = historyBox[0];
-        while (playerHistoryContent.name != "Content") // player Content Ã£¾Æ¼­ ³Ö¾îÁÖ±â
+        while (playerHistoryContent.name != "Content") // player Content Ã£ï¿½Æ¼ï¿½ ï¿½Ö¾ï¿½ï¿½Ö±ï¿½
         {
             playerHistoryContent = playerHistoryContent.transform.GetChild(0).gameObject;
         }
 
         Debug.Log("player move history");
         GameObject indexObj = Instantiate(historyIndex, new Vector3(0, 0, 0), Quaternion.identity, playerHistoryContent.transform);
-        indexObj.transform.GetChild(0).GetComponent<Text>().text = "ÅÏ " + (GameManager.Turn / 2 + 1); // ÅÏ Ç¥½Ã
-        indexObj.transform.GetChild(1).GetComponent<Text>().text = "ÀÌµ¿"; // ÀÌµ¿ or º®¼³Ä¡ Ç¥½Ã
-        indexObj.transform.GetChild(2).GetComponent<Text>().text = "" + (char)(beforePos.x + 69) + ((beforePos.y - 4) * -1) + "¡æ" + (char)(currentPos.x + 69) + ((currentPos.y - 4) * -1); // 65 - A ¿¡¼­ ¾Æ½ºÅ°ÄÚµå°ª + ÁÂÇ¥°ªÀ¸·Î ¹®ÀÚ Ãâ·Â
+        indexObj.transform.GetChild(0).GetComponent<Text>().text = "ï¿½ï¿½ " + (GameManager.Turn / 2 + 1); // ï¿½ï¿½ Ç¥ï¿½ï¿½
+        indexObj.transform.GetChild(1).GetComponent<Text>().text = "ï¿½Ìµï¿½"; // ï¿½Ìµï¿½ or ï¿½ï¿½ï¿½ï¿½Ä¡ Ç¥ï¿½ï¿½
+        indexObj.transform.GetChild(2).GetComponent<Text>().text = "" + (char)(beforePos.x + 69) + ((beforePos.y - 4) * -1) + "ï¿½ï¿½" + (char)(currentPos.x + 69) + ((currentPos.y - 4) * -1); // 65 - A ï¿½ï¿½ï¿½ï¿½ ï¿½Æ½ï¿½Å°ï¿½Úµå°ª + ï¿½ï¿½Ç¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
     }
 
     public static void InputPlayerWallHistory(Vector3 wallPos, Quaternion wallRot, GameObject historyIndex)
     {
         GameObject playerHistoryContent = historyBox[0];
-        while (playerHistoryContent.name != "Content") // player Content Ã£¾Æ¼­ ³Ö¾îÁÖ±â
+        while (playerHistoryContent.name != "Content") // player Content Ã£ï¿½Æ¼ï¿½ ï¿½Ö¾ï¿½ï¿½Ö±ï¿½
         {
             playerHistoryContent = playerHistoryContent.transform.GetChild(0).gameObject;
         }
 
         Debug.Log("player wall history");
         GameObject indexObj = Instantiate(historyIndex, new Vector3(0, 0, 0), Quaternion.identity, playerHistoryContent.transform);
-        indexObj.transform.GetChild(0).GetComponent<Text>().text = "ÅÏ " + (GameManager.Turn / 2); // ÅÏ Ç¥½Ã
-        indexObj.transform.GetChild(1).GetComponent<Text>().text = "º®¼³Ä¡"; // ÀÌµ¿ or º®¼³Ä¡ Ç¥½Ã
-        indexObj.transform.GetChild(2).GetComponent<Text>().text = "¾Æ";
+        indexObj.transform.GetChild(0).GetComponent<Text>().text = "ï¿½ï¿½ " + (GameManager.Turn / 2); // ï¿½ï¿½ Ç¥ï¿½ï¿½
+        indexObj.transform.GetChild(1).GetComponent<Text>().text = "ï¿½ï¿½ï¿½ï¿½Ä¡"; // ï¿½Ìµï¿½ or ï¿½ï¿½ï¿½ï¿½Ä¡ Ç¥ï¿½ï¿½
+        indexObj.transform.GetChild(2).GetComponent<Text>().text = "ï¿½ï¿½";
     }
 
 
-    public static IEnumerator EnemyPanelPop() // TurnPanel child ¡æ 0 = player, 1 = enemy
+    public static IEnumerator EnemyPanelPop() // TurnPanel child ï¿½ï¿½ 0 = player, 1 = enemy
     {
         if (turnAnchor != GameManager.Turn)
         {
@@ -124,7 +124,7 @@ public class UiManager : MonoBehaviour
         }
     }
 
-    public static IEnumerator PlayerPanelPop() // TurnPanel child ¡æ 0 = player, 1 = enemy
+    public static IEnumerator PlayerPanelPop() // TurnPanel child ï¿½ï¿½ 0 = player, 1 = enemy
     {
         if (turnAnchor != GameManager.Turn)
         {
@@ -135,7 +135,7 @@ public class UiManager : MonoBehaviour
         }
     }
     
-    //ÇöÀç Á¸ÀçÇÏ´Â ÀûµéÀ» Àû »óÅÂÃ¢¿¡ Ç¥±â ¹× Á¤·ÄÇÑ´Ù.
+    //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã¢ï¿½ï¿½ Ç¥ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
     public void EnemyStateSetting()
     {
         enemies = Enemy.enemyObjects;
@@ -147,15 +147,15 @@ public class UiManager : MonoBehaviour
             enemyStates.Add(Instantiate(enemyStatePre, canvas.transform.GetChild(3).GetChild(1).GetChild(0)).GetComponent<RectTransform>());
             enemyStates[i].GetChild(0).GetChild(0).GetComponent<Image>().sprite = enemies[i].GetComponent<SpriteRenderer>().sprite;
             enemyStates[i].GetChild(0).GetChild(0).GetComponent<Image>().color = enemies[i].GetComponent<SpriteRenderer>().color;
-            enemyStates[i].GetChild(1).GetComponent<Text>().text = "Çàµ¿·Â : " + enemiesScript[i].moveCtrl[1] + " / 10";
-            enemyStates[i].GetChild(2).GetComponent<Text>().text = "Ã¼·Â : " + enemiesScript[i].hp + " / " + enemies[i].GetComponent<Enemy>().maxHp;
+            enemyStates[i].GetChild(1).GetComponent<Text>().text = "ï¿½àµ¿ï¿½ï¿½ : " + enemiesScript[i].moveCtrl[1] + " / 10";
+            enemyStates[i].GetChild(2).GetComponent<Text>().text = "Ã¼ï¿½ï¿½ : " + enemiesScript[i].hp + " / " + enemies[i].GetComponent<Enemy>().maxHp;
             //enemyManager.sortingList.Add(i);
         }
         //EnemyStateSort();
         EnemyStatesArr();
     }
 /*
-    //Àû »óÅÂÃ¢ ¼ø¼­ Á¤·Ä
+    //ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã¢ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     private void EnemyStateSort()
     {
         for(int i = 1; i < enemies.Count; i++)
@@ -172,7 +172,7 @@ public class UiManager : MonoBehaviour
         }
     }
 */
-    //Àû »óÅÂÃ¢µé ¹èÄ¡
+    //ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã¢ï¿½ï¿½ ï¿½ï¿½Ä¡
     private void EnemyStatesArr()
     {
         float firstPosition = enemyStates[0].rect.height * -0.7f;
@@ -183,17 +183,17 @@ public class UiManager : MonoBehaviour
         }
     }
 
-    //Çàµ¿·Â ¿Ã¶ó°¡´Â ¾Ö´Ï¸ÞÀÌ¼Ç  (¸î¹øÂ° ¿¡³×¹ÌÀÎÁö, ½ÃÀÛ Çàµ¿·Â, ¸ñÇ¥ Çàµ¿·Â)
+    //ï¿½àµ¿ï¿½ï¿½ ï¿½Ã¶ó°¡´ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½  (ï¿½ï¿½ï¿½Â° ï¿½ï¿½ï¿½×¹ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½àµ¿ï¿½ï¿½, ï¿½ï¿½Ç¥ ï¿½àµ¿ï¿½ï¿½)
     public IEnumerator MovectrlCountAnim(int enemyNum, int startCost, int goalCost)
     {
         if (goalCost > 10) goalCost = 10;
         enemyStates[enemyNum].GetComponent<Image>().DOFade(1, 0);
-        DOVirtual.Int(startCost, goalCost, uiMoveTime, ((x) => { enemyStates[enemyNum].GetChild(1).GetComponent<Text>().text = "Çàµ¿·Â : " + x + " / " + enemiesScript[enemyNum].moveCtrl[0]; })).SetEase(Ease.OutCirc);
+        DOVirtual.Int(startCost, goalCost, uiMoveTime, ((x) => { enemyStates[enemyNum].GetChild(1).GetComponent<Text>().text = "ï¿½àµ¿ï¿½ï¿½ : " + x + " / " + enemiesScript[enemyNum].moveCtrl[0]; })).SetEase(Ease.OutCirc);
         yield return new WaitForSeconds(uiMoveTime);
         yield return StartCoroutine(StateSwapAnim(enemyNum));
     }
 
-    //Çàµ¿·Â¿¡ µû¶ó Àûµé »óÅÂÃ¢ ½º¿Ò
+    //ï¿½àµ¿ï¿½Â¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã¢ ï¿½ï¿½ï¿½ï¿½
     public IEnumerator StateSwapAnim(int enemyNum)
     {
         float firstPosition = enemyStates[0].rect.height * -0.7f;
@@ -208,7 +208,7 @@ public class UiManager : MonoBehaviour
         enemyStates[enemyNum].GetComponent<Image>().DOFade(0.392f, 0);
     }
 
-    // Çàµ¿·Â »ç¿ë ÈÄ ¸Ç ¾Æ·¡·Î ³»¸®°í ³ª¸ÓÁö À§·Î ¿Ã¸².
+    // ï¿½àµ¿ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½Æ·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã¸ï¿½.
     public IEnumerator ReloadState(int enemyNum, int goalCost)
     {
         enemyStates[enemyNum].DOAnchorPosX(enemyStates[enemyNum].anchoredPosition.x + 400, uiMoveTime);
@@ -216,7 +216,7 @@ public class UiManager : MonoBehaviour
         //cg = enemyStates[enemyNum]
         yield return new WaitForSeconds(uiMoveTime);
         yield return StartCoroutine(StateSwapAnim(enemyNum));
-        enemyStates[enemyNum].GetChild(1).GetComponent<Text>().text = "Çàµ¿·Â : " + 0 + " / " + enemiesScript[enemyNum].moveCtrl[0];
+        enemyStates[enemyNum].GetChild(1).GetComponent<Text>().text = "ï¿½àµ¿ï¿½ï¿½ : " + 0 + " / " + enemiesScript[enemyNum].moveCtrl[0];
         enemyStates[enemyNum].DOAnchorPosX(enemyStates[enemyNum].anchoredPosition.x - 400, uiMoveTime);
         yield return new WaitForSeconds(uiMoveTime);
 

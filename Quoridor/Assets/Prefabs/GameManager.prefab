@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6551029922462568089}
   - component: {fileID: 6551029922462568091}
   - component: {fileID: 8153990614069101066}
+  - component: {fileID: 1664343263}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -84,9 +85,16 @@ MonoBehaviour:
   - {fileID: 5098181600813880054, guid: 6c99decf9e645414e84f44135403f774, type: 3}
   - {fileID: 5098181600813880054, guid: c53b27d8158dcf24ea6cd23326b9c773, type: 3}
   - {fileID: 5098181600813880054, guid: 22d7fab92bc1f83418fabd41b3d4f122, type: 3}
-  loyalEnemyPrefabs: []
-  currentStage: 0
-  enemyStatePrefab: {fileID: 4699710257723076532, guid: d61468c5d18f0fa45b216e140a86f967, type: 3}
+  loyalEnemyPrefabs:
+  - {fileID: 5098181600813880054, guid: d5715f11d18ac0e4fa7329b5110addd2, type: 3}
+  - {fileID: 5098181600813880054, guid: 3eb86d1434972a643aeb3fb514298e00, type: 3}
+  - {fileID: 5098181600813880054, guid: f1a2ca39495352c44afbdb3931318bf7, type: 3}
+  - {fileID: 5098181600813880054, guid: 048fbceac64cdbc40aa61c056763b4dc, type: 3}
+  - {fileID: 5098181600813880054, guid: c50fb871971ce1e458f5f134b40ad790, type: 3}
+  - {fileID: 5098181600813880054, guid: 99761d4bae87a9e4f91fd0a4909efc40, type: 3}
+  - {fileID: 5098181600813880054, guid: 0e0fb8e97028bca46abdab99d0bc84c2, type: 3}
+  warningSignBox: {fileID: 7065647469601570882, guid: 9c77cdc7e21904e44ba865c5c97eaba7, type: 3}
+  enemyUiCanvas: {fileID: 7471301692746399857, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
   FinalPathList: []
   bottomLeft: {x: 0, y: 0}
   topRight: {x: 8, y: 8}
@@ -97,4 +105,22 @@ MonoBehaviour:
   allowDiagonal: 1
   dontCrossCorner: 0
   gameManager: {fileID: 0}
-  enemyWarningPrefab: {fileID: 3946850747803572305, guid: e63a2fcd554c9044f980cda48c94916d, type: 3}
+--- !u!114 &1664343263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6551029922462568088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c0d9f9142f1d3b449cdda97849f1232, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  normalEnemys: []
+  championEnemys: []
+  namedEnemys: []
+  bossEnemys: []
+  EM: {fileID: 8153990614069101066}
+  gameManager: {fileID: 0}
+  enemyStatePrefab: {fileID: 4699710257723076532, guid: d61468c5d18f0fa45b216e140a86f967, type: 3}

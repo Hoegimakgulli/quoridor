@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public enum EPlayerControlStatus { None, Move, Build, Attack };
+    public enum EPlayerControlStatus { None, Move, Build, Attack, Ability };
     public EPlayerControlStatus playerControlStatus = EPlayerControlStatus.None;
 
     public static int Turn = 1; // 현재 턴
     public const float gridSize = 1.3f; // 그리드의 크기
 
     public Vector3 playerPosition = new Vector3(0, -4, 0); // 플레이어의 위치
+
+    public static List<Vector3> enemyPositions = new List<Vector3>();    // 모든 적들 위치 정보 저장
+    public static List<GameObject> enemyObjects = new List<GameObject>(); // 모든 적 기물 오브젝트 저장
 
     public int[,] mapGraph = new int[81, 81]; //DFS용 맵 그래프
 
@@ -74,7 +77,7 @@ public class GameManager : MonoBehaviour
         }
         DFS(playerGraphPosition);
         // Debug.Log(visited[enemyGraphPosition]);
-        foreach(Vector3 enemyPosition in Enemy.enemyPositions)
+        foreach (Vector3 enemyPosition in enemyPositions)
         {
             int enemyGraphPosition = (int)((enemyPosition.y + 4) * 9 + enemyPosition.x + 4);
             if (!visited[enemyGraphPosition]) return false;
