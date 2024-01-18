@@ -63,7 +63,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9885a4155447a6144924e6825c0fc7e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EnemyStatePanel: {fileID: 5240648681889013594, guid: 9fd3a5773f8515a44b814c93a3733bed, type: 3}
 --- !u!114 &8153990614069101066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,6 +94,7 @@ MonoBehaviour:
   - {fileID: 5098181600813880054, guid: 0e0fb8e97028bca46abdab99d0bc84c2, type: 3}
   warningSignBox: {fileID: 7065647469601570882, guid: 9c77cdc7e21904e44ba865c5c97eaba7, type: 3}
   enemyUiCanvas: {fileID: 7471301692746399857, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
+  EnemyStatePanel: {fileID: 5240648681889013594, guid: 9fd3a5773f8515a44b814c93a3733bed, type: 3}
   FinalPathList: []
   bottomLeft: {x: 0, y: 0}
   topRight: {x: 8, y: 8}
@@ -123,4 +123,5 @@ MonoBehaviour:
   bossEnemys: []
   EM: {fileID: 8153990614069101066}
   gameManager: {fileID: 0}
+  stageUI: {fileID: 5946504288105859631, guid: 71481e6e3a90d694da49ff0822cfa597, type: 3}
   enemyStatePrefab: {fileID: 4699710257723076532, guid: d61468c5d18f0fa45b216e140a86f967, type: 3}

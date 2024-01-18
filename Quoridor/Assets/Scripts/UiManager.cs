@@ -23,7 +23,7 @@ public class UiManager : MonoBehaviour
     public bool popLock = false; //�ӽ� ����. �÷��̾� �� ���� �˷��ִ� �˾� ������.
     //private List<int> sortingList = new List<int>(); //�ൿ�� ������ EnemyState�� ������ ����Ʈ. �� �迭�� ���ڴ� enemyState ����Ʈ�� ���° �迭������ ��Ÿ��
 
-    public GameObject EnemyStatePanel;
+
 
     private void Awake()
     {

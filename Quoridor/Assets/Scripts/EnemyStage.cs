@@ -38,6 +38,8 @@ public class EnemyStage : MonoBehaviour
     public EnemyManager EM;
     public GameManager gameManager;
 
+    public GameObject stageUI;
+
     public void Start()
     {
         gameManager = transform.GetComponent<GameManager>();
@@ -62,16 +64,8 @@ public class EnemyStage : MonoBehaviour
         // 모든 적 유닛이 사망했을때
         if (totalEnemyCount == 0)
         {
-            GameManager.enemyPositions.Clear();
-            GameManager.enemyObjects.Clear();
-            Debug.Log(GameManager.enemyPositions.Count);
-            Debug.Log(GameManager.enemyObjects.Count);
-            gameManager.currentStage++;
-            gameManager.playerPosition = new Vector3(0, -4, 0);
-            GameObject.FindWithTag("Player").transform.position = GameManager.gridSize * gameManager.playerPosition;
-            StageEnemySpawn();
-            GameManager.Turn = 1;
-            totalEnemyCount = stageEnemySettig[gameManager.currentStage].TotalReturn();
+            Instantiate(stageUI);
+            totalEnemyCount = -1;
         }
     }
 
@@ -164,7 +158,7 @@ public class EnemyStage : MonoBehaviour
                     break;
             }
 
-            for(int count = 0; count < currentSpawn.values[spawnCount]; count++)
+            for (int count = 0; count < currentSpawn.values[spawnCount]; count++)
             {
                 Vector3 enemyPosition;
                 do

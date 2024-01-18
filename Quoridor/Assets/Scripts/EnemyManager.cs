@@ -42,11 +42,12 @@ public class EnemyManager : MonoBehaviour
     private bool enemyTurnAnchor = true;
     //private bool enemyWarningSignAnchor = true;
 
-    //�̱Ժ� �߰�
+//�̱Ժ� �߰�
     private int sortingNum = 0; //�����Ҷ� ���� int
     public List<int> sortingList = new List<int>(); //�����Ҷ� ���� ����Ʈ
 
     private UiManager uiM;
+    public GameObject EnemyStatePanel;
 
     private void Awake()
     {
@@ -55,7 +56,8 @@ public class EnemyManager : MonoBehaviour
         uiM = GetComponent<UiManager>();
         Enemy.enemyObjects.Clear(); // �� ��ġ �� ��ü ���� �ʱ�ȭ
         Enemy.enemyPositions.Clear();
-        Instantiate(enemyUiCanvas);
+        GameObject enemyUi = Instantiate(enemyUiCanvas);
+        Instantiate(EnemyStatePanel, enemyUi.transform);
         gameManager = transform.gameObject.GetComponent<GameManager>();
         GameManager.enemyObjects.Clear(); // �� ��ġ �� ��ü ���� �ʱ�ȭ
         GameManager.enemyPositions.Clear();
@@ -186,7 +188,7 @@ public class EnemyManager : MonoBehaviour
         sizeY = topRight.y - bottomLeft.y + 1;
         PathArray = new Path[sizeX, sizeY];
 
-        for (int i = 0; i < sizeX; i++) 
+        for (int i = 0; i < sizeX; i++)
         {
             for (int j = 0; j < sizeY; j++)
             {
@@ -253,8 +255,8 @@ public class EnemyManager : MonoBehaviour
             OpenListAdd(CurNode.x, CurNode.y - 1); // �Ʒ�
             OpenListAdd(CurNode.x - 1, CurNode.y); // ����
         }
-        
-        if(FinalPathList.Count == 0)
+
+        if (FinalPathList.Count == 0)
         {
             PathFinding(startObj, blockEmemyObj);
         }
