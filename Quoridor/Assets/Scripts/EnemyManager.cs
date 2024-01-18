@@ -31,13 +31,12 @@ public class Path
 
 public class EnemyManager : MonoBehaviour
 {
-
     public List<GameObject> enemyPrefabs; // 기본 유닛 오브젝트들 리스트 넣어두기
     public List<GameObject> loyalEnemyPrefabs; // 상위 고급 유닛 오브젝트들 리스트 넣어두기
 
     // public static int gameManager.currentStage = 0;
-    public GameObject enemyStatePrefab; // 적 기물 상태 판넬안에 들어가는 기본 빵틀 이라고 생각.
     public GameObject warningSignBox; // 경고 표기 담아두는 박스
+    public GameObject enemyUiCanvas;
     public const float gridSize = 1.3f; // 그리드의 크기
 
     private bool enemyTurnAnchor = true;
@@ -45,6 +44,7 @@ public class EnemyManager : MonoBehaviour
 
     private void Awake()
     {
+        Instantiate(enemyUiCanvas);
         gameManager = transform.gameObject.GetComponent<GameManager>();
         GameManager.enemyObjects.Clear(); // 적 위치 및 객체 정보 초기화
         GameManager.enemyPositions.Clear();
@@ -53,7 +53,6 @@ public class EnemyManager : MonoBehaviour
     private void Start()
     {
         Instantiate(warningSignBox);
-        SpawnEnemy(); // 적 코스트에 따라 소환
     }
 
     void Update()
@@ -79,10 +78,11 @@ public class EnemyManager : MonoBehaviour
                 Destroy(child.gameObject);
             }
             // 오브젝트 카운트 초기화
+            /*
             for (int count = 0; count < GameManager.enemyObjects.Count; count++)
             {
                 GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
-            }
+            }*/
 
             StartCoroutine(StartEnemyTurn());
         }
@@ -97,40 +97,6 @@ public class EnemyManager : MonoBehaviour
         */
     }
 
-    void SpawnEnemy()
-    {
-        int enemyCost = gameManager.currentStage + 2;
-        while (enemyCost != 0) // enemyCost = totalCost 0이 되기 전까지 계속 확인 후 소환
-        {
-            int randomNumber = Random.Range(0, enemyPrefabs.Count);
-            int cost = enemyPrefabs[randomNumber].GetComponent<Enemy>().cost;
-            if (enemyCost - cost >= 0)
-            {
-                Vector3 enemyPosition;
-                do
-                {
-                    enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0);
-                }
-                while (GameManager.enemyPositions.Contains(enemyPosition) && GameManager.enemyPositions.Count != 0); // 이미 소환된 적의 위치랑 안 겹칠때
-                GameManager.enemyPositions.Add(enemyPosition);
-                GameObject currentEnemyObj = Instantiate(enemyPrefabs[randomNumber], GameManager.gridSize * GameManager.enemyPositions[GameManager.enemyPositions.Count - 1], Quaternion.identity);
-                GameManager.enemyObjects.Add(currentEnemyObj);
-                enemyCost -= cost;
-
-                // 유닛 판넬안에 보드위에 있는 적들 데이터 정보를 넣는 부분
-                Enemy currentEnemey = currentEnemyObj.GetComponent<Enemy>();
-                currentEnemey.moveCtrl[1] = Random.Range(0, 3);
-
-                // 적 정보 UI 판넬에 표시하는 부분
-                GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("EnemyStateContent").transform);
-                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = enemyPrefabs[randomNumber].GetComponent<SpriteRenderer>().sprite;
-                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().color = enemyPrefabs[randomNumber].GetComponent<SpriteRenderer>().color;
-                currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "행동력 " + currentEnemey.moveCtrl[1] + " / 10";
-                currentEnemey.maxHp = currentEnemey.hp;
-                currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "체력 " + currentEnemey.hp + " / " + currentEnemey.maxHp;
-            }
-        }
-    }
     public List<Path> FinalPathList;
     public Vector2Int bottomLeft, topRight, startPos, targetPos;
     public Vector2Int topLeft, bottomRight;
@@ -148,7 +114,7 @@ public class EnemyManager : MonoBehaviour
         sizeY = topRight.y - bottomLeft.y + 1;
         PathArray = new Path[sizeX, sizeY];
 
-        for (int i = 0; i < sizeX; i++)
+        for (int i = 0; i < sizeX; i++) 
         {
             for (int j = 0; j < sizeY; j++)
             {

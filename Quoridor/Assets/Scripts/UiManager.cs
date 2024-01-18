@@ -14,7 +14,7 @@ public class UiManager : MonoBehaviour
 
     private void Awake()
     {
-        Instantiate(EnemyStatePanel, GameObject.Find("Canvas").transform);
+        Instantiate(EnemyStatePanel, GameObject.Find("Canvas(Clone)").transform);
     }
 
     private void Start()

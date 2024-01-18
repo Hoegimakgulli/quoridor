@@ -6,13 +6,12 @@ using DG.Tweening;
 public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 {
     //-------------- Enemy Values --------------//
-    public int cost;                                  // 소환 시 필요한 비용
     public int hp;                                    // 받아야하는 총 체력
     public int maxHp;
     public int[] moveCtrl = new int[3];               // 0 = 요구 행동력, 1 = 현재 채워져 있는 행동력, 2 = 랜덤 행동력 충전 최대치
     public Vector2Int[] moveablePoints;
     public Vector2Int[] attackablePoints;
-    public enum EState { Idle, Move, Attack, Dead };
+    public enum EState { Idle, Move, Attack };
     public enum EValue { Normal = 0, Champion = 1, Named = 2, Boss = 3 }; // 0 = Normal, 1 = Champion, 2 = Named, 3 = Boss
     // 0 - 전진해 player를 공격, 1 - 뒤 포지션을 잡으면서 플레이어 공격, 2 - 자기 구역을 사수하면서 플레이어를 공격 
     // 추후 유닛 특성 상속받을 때 사용 현재 미사용.
@@ -113,21 +112,18 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     // Attack 받았을 때 실행하는 함수
     public void DieEnemy()
     {
-        state = EState.Dead;
-        if (state == EState.Dead)
+        foreach (GameObject child in GameManager.enemyObjects)
         {
-            foreach (GameObject child in GameManager.enemyObjects)
+            if (child == gameObject)
             {
-                if (child == gameObject)
-                {
-                    GameManager.enemyPositions.Remove(child.transform.position);
-                    GameManager.enemyObjects.Remove(child);
-                    break;
-                }
+                GameManager.enemyPositions.Remove(child.transform.position);
+                GameManager.enemyObjects.Remove(child);
+                break;
             }
-            Debug.Log("Enemy Dead : " + transform.name);
-            Destroy(transform.gameObject);
         }
+        Debug.Log("Enemy Dead : " + transform.name);
+        Destroy(transform.gameObject);
+        EnemyStage.totalEnemyCount--;
     }
     //--------------- Die 종료 ---------------//
 
