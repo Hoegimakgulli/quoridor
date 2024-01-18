@@ -478,7 +478,6 @@ public class EnemyManager : MonoBehaviour
         {
             currentEnemyState = Enemy.enemyObjects[originSortingList[count]].GetComponent<Enemy>();
             originCost = currentEnemyState.moveCtrl[1];
-            Debug.Log("origin :   " + originCost);
 
             //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
             currentEnemyState.moveCtrl[1] += Random.Range(1, (currentEnemyState.moveCtrl[2] + 1)); // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
@@ -486,6 +485,8 @@ public class EnemyManager : MonoBehaviour
 
             EnemyStateSort();
             yield return StartCoroutine(uiM.MovectrlCountAnim(originSortingList[count], originCost, currentEnemyState.moveCtrl[1]));
+
+            originCost = currentEnemyState.moveCtrl[1]; //여기서부터 originCost는 현재 행동력
 
             if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
             {
@@ -496,10 +497,12 @@ public class EnemyManager : MonoBehaviour
                 currentEnemyState.EnemyMove(FinalPathList);
                 //currentEnemyState.moveCtrl[1] = 0; // 현재 행동력 초기화
                 Debug.Log("바뀌기 전 행동력"+currentEnemyState.moveCtrl[1]);
-                currentEnemyState.moveCtrl[1] -= currentEnemyState.moveCtrl[0]; //행동력 감소
+                //currentEnemyState.moveCtrl[1] -= currentEnemyState.moveCtrl[0]; //행동력 감소
                 Debug.Log("감소될 행동력 " + currentEnemyState.moveCtrl[0]);
                 Debug.Log("바뀐 후 행동력력   "+ currentEnemyState.moveCtrl[1]);
+                currentEnemyState.moveCtrl[1] = -1;
                 EnemyStateSort();
+                currentEnemyState.moveCtrl[1] = originCost - currentEnemyState.moveCtrl[0];
                 yield return StartCoroutine(uiM.ReloadState(originSortingList[count], currentEnemyState.moveCtrl[1]));
 
                 if (!turnCheck)
