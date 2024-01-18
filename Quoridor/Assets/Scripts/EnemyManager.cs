@@ -41,9 +41,17 @@ public class EnemyManager : MonoBehaviour
     private bool enemyTurnAnchor = true;
     private bool enemyWarningSignAnchor = true;
 
+    //이규빈 추가
+    private int sortingNum = 0; //정렬할때 쓰는 int
+    public List<int> sortingList = new List<int>(); //정렬할때 쓰는 리스트
+
+    private UiManager uiM;
+
     private void Awake()
     {
+        sortingNum = 0;
         gameManager = transform.gameObject.GetComponent<GameManager>();
+        uiM = GetComponent<UiManager>();
         Enemy.enemyObjects.Clear(); // 적 위치 및 객체 정보 초기화
         Enemy.enemyPositions.Clear();
     }
@@ -95,7 +103,8 @@ public class EnemyManager : MonoBehaviour
 
     void SpawnEnemy()
     {
-        int enemyCost = currentStage + 2;
+        sortingNum = 0;
+        int enemyCost = currentStage + 10;
         while (enemyCost != 0) // enemyCost = totalCost 0이 되기 전까지 계속 확인 후 소환
         {
             int randomNumber = Random.Range(0, enemyPrefabs.Count);
@@ -122,9 +131,37 @@ public class EnemyManager : MonoBehaviour
                 currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "행동력 " + currentEnemey.cost + " / 10";
                 currentEnemey.maxHp = currentEnemey.hp;
                 currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "체력 " + currentEnemey.hp + " / " + currentEnemey.maxHp;
+
+                //이 아래들은 이규빈 작성파트
+                sortingList.Add(sortingNum);
+                sortingNum++;
+                if(enemyCost == 0)
+                {
+                    EnemyStateSort();
+                    uiM.EnemyStateSetting();
+                    currentEnemyState.transform.parent.parent.parent.parent.gameObject.SetActive(false);
+                }
             }
         }
     }
+    
+    //적들 상태창 정렬을 위해 sortingList를 정렬
+    public void EnemyStateSort()
+    {
+        for (int i = 1; i < Enemy.enemyObjects.Count; i++)
+        {
+            int key = sortingList[i];
+            int j = i - 1;
+
+            while (j >= 0 && Enemy.enemyObjects[sortingList[j]].GetComponent<Enemy>().moveCtrl[1] < Enemy.enemyObjects[key].GetComponent<Enemy>().moveCtrl[1])
+            {
+                sortingList[j + 1] = sortingList[j];
+                j--;
+            }
+            sortingList[j + 1] = key;
+        }
+    }
+
     public List<Path> FinalPathList;
     public Vector2Int bottomLeft, topRight, startPos, targetPos;
     public Vector2Int topLeft, bottomRight;
@@ -281,6 +318,15 @@ public class EnemyManager : MonoBehaviour
     }
     */
     static public bool turnCheck = false;
+
+
+
+
+
+
+
+
+    /*
     void MoveCtrlUpdate()
     {
         Enemy currentEnemyState;
@@ -313,7 +359,7 @@ public class EnemyManager : MonoBehaviour
                 }
                 Enemy.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
                 */
-                if (!turnCheck)
+  /*              if (!turnCheck)
                 {
                     turnCheck = true;
                     GameManager.Turn++;
@@ -331,6 +377,15 @@ public class EnemyManager : MonoBehaviour
             }
         }
     }
+ */
+
+
+
+
+
+
+
+
 
     public GameObject enemyWarningPrefab;
     public void WarningEnemy()
@@ -398,8 +453,73 @@ public class EnemyManager : MonoBehaviour
 
      IEnumerator StartEnemyTurn()
     {
+        StartCoroutine(MoveCtrlUpdate());
         yield return new WaitForSeconds(2);
-        MoveCtrlUpdate();
+        //MoveCtrlUpdate();
         enemyTurnAnchor = true;
+    }
+
+
+
+
+
+    IEnumerator MoveCtrlUpdate()
+    {
+        uiM.popLock = true; //////////////////////////////////////////////////////////// 임시
+        List<int> originSortingList = new List<int>();
+        int originCost;
+        for(int i = 0; i < sortingList.Count; i++)
+        {
+            originSortingList.Add(sortingList[i]);
+        }
+        Enemy currentEnemyState;
+        int count;
+        for (count = 0; count < Enemy.enemyObjects.Count; count++)
+        {
+            currentEnemyState = Enemy.enemyObjects[originSortingList[count]].GetComponent<Enemy>();
+            originCost = currentEnemyState.moveCtrl[1];
+            Debug.Log("origin :   " + originCost);
+
+            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            currentEnemyState.moveCtrl[1] += Random.Range(1, (currentEnemyState.moveCtrl[2] + 1)); // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
+            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
+
+            EnemyStateSort();
+            yield return StartCoroutine(uiM.MovectrlCountAnim(originSortingList[count], originCost, currentEnemyState.moveCtrl[1]));
+
+            if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
+            {
+                GameObject currenEnemy = Enemy.enemyObjects[originSortingList[count]];
+                GameObject player = GameObject.FindWithTag("Player");
+                currentEnemyState.state = Enemy.EState.Move;
+                PathFinding(currenEnemy, player);
+                currentEnemyState.EnemyMove(FinalPathList);
+                //currentEnemyState.moveCtrl[1] = 0; // 현재 행동력 초기화
+                Debug.Log("바뀌기 전 행동력"+currentEnemyState.moveCtrl[1]);
+                currentEnemyState.moveCtrl[1] -= currentEnemyState.moveCtrl[0]; //행동력 감소
+                Debug.Log("감소될 행동력 " + currentEnemyState.moveCtrl[0]);
+                Debug.Log("바뀐 후 행동력력   "+ currentEnemyState.moveCtrl[1]);
+                EnemyStateSort();
+                yield return StartCoroutine(uiM.ReloadState(originSortingList[count], currentEnemyState.moveCtrl[1]));
+
+                if (!turnCheck)
+                {
+                    turnCheck = true;
+                    GameManager.Turn++;
+                }
+            }
+
+            else
+            {
+                if (!turnCheck)
+                {
+                    turnCheck = true;
+                    GameManager.Turn++;
+
+                }
+            }
+        }
+
+        uiM.popLock = false; /////////////////////////////////////////임시
     }
 }
