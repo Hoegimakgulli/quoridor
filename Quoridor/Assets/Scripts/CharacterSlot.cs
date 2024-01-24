@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,7 +7,7 @@ public class CharacterSlot : MonoBehaviour
 {
     public CharacterSelectionManager csm;
     public int a = 1;
-    public bool isSelectable = true; //È°¼ºÈ­ ¿©ºÎ
+    public bool isSelectable = true; //í™œì„±í™” ì—¬ë¶€
     private void Awake()
     {
         csm = GameObject.Find("Character Selection Manager").GetComponent<CharacterSelectionManager>();
@@ -16,7 +16,7 @@ public class CharacterSlot : MonoBehaviour
     private void Start()
     {
         GetComponent<Button>().onClick.AddListener(SelectThisCharacter);
-        gameObject.GetComponent<RectTransform>().localScale = Vector3.one; //È­¸é Å©±â¿¡ µû¶ó ½ºÄÉÀÏÀÌ ´Ş¶óÁ®¼­ °íÁ¤½ÃÅ´
+        gameObject.GetComponent<RectTransform>().localScale = Vector3.one; //í™”ë©´ í¬ê¸°ì— ë”°ë¼ ìŠ¤ì¼€ì¼ì´ ë‹¬ë¼ì ¸ì„œ ê³ ì •ì‹œí‚´
     }
 
     public void SelectThisCharacter()

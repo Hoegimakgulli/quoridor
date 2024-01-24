@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
@@ -11,13 +11,13 @@ using UnityEngine.UI;
 public class CharacterSelectionManager : MonoBehaviour
 {
 
-    public int charactersNum; //Ä³¸¯ÅÍÀÇ °¹¼ö
+    public int charactersNum; //ìºë¦­í„°ì˜ ê°¯ìˆ˜
     public int currentSelectedNum = 0;
-    public List<Sprite> slotSprite = new List<Sprite>(); //Ä³¸¯ÅÍ ½½·Ô ÀÌ¹ÌÁö ¸®½ºÆ®
-    public List<GameObject> slotObject = new List<GameObject>(); //Ä³¸¯ÅÍ ½½·Ô ¿ÀºêÁ§Æ® ¸®½ºÆ®
-    public GameObject selectedCharacter; //ÇöÀç ¼±ÅÃµÇ¾î ÀÖ´Â Ä³¸¯ÅÍ
+    public List<Sprite> slotSprite = new List<Sprite>(); //ìºë¦­í„° ìŠ¬ë¡¯ ì´ë¯¸ì§€ ë¦¬ìŠ¤íŠ¸
+    public List<GameObject> slotObject = new List<GameObject>(); //ìºë¦­í„° ìŠ¬ë¡¯ ì˜¤ë¸Œì íŠ¸ ë¦¬ìŠ¤íŠ¸
+    public GameObject selectedCharacter; //í˜„ì¬ ì„ íƒë˜ì–´ ìˆëŠ” ìºë¦­í„°
 
-    public List<TextMeshProUGUI> tempoTexts = new List<TextMeshProUGUI>(); //ÀÓ½Ã
+    public List<TextMeshProUGUI> tempoTexts = new List<TextMeshProUGUI>(); //ì„ì‹œ
 
     private List<CharacterSlot> slotCS = new List<CharacterSlot>();
 
@@ -30,10 +30,10 @@ public class CharacterSelectionManager : MonoBehaviour
         SelectCharacter(currentSelectedNum);
     }
 
-    //¼±ÅÃµÈ Ä³¸¯ÅÍ°¡ ¸î¹øÂ°ÀÎÁö¸¦ ÀÎÀÚ·Î ¹Ş¾Æ¿Â´Ù.
+    //ì„ íƒëœ ìºë¦­í„°ê°€ ëª‡ë²ˆì§¸ì¸ì§€ë¥¼ ì¸ìë¡œ ë°›ì•„ì˜¨ë‹¤.
     public void SelectCharacter(int selectedNum)
     {
-        if (!slotCS[selectedNum].isSelectable) //¼±ÅÃÀÌ ºÒ°¡´ÉÇÑ Ä³¸¯ÅÍ¸¦ ¼±ÅÃÇßÀ¸¸é ºÒ¹ß
+        if (!slotCS[selectedNum].isSelectable) //ì„ íƒì´ ë¶ˆê°€ëŠ¥í•œ ìºë¦­í„°ë¥¼ ì„ íƒí–ˆìœ¼ë©´ ë¶ˆë°œ
         {
             return;
         }
@@ -42,7 +42,7 @@ public class CharacterSelectionManager : MonoBehaviour
         selectedCharacter = slotObject[currentSelectedNum];
         for(int i = 0; i < slotObject.Count; i++)
         {
-            if (!slotCS[i].isSelectable) //¼±ÅÃ ºÒ°¡´ÉÇÑ °æ¿ì ¿ÏÀüÈ÷ °Ë°Ô
+            if (!slotCS[i].isSelectable) //ì„ íƒ ë¶ˆê°€ëŠ¥í•œ ê²½ìš° ì™„ì „íˆ ê²€ê²Œ
             {
                 slotObject[i].GetComponent<Image>().color = new Color(0, 0, 0);
             }
@@ -56,12 +56,12 @@ public class CharacterSelectionManager : MonoBehaviour
             }
         }
 
-        /* ÀÓ½Ã */
+        /* ì„ì‹œ */
         tempoTexts[0].text = "Character\nImage " + (currentSelectedNum + 1);
         tempoTexts[1].text = "Moving\nImage " + (currentSelectedNum + 1);
         tempoTexts[2].text = "Attack\nImage " + (currentSelectedNum + 1);
         tempoTexts[3].text = "Skill Information  " + (currentSelectedNum + 1);
-        /* ÀÓ½Ã */
+        /* ì„ì‹œ */
     }
 
     public void LeftArrow()

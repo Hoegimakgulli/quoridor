@@ -1,4 +1,4 @@
-using DG.Tweening;
+ï»¿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -71,15 +71,15 @@ public class RhythmSound : MonoBehaviour
 
     void Judgment()
     {
-        if((-37.5 <= needlePos && -22.5 >= needlePos) || (22.5 <= needlePos && 37.5 >= needlePos)) //ÇÃ·¯½º ÆÇÁ¤
+        if((-37.5 <= needlePos && -22.5 >= needlePos) || (22.5 <= needlePos && 37.5 >= needlePos)) //í”ŒëŸ¬ìŠ¤ íŒì •
         {
             PlusProduction();
         }
-        else if(-10 <= needlePos && 10 >= needlePos) //Á¾·á ÆÇÁ¤
+        else if(-10 <= needlePos && 10 >= needlePos) //ì¢…ë£Œ íŒì •
         {
             isPlaying = false;
         }
-        else //¸¶ÀÌ³Ê½º ÆÇÁ¤
+        else //ë§ˆì´ë„ˆìŠ¤ íŒì •
         {
             MinusProduction();
         }

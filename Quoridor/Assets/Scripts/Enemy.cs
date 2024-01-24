@@ -1,20 +1,22 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
 public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 {
+    public UiManager uiManager;
+
     //-------------- Enemy Values --------------//
-    public int hp;                                    // ¹Ş¾Æ¾ßÇÏ´Â ÃÑ Ã¼·Â
+    public int hp;                                    // ë°›ì•„ì•¼í•˜ëŠ” ì´ ì²´ë ¥
     public int maxHp;
-    public int[] moveCtrl = new int[3];               // 0 = ¿ä±¸ Çàµ¿·Â, 1 = ÇöÀç Ã¤¿öÁ® ÀÖ´Â Çàµ¿·Â, 2 = ·£´ı Çàµ¿·Â ÃæÀü ÃÖ´ëÄ¡
+    public int[] moveCtrl = new int[3];               // 0 = ìš”êµ¬ í–‰ë™ë ¥, 1 = í˜„ì¬ ì±„ì›Œì ¸ ìˆëŠ” í–‰ë™ë ¥, 2 = ëœë¤ í–‰ë™ë ¥ ì¶©ì „ ìµœëŒ€ì¹˜
     public Vector2Int[] moveablePoints;
     public Vector2Int[] attackablePoints;
     public enum EState { Idle, Move, Attack };
     public enum EValue { Normal = 0, Champion = 1, Named = 2, Boss = 3 }; // 0 = Normal, 1 = Champion, 2 = Named, 3 = Boss
-    // 0 - ÀüÁøÇØ player¸¦ °ø°İ, 1 - µÚ Æ÷Áö¼ÇÀ» ÀâÀ¸¸é¼­ ÇÃ·¹ÀÌ¾î °ø°İ, 2 - ÀÚ±â ±¸¿ªÀ» »ç¼öÇÏ¸é¼­ ÇÃ·¹ÀÌ¾î¸¦ °ø°İ 
-    // ÃßÈÄ À¯´Ö Æ¯¼º »ó¼Ó¹ŞÀ» ¶§ »ç¿ë ÇöÀç ¹Ì»ç¿ë.
+    // 0 - ì „ì§„í•´ playerë¥¼ ê³µê²©, 1 - ë’¤ í¬ì§€ì…˜ì„ ì¡ìœ¼ë©´ì„œ í”Œë ˆì´ì–´ ê³µê²©, 2 - ìê¸° êµ¬ì—­ì„ ì‚¬ìˆ˜í•˜ë©´ì„œ í”Œë ˆì´ì–´ë¥¼ ê³µê²© 
+    // ì¶”í›„ ìœ ë‹› íŠ¹ì„± ìƒì†ë°›ì„ ë•Œ ì‚¬ìš© í˜„ì¬ ë¯¸ì‚¬ìš©.
     public enum ECharacteristic { Forward, BackWard, Hold };
     //------------------------------------------//
 
@@ -23,11 +25,11 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public EValue value = EValue.Normal;
 
 
-    //--------------- Move ½ÃÀÛ ---------------//
-    // ¸ğµç enemy °´Ã¼ µ¿½Ã¿¡ ¿òÁ÷ÀÓ ½Ç½Ã
+    //--------------- Move ì‹œì‘ ---------------//
+    // ëª¨ë“  enemy ê°ì²´ ë™ì‹œì— ì›€ì§ì„ ì‹¤ì‹œ
     public void EnemyMove(List<Path> path)
     {
-        // enemy°¡ Move »óÅÂÀÏ ¶§ À¯´ÖÀÇ Æ¯Â¡¿¡ µû¶ó ¿òÁ÷ÀÌ´Â ¹üÀ§ Á¶Á¤
+        // enemyê°€ Move ìƒíƒœì¼ ë•Œ ìœ ë‹›ì˜ íŠ¹ì§•ì— ë”°ë¼ ì›€ì§ì´ëŠ” ë²”ìœ„ ì¡°ì •
         if (state == EState.Move)
         {
             if (characteristic == ECharacteristic.Forward)
@@ -45,7 +47,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         }
     }
 
-    // A* ¾Ë°í¸®Áò
+    // A* ì•Œê³ ë¦¬ì¦˜
     public void GetShortRoad(List<Path> path)
     {
         Vector2 playerPos = GameObject.FindWithTag("Player").transform.position / GameManager.gridSize;
@@ -96,20 +98,37 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         }
     }
 
-    // ¾ÆÁ÷ ¹ÌÁ¤
+    // ì•„ì§ ë¯¸ì •
     public void GetBackRoad()
     {
 
     }
-    // ¾ÆÁ÷ ¹ÌÁ¤
+    // ì•„ì§ ë¯¸ì •
     public void GetHoldRoad()
     {
 
     }
-    //--------------- Move Á¾·á ---------------//
+    //--------------- Move ì¢…ë£Œ ---------------//
 
-    //--------------- Die ½ÃÀÛ ---------------//
-    // Attack ¹Ş¾ÒÀ» ¶§ ½ÇÇàÇÏ´Â ÇÔ¼ö
+    //--------------- Die ì‹œì‘ ---------------//
+    // Attack ë°›ì•˜ì„ ë•Œ ì‹¤í–‰í•˜ëŠ” í•¨ìˆ˜
+    public void AttackedEnemy(int playerAtk)
+    {
+        int originHP = hp;
+        hp -= playerAtk;
+        for(int i = 0; i < GameManager.enemyObjects.Count; i++)
+        {
+            if (GameManager.enemyObjects[i] == gameObject)
+            {
+                uiManager.StartCountEnemyHpAnim(i, originHP, hp);
+            }
+        }
+        if(hp <= 0)
+        {
+            DieEnemy();
+        }
+    }
+    
     public void DieEnemy()
     {
         foreach (GameObject child in GameManager.enemyObjects)
@@ -125,17 +144,17 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         Destroy(transform.gameObject);
         EnemyStage.totalEnemyCount--;
     }
-    //--------------- Die Á¾·á ---------------//
+    //--------------- Die ì¢…ë£Œ ---------------//
 
-    //--------------- Attack ½ÃÀÛ ---------------//
-    // playerAttack ÇÔ¼ö Raycast»ç¿ë
+    //--------------- Attack ì‹œì‘ ---------------//
+    // playerAttack í•¨ìˆ˜ Raycastì‚¬ìš©
     public void AttackPlayer()
     {
         if (AttackCanEnemy() && state == EState.Attack)
         {
             Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")); // enemy À§Ä¡¿¡¼­ player±îÁö ray½î±â
-            if (hit.transform.tag == "Player") // ´êÀº ray°¡ Player ÅÂ±×¸¦ °¡Áö°í ÀÖ´Ù¸é
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")); // enemy ìœ„ì¹˜ì—ì„œ playerê¹Œì§€ rayì˜ê¸°
+            if (hit.transform.tag == "Player") // ë‹¿ì€ rayê°€ Player íƒœê·¸ë¥¼ ê°€ì§€ê³  ìˆë‹¤ë©´
             {
                 Debug.Log("Player Dead");
                 Destroy(hit.transform.gameObject);
@@ -161,13 +180,13 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             currentAttackPoint = enemyPos + attackablePoints[attackCount];
             if (playerPos == currentAttackPoint)
             {
-                Debug.Log("°ø°İ °¡´É");
+                Debug.Log("ê³µê²© ê°€ëŠ¥");
                 return true;
             }
         }
         return false;
     }
-    //--------------- Attack Á¾·á ---------------//
+    //--------------- Attack ì¢…ë£Œ ---------------//
 
     Sequence shakeSequence;
     public GameObject fadeObj;
@@ -175,6 +194,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     public void Start()
     {
+        uiManager = GameObject.Find("GameManager").GetComponent<UiManager>();
         Material tmpObj = Instantiate(fadeObj, transform.position, Quaternion.identity, transform).GetComponent<SpriteRenderer>().material;
         shakeSequence = DOTween.Sequence()
             .SetAutoKill(false)

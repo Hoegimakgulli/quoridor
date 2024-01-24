@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -273,7 +273,7 @@ public class EnemyManager : MonoBehaviour
         {
             currentEnemyState = GameManager.enemyObjects[count].GetComponent<Enemy>();
 
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            //Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
             currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
             Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
 
@@ -388,8 +388,73 @@ public class EnemyManager : MonoBehaviour
 
     IEnumerator StartEnemyTurn()
     {
-        yield return new WaitForSeconds(2);
-        MoveCtrlUpdate();
+        //yield return new WaitForSeconds(0.01f);
+        //MoveCtrlUpdate();
+        yield return StartCoroutine(MoveCtrlUpdateCoroutine());
         enemyTurnAnchor = true;
+    }
+
+
+
+
+
+
+
+
+    //적 움직임 상태창 애니메이션에 맞춰 순차적으로 움직이도록 수정 (이규빈)
+    IEnumerator MoveCtrlUpdateCoroutine()
+    {
+        UiManager uiManager = GetComponent<UiManager>();
+        List<int> originSortingList = new List<int>(); //적들이 움직이기 전에 행동력 순서로 분류되어있던 리스트
+        for (int i = 0; i < uiManager.sortingList.Count; i++)
+        {
+            originSortingList.Add(uiManager.sortingList[i]);
+        }
+
+        Enemy currentEnemyState;
+        int count;
+        int originMoveCtrl;  //원래 행동력.
+        for (count = 0; count < GameManager.enemyObjects.Count; count++)
+        {
+            currentEnemyState = GameManager.enemyObjects[originSortingList[count]].GetComponent<Enemy>();
+            originMoveCtrl = currentEnemyState.moveCtrl[1];
+
+            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
+            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
+
+            uiManager.SortEnemyStates(); //행동력에 따라 적 상태창 순서 정렬
+            yield return StartCoroutine(uiManager.CountMovectrlAnim(originSortingList[count], originMoveCtrl, currentEnemyState.moveCtrl[1])); //원래 행동력에서 바뀐 행동력까지 숫자가 바뀌는 애니메이션
+            originMoveCtrl = currentEnemyState.moveCtrl[1]; //여기서부터 originMoveCtrl은 바뀐 후의 행동력
+
+            if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
+            {
+                GameObject currenEnemy = GameManager.enemyObjects[originSortingList[count]];
+                GameObject player = GameObject.FindWithTag("Player");
+                currentEnemyState.state = Enemy.EState.Move;
+                PathFinding(currenEnemy, player);
+                currentEnemyState.EnemyMove(FinalPathList);
+                currentEnemyState.moveCtrl[1] = -1; //상태창 순서를 행동력 순으로 정렬했을 때, 방금 이동한 적의 순서가 가장 아래로 내려오도록 행동력을 마이너스로 수정.
+                uiManager.SortEnemyStates(); //방금 이동한 적의 상태창이 아래로 내려오도록 리스트를 재정렬
+                currentEnemyState.moveCtrl[1] = originMoveCtrl - currentEnemyState.moveCtrl[0]; //적의 행동력 감소
+                yield return StartCoroutine(uiManager.ReloadState(originSortingList[count], currentEnemyState.moveCtrl[1]));
+
+                if (!turnCheck)
+                {
+                    turnCheck = true;
+                    GameManager.Turn++;
+                }
+            }
+
+            else
+            {
+                if (!turnCheck)
+                {
+                    turnCheck = true;
+                    GameManager.Turn++;
+
+                }
+            }
+        }
     }
 }

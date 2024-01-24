@@ -1545,7 +1545,7 @@ PrefabInstance:
     - target: {fileID: 1664343263, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
       propertyPath: enemyStatePrefab
       value: 
-      objectReference: {fileID: 4699710257723076532, guid: d61468c5d18f0fa45b216e140a86f967, type: 3}
+      objectReference: {fileID: 970041399232811901, guid: b7b3ce9447a57e84baf49738d48e74c9, type: 3}
     - target: {fileID: 6551029922462568088, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
       propertyPath: m_Name
       value: GameManager
@@ -1602,5 +1602,9 @@ PrefabInstance:
       propertyPath: enemyUiCanvas
       value: 
       objectReference: {fileID: 7471301692746399857, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
+    - target: {fileID: 8153990614069101066, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
+      propertyPath: EnemyStatePanel
+      value: 
+      objectReference: {fileID: 5103136805041529522, guid: 2a5d1fcbd7b055a42b491af212caa37e, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}

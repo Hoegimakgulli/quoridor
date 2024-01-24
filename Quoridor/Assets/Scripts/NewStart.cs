@@ -1,11 +1,11 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class NewStart : MonoBehaviour
 {
-    public bool hasPlayData = false; //ÀÌÀü µ¥ÀÌÅÍ°¡ Á¸ÀçÇÏ´ÂÁö ¿©ºÎ
+    public bool hasPlayData = false; //ì´ì „ ë°ì´í„°ê°€ ì¡´ì¬í•˜ëŠ”ì§€ ì—¬ë¶€
     private GameObject newGamePopup;
 
     private void Awake()
@@ -17,7 +17,7 @@ public class NewStart : MonoBehaviour
         newGamePopup.SetActive(false);
     }
 
-    //NEW GAME ¹öÆ°À» ´­·¶À» ¶§ ½ÇÇà
+    //NEW GAME ë²„íŠ¼ì„ ëˆŒë €ì„ ë•Œ ì‹¤í–‰
     public void StartGame()
     {
        
@@ -31,12 +31,12 @@ public class NewStart : MonoBehaviour
         }
     }
 
-    //±âÁ¸ ÇÃ·¹ÀÌ µ¥ÀÌÅÍ ÃÊ±âÈ­
+    //ê¸°ì¡´ í”Œë ˆì´ ë°ì´í„° ì´ˆê¸°í™”
     public void InitializePlayData()
     {
-        /* µ¥ÀÌÅÍ ÃÊ±âÈ­ÇÏ´Â ÄÚµå ÀÛ¼º ÇÊ¿ä */
+        /* ë°ì´í„° ì´ˆê¸°í™”í•˜ëŠ” ì½”ë“œ ì‘ì„± í•„ìš” */
         hasPlayData = false;
-        Debug.Log("µ¥ÀÌÅÍ ÃÊ±âÈ­");
+        Debug.Log("ë°ì´í„° ì´ˆê¸°í™”");
         StartGame();
     }
 }

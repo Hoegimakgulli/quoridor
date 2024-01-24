@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,14 +14,14 @@ public class CharacterSlotBag : MonoBehaviour
     {
         csm = GameObject.Find("Character Selection Manager").GetComponent<CharacterSelectionManager>();
 
-        //Ä³¸¯ÅÍ ½½·Ô ¹è°æ ¹× ±×¸®µå Å©±â Á¶Àı
+        //ìºë¦­í„° ìŠ¬ë¡¯ ë°°ê²½ ë° ê·¸ë¦¬ë“œ í¬ê¸° ì¡°ì ˆ
         csm.charactersNum = csm.slotSprite.Count;
         slotBackgroundRT = transform.GetChild(0).gameObject.GetComponent<RectTransform>();
         slotBackgroundRT.sizeDelta = new Vector2(csm.charactersNum * 100 - (csm.charactersNum - 1) * 10, 100);
         slotGridRT = transform.GetChild(0).GetChild(0).gameObject.GetComponentInParent<RectTransform>();
         slotGridRT.sizeDelta = new Vector2(csm.charactersNum * 100, 100);
         
-        //Ä³¸¯ÅÍ ½½·Ô »ı¼º
+        //ìºë¦­í„° ìŠ¬ë¡¯ ìƒì„±
         for(int i = 0; i < csm.charactersNum; i++)
         {
             GameObject characterSlotSprite = new GameObject("Character Slot " + i);
