@@ -7,8 +7,8 @@ using UnityEngine.UI;
 [System.Serializable]
 public class Path
 {
-    // �߾� ��ǥ�� (0, 0) �������� x, y ��ǥ
-    // G = �������κ��� �̵��� �Ÿ�, H = ����, ���η� ���� �����ϰ� Player���� �̵��� �Ÿ�
+    // 중앙 좌표상 (0, 0) 시작으로 x, y 좌표
+    // G = 시작으로부터 이동한 거리, H = 가로, 세로로 벽을 무시하고 Player까지 이동한 거리
     public int x, y, G, H;
 
     public Path(int _x, int _y)
@@ -19,7 +19,7 @@ public class Path
 
     public Path ParentNode;
 
-    // F = G, H �� �ջ갪
+    // F = G, H 총 합산값
     public int F
     {
         get
@@ -31,35 +31,26 @@ public class Path
 
 public class EnemyManager : MonoBehaviour
 {
-    public List<GameObject> enemyPrefabs; // �⺻ ���� ������Ʈ�� ����Ʈ �־�α�
-    public List<GameObject> loyalEnemyPrefabs; // ���� ���� ���� ������Ʈ�� ����Ʈ �־�α�
+    public List<GameObject> enemyPrefabs; // 기본 유닛 오브젝트들 리스트 넣어두기
+    public List<GameObject> loyalEnemyPrefabs; // 상위 고급 유닛 오브젝트들 리스트 넣어두기
 
     // public static int gameManager.currentStage = 0;
-    public GameObject warningSignBox; // ��� ǥ�� ��Ƶδ� �ڽ�
+    public GameObject warningSignBox; // 경고 표기 담아두는 박스
     public GameObject enemyUiCanvas;
-    public const float gridSize = 1.3f; // �׸����� ũ��
+    public const float gridSize = 1.3f; // 그리드의 크기
 
     private bool enemyTurnAnchor = true;
     //private bool enemyWarningSignAnchor = true;
 
-//�̱Ժ� �߰�
-    private int sortingNum = 0; //�����Ҷ� ���� int
-    public List<int> sortingList = new List<int>(); //�����Ҷ� ���� ����Ʈ
-
-    private UiManager uiM;
     public GameObject EnemyStatePanel;
 
     private void Awake()
     {
-        sortingNum = 0;
-        gameManager = transform.gameObject.GetComponent<GameManager>();
-        uiM = GetComponent<UiManager>();
-        Enemy.enemyObjects.Clear(); // �� ��ġ �� ��ü ���� �ʱ�ȭ
-        Enemy.enemyPositions.Clear();
         GameObject enemyUi = Instantiate(enemyUiCanvas);
         Instantiate(EnemyStatePanel, enemyUi.transform);
+        Debug.Log("ui Spawned");
         gameManager = transform.gameObject.GetComponent<GameManager>();
-        GameManager.enemyObjects.Clear(); // �� ��ġ �� ��ü ���� �ʱ�ȭ
+        GameManager.enemyObjects.Clear(); // 적 위치 및 객체 정보 초기화
         GameManager.enemyPositions.Clear();
     }
 
@@ -80,17 +71,17 @@ public class EnemyManager : MonoBehaviour
             testMove();
         }
 
-        // �� ���϶� (�̵� �� ����Ȯ��)
+        // 적 턴일때 (이동 및 공격확인)
         if (GameManager.Turn % 2 == 0 && enemyTurnAnchor)
         {
             //enemyWarningSignAnchor = true;
             enemyTurnAnchor = false;
-            // ���sign �ʱ�ȭ
+            // 경고sign 초기화
             foreach (Transform child in GameObject.FindWithTag("WarningBox").transform)
             {
                 Destroy(child.gameObject);
             }
-            // ������Ʈ ī��Ʈ �ʱ�ȭ
+            // 오브젝트 카운트 초기화
             /*
             for (int count = 0; count < GameManager.enemyObjects.Count; count++)
             {
@@ -100,7 +91,7 @@ public class EnemyManager : MonoBehaviour
             StartCoroutine(StartEnemyTurn());
         }
 
-        // �÷��̾� ���϶� (�� ������ ���)
+        // 플레이어 턴일때 (적 움직임 경고)
         /*
         if(GameManager.Turn % 2 == 1 && enemyWarningSignAnchor)
         {
@@ -108,67 +99,6 @@ public class EnemyManager : MonoBehaviour
            WarningEnemy();
         }
         */
-    }
-
-    void SpawnEnemy()
-    {
-        sortingNum = 0;
-        int enemyCost = currentStage + 10;
-        while (enemyCost != 0) // enemyCost = totalCost 0�� �Ǳ� ������ ��� Ȯ�� �� ��ȯ
-        {
-            int randomNumber = Random.Range(0, enemyPrefabs.Count);
-            int cost = enemyPrefabs[randomNumber].GetComponent<Enemy>().cost;
-            if (enemyCost - cost >= 0)
-            {
-                Vector3 enemyPosition;
-                do
-                { 
-                    enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0); }
-                while (Enemy.enemyPositions.Contains(enemyPosition) && Enemy.enemyPositions.Count != 0); // �̹� ��ȯ�� ���� ��ġ�� �� ��ĥ��
-                Enemy.enemyPositions.Add(enemyPosition);
-                GameObject currentEnemyObj = Instantiate(enemyPrefabs[randomNumber], GameManager.gridSize * Enemy.enemyPositions[Enemy.enemyPositions.Count - 1], Quaternion.identity);
-                Enemy.enemyObjects.Add(currentEnemyObj);
-                enemyCost -= cost;
-
-                // ���� �ǳھȿ� �������� �ִ� ���� ������ ������ �ִ� �κ�
-                Enemy currentEnemey = currentEnemyObj.GetComponent<Enemy>();
-
-                // �� ���� UI �ǳڿ� ǥ���ϴ� �κ�
-                GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("EnemyStateContent").transform);
-                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = enemyPrefabs[randomNumber].GetComponent<SpriteRenderer>().sprite;
-                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().color = enemyPrefabs[randomNumber].GetComponent<SpriteRenderer>().color;
-                currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "�ൿ�� " + currentEnemey.cost + " / 10";
-                currentEnemey.maxHp = currentEnemey.hp;
-                currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "ü�� " + currentEnemey.hp + " / " + currentEnemey.maxHp;
-
-                //�� �Ʒ����� �̱Ժ� �ۼ���Ʈ
-                sortingList.Add(sortingNum);
-                sortingNum++;
-                if(enemyCost == 0)
-                {
-                    EnemyStateSort();
-                    uiM.EnemyStateSetting();
-                   // currentEnemyState.transform.parent.parent.parent.parent.gameObject.SetActive(false);
-                }
-            }
-        }
-    }
-    
-    //���� ����â ������ ���� sortingList�� ����
-    public void EnemyStateSort()
-    {
-        for (int i = 1; i < Enemy.enemyObjects.Count; i++)
-        {
-            int key = sortingList[i];
-            int j = i - 1;
-
-            while (j >= 0 && Enemy.enemyObjects[sortingList[j]].GetComponent<Enemy>().moveCtrl[1] < Enemy.enemyObjects[key].GetComponent<Enemy>().moveCtrl[1])
-            {
-                sortingList[j + 1] = sortingList[j];
-                j--;
-            }
-            sortingList[j + 1] = key;
-        }
     }
 
     public List<Path> FinalPathList;
@@ -181,7 +111,7 @@ public class EnemyManager : MonoBehaviour
     Path StartNode, TargetNode, CurNode;
     List<Path> OpenList, ClosedList;
 
-    // A* �˰�����
+    // A* 알고리즘
     public void PathFinding(GameObject startObj, GameObject endObj)
     {
         sizeX = topRight.x - bottomLeft.x + 1;
@@ -196,7 +126,7 @@ public class EnemyManager : MonoBehaviour
             }
         }
 
-        // startPos, endPos ���� position�� girdSize�� ������ ����ȭ ������ ���� ��ǥ�� (0, 0)�� ���� �Ʒ� �����ڸ��� �ٲ���
+        // startPos, endPos 기존 position을 girdSize로 나눠서 정수화 시켜준 다음 좌표계 (0, 0)을 왼쪽 아래 가장자리로 바꿔줌
         Vector2 trimPos;
         trimPos = startObj.transform.position / GameManager.gridSize;
         startPos = new Vector2Int(Mathf.FloorToInt(trimPos.x) + 4, Mathf.FloorToInt(trimPos.y) + 4);
@@ -206,14 +136,14 @@ public class EnemyManager : MonoBehaviour
         StartNode = PathArray[startPos.x - bottomLeft.x, startPos.y - bottomLeft.y];
         TargetNode = PathArray[targetPos.x - bottomLeft.x, targetPos.y - bottomLeft.y];
 
-        // ���۰� �� ���, ��������Ʈ�� ��������Ʈ, ����������Ʈ �ʱ�ȭ
+        // 시작과 끝 노드, 열린리스트와 닫힌리스트, 마지막리스트 초기화
         OpenList = new List<Path>() { StartNode };
         ClosedList = new List<Path>();
         FinalPathList = new List<Path>();
 
         while (OpenList.Count > 0)
         {
-            // ��������Ʈ �� ���� F�� �۰� F�� ���ٸ� H�� ���� �� ������� �ϰ� ��������Ʈ���� ��������Ʈ�� �ű��
+            // 열린리스트 중 가장 F가 작고 F가 같다면 H가 작은 걸 현재노드로 하고 열린리스트에서 닫힌리스트로 옮기기
             CurNode = OpenList[0];
             for (int i = 1; i < OpenList.Count; i++)
             {
@@ -224,7 +154,7 @@ public class EnemyManager : MonoBehaviour
             ClosedList.Add(CurNode);
 
 
-            // ������
+            // 마지막
             if (CurNode == TargetNode)
             {
                 Path TargetCurNode = TargetNode.ParentNode;
@@ -236,24 +166,24 @@ public class EnemyManager : MonoBehaviour
                 FinalPathList.Add(StartNode);
                 FinalPathList.Reverse();
 
-                //for (int i = 0; i < FinalPathList.Count; i++) print(i + "��°�� " + FinalPathList[i].x + ", " + FinalPathList[i].y);
+                //for (int i = 0; i < FinalPathList.Count; i++) print(i + "번째는 " + FinalPathList[i].x + ", " + FinalPathList[i].y);
                 return;
             }
 
             if (allowDiagonal)
             {
-                // ������ �� ��ǥ ����
-                OpenListAdd(CurNode.x + 1, CurNode.y + 1); // ������ ��
-                OpenListAdd(CurNode.x - 1, CurNode.y + 1); // ���� ��
-                OpenListAdd(CurNode.x - 1, CurNode.y - 1); // ���� �Ʒ�
-                OpenListAdd(CurNode.x + 1, CurNode.y - 1); // ������ �Ʒ�
+                // 다음에 들어갈 좌표 전달
+                OpenListAdd(CurNode.x + 1, CurNode.y + 1); // 오른쪽 위
+                OpenListAdd(CurNode.x - 1, CurNode.y + 1); // 왼쪽 위
+                OpenListAdd(CurNode.x - 1, CurNode.y - 1); // 왼쪽 아래
+                OpenListAdd(CurNode.x + 1, CurNode.y - 1); // 오른쪽 아래
             }
 
-            // �� �� �� ��
-            OpenListAdd(CurNode.x, CurNode.y + 1); // ��
-            OpenListAdd(CurNode.x + 1, CurNode.y); // ������
-            OpenListAdd(CurNode.x, CurNode.y - 1); // �Ʒ�
-            OpenListAdd(CurNode.x - 1, CurNode.y); // ����
+            // ↑ → ↓ ←
+            OpenListAdd(CurNode.x, CurNode.y + 1); // 위
+            OpenListAdd(CurNode.x + 1, CurNode.y); // 오른쪽
+            OpenListAdd(CurNode.x, CurNode.y - 1); // 아래
+            OpenListAdd(CurNode.x - 1, CurNode.y); // 왼쪽
         }
 
         if (FinalPathList.Count == 0)
@@ -265,42 +195,42 @@ public class EnemyManager : MonoBehaviour
     public GameManager gameManager;
     void OpenListAdd(int checkX, int checkY)
     {
-        // graph �� (0,0) == 0�� ����
+        // graph 상 (0,0) == 0과 같음
         int startGraphPosition = (int)(CurNode.y * 9 + CurNode.x);
         int endGraphPosition = (int)(checkY * 9 + checkX);
-        // �����¿� ������ ����� �ʰ�, ���� �ƴϸ鼭, ��������Ʈ�� ���ٸ�
+        // 상하좌우 범위를 벗어나지 않고, 벽이 아니면서, 닫힌리스트에 없다면
         if (checkX >= bottomLeft.x && checkX < topRight.x + 1 && checkY >= bottomLeft.y && checkY < topRight.y + 1 && !ClosedList.Contains(PathArray[checkX - bottomLeft.x, checkY - bottomLeft.y]))
         {
-            // start �������� ���� end ���� ���̿� ���� �ִ��� Ȯ��
+            // start 지점으로 부터 end 지점 사이에 벽이 있는지 확인
             if (gameManager.mapGraph[startGraphPosition, endGraphPosition] == 0) return;
             if (CheckEnemyPos(new Vector2((checkX - 4) * GameManager.gridSize, (checkY - 4) * GameManager.gridSize))) return;
-            // �밢�� ����, �� ���̷� ��� �ȵ�
+            // 대각선 허용시, 벽 사이로 통과 안됨
             if (allowDiagonal)
             {
                 if (gameManager.mapGraph[startGraphPosition, startGraphPosition + (checkX - CurNode.x)] == 0)
                 {
                     if (checkY - CurNode.y == 1)
                     {
-                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition + 9] == 0) return; // �Ʒ����� ���� �ö󰡴� ���
+                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition + 9] == 0) return; // 아래에서 위로 올라가는 경우
                     }
                     else if (checkY - CurNode.y == -1)
                     {
-                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition - 9] == 0) return; // ������ �Ʒ��� �������� ���
+                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition - 9] == 0) return; // 위에서 아래로 내려가는 경우
                     }
                 }
             }
 
-            // �ڳʸ� �������� ���� ������, �̵� �߿� �������� ��ֹ��� ������ �ȵ�
+            // 코너를 가로질러 가지 않을시, 이동 중에 수직수평 장애물이 있으면 안됨
             if (dontCrossCorner)
             {
                 //if (PathArray[CurNode.x - bottomLeft.x, checkY - bottomLeft.y].isWall || PathArray[checkX - bottomLeft.x, CurNode.y - bottomLeft.y].isWall) return;
             }
 
-            // �̿���忡 �ְ�, ������ 10, �밢���� 14���
+            // 이웃노드에 넣고, 직선은 10, 대각선은 14비용
             Path NeighborNode = PathArray[checkX - bottomLeft.x, checkY - bottomLeft.y];
             int MoveCost = CurNode.G + (CurNode.x - checkX == 0 || CurNode.y - checkY == 0 ? 10 : 14);
 
-            // �̵������ �̿����G���� �۰ų� �Ǵ� ��������Ʈ�� �̿���尡 ���ٸ� G, H, ParentNode�� ���� �� ��������Ʈ�� �߰�
+            // 이동비용이 이웃노드G보다 작거나 또는 열린리스트에 이웃노드가 없다면 G, H, ParentNode를 설정 후 열린리스트에 추가
             if (MoveCost < NeighborNode.G || !OpenList.Contains(NeighborNode))
             {
                 NeighborNode.G = MoveCost;
@@ -335,15 +265,6 @@ public class EnemyManager : MonoBehaviour
     }
     */
     static public bool turnCheck = false;
-
-
-
-
-
-
-
-
-    /*
     void MoveCtrlUpdate()
     {
         Enemy currentEnemyState;
@@ -352,11 +273,11 @@ public class EnemyManager : MonoBehaviour
         {
             currentEnemyState = GameManager.enemyObjects[count].GetComponent<Enemy>();
 
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "�� �ൿ���� �� " + currentEnemyState.moveCtrl[1]);
-            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // �������� ������ ������ �ൿ�� 0 ~ �� �ൿ�� ȸ�� �ִ�ġ
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "�� ���� �ൿ���� �� " + currentEnemyState.moveCtrl[1]);
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
 
-            //currentEnemyState.moveCtrl[1] += 10; // test �� �߰�
+            //currentEnemyState.moveCtrl[1] += 10; // test 용 추가
 
             if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
             {
@@ -365,7 +286,7 @@ public class EnemyManager : MonoBehaviour
                 currentEnemyState.state = Enemy.EState.Move;
                 PathFinding(currenEnemy, player);
                 currentEnemyState.EnemyMove(FinalPathList);
-                currentEnemyState.moveCtrl[1] = 0; // ���� �ൿ�� �ʱ�ȭ
+                currentEnemyState.moveCtrl[1] = 0; // 현재 행동력 초기화
                 /*
                 foreach(Transform child in GameObject.FindWithTag("WarningBox").transform)
                 {
@@ -376,7 +297,7 @@ public class EnemyManager : MonoBehaviour
                 }
                 GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
                 */
-  /*              if (!turnCheck)
+                if (!turnCheck)
                 {
                     turnCheck = true;
                     GameManager.Turn++;
@@ -394,15 +315,6 @@ public class EnemyManager : MonoBehaviour
             }
         }
     }
- */
-
-
-
-
-
-
-
-
 
     void testMove()
     {
@@ -412,9 +324,9 @@ public class EnemyManager : MonoBehaviour
         {
             currentEnemyState = GameManager.enemyObjects[count].GetComponent<Enemy>();
 
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "�� �ൿ���� �� " + currentEnemyState.moveCtrl[1]);
-            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // ȸ���ϴ� �� �ൿ��
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "�� ���� �ൿ���� �� " + currentEnemyState.moveCtrl[1]);
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // 회복하는 적 행동력
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
         }
     }
 
@@ -476,77 +388,8 @@ public class EnemyManager : MonoBehaviour
 
     IEnumerator StartEnemyTurn()
     {
-        StartCoroutine(MoveCtrlUpdate());
         yield return new WaitForSeconds(2);
-        //MoveCtrlUpdate();
+        MoveCtrlUpdate();
         enemyTurnAnchor = true;
-    }
-
-
-
-
-
-    IEnumerator MoveCtrlUpdate()
-    {
-        uiM.popLock = true; //////////////////////////////////////////////////////////// �ӽ�
-        List<int> originSortingList = new List<int>();
-        int originCost;  //���� �ൿ��. �ڽ�Ʈ�� �ൿ������ ������.
-        for(int i = 0; i < sortingList.Count; i++)
-        {
-            originSortingList.Add(sortingList[i]);
-        }
-        Enemy currentEnemyState;
-        int count;
-        for (count = 0; count < Enemy.enemyObjects.Count; count++)
-        {
-            currentEnemyState = Enemy.enemyObjects[originSortingList[count]].GetComponent<Enemy>();
-            originCost = currentEnemyState.moveCtrl[1];
-
-            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "�� �ൿ���� �� " + currentEnemyState.moveCtrl[1]);
-            currentEnemyState.moveCtrl[1] += Random.Range(1, (currentEnemyState.moveCtrl[2] + 1)); // �������� ������ ������ �ൿ�� 0 ~ �� �ൿ�� ȸ�� �ִ�ġ
-            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "�� ���� �ൿ���� �� " + currentEnemyState.moveCtrl[1]);
-
-            EnemyStateSort();
-            yield return StartCoroutine(uiM.MovectrlCountAnim(originSortingList[count], originCost, currentEnemyState.moveCtrl[1]));
-            originCost = currentEnemyState.moveCtrl[1]; //���⼭���� originCost�� ���� �ൿ��
-
-            originCost = currentEnemyState.moveCtrl[1]; //���⼭���� originCost�� ���� �ൿ��
-
-            if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
-            {
-                GameObject currenEnemy = Enemy.enemyObjects[originSortingList[count]];
-                GameObject player = GameObject.FindWithTag("Player");
-                currentEnemyState.state = Enemy.EState.Move;
-                PathFinding(currenEnemy, player);
-                currentEnemyState.EnemyMove(FinalPathList);
-                //currentEnemyState.moveCtrl[1] = 0; // ���� �ൿ�� �ʱ�ȭ
-                Debug.Log("�ٲ�� �� �ൿ��"+currentEnemyState.moveCtrl[1]);
-                //currentEnemyState.moveCtrl[1] -= currentEnemyState.moveCtrl[0]; //�ൿ�� ����
-                Debug.Log("���ҵ� �ൿ�� " + currentEnemyState.moveCtrl[0]);
-                Debug.Log("�ٲ� �� �ൿ�·�   "+ currentEnemyState.moveCtrl[1]);
-                currentEnemyState.moveCtrl[1] = -1;
-                EnemyStateSort();
-                currentEnemyState.moveCtrl[1] = originCost - currentEnemyState.moveCtrl[0];
-                yield return StartCoroutine(uiM.ReloadState(originSortingList[count], currentEnemyState.moveCtrl[1]));
-
-                if (!turnCheck)
-                {
-                    turnCheck = true;
-                    GameManager.Turn++;
-                }
-            }
-
-            else
-            {
-                if (!turnCheck)
-                {
-                    turnCheck = true;
-                    GameManager.Turn++;
-
-                }
-            }
-        }
-
-        uiM.popLock = false; /////////////////////////////////////////�ӽ�
     }
 }
