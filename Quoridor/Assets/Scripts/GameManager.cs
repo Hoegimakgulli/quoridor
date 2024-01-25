@@ -55,6 +55,7 @@ public class GameManager : MonoBehaviour
         enemyPositions.Clear();
         enemyObjects.Clear();
         playerPosition = new Vector3(0, -4, 0);
+        playerControlStatus = EPlayerControlStatus.None;
         Turn = 1; // 턴 초기화
         for (int i = 0; i < mapGraph.GetLength(0); i++) // 맵 그래프 초기화
         {

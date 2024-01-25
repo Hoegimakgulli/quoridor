@@ -7,25 +7,22 @@ public class StageUI : MonoBehaviour
 {
     GameManager gameManager;
     EnemyStage enemyStage;
+    Player player;
     // Start is called before the first frame update
     void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         enemyStage = GameObject.Find("GameManager").GetComponent<EnemyStage>();
+        player = GameObject.FindWithTag("Player").GetComponent<Player>();
     }
 
     public void ClearStage()
     {
-        GameManager.enemyPositions.Clear();
-        GameManager.enemyObjects.Clear();
-        Debug.Log(GameManager.enemyPositions.Count);
-        Debug.Log(GameManager.enemyObjects.Count);
         gameManager.currentStage++;
-        gameManager.playerPosition = new Vector3(0, -4, 0);
-        GameObject.FindWithTag("Player").transform.position = GameManager.gridSize * gameManager.playerPosition;
-        enemyStage.StageEnemySpawn();
-        GameManager.Turn = 1;
-        EnemyStage.totalEnemyCount = enemyStage.stageEnemySettig[gameManager.currentStage].TotalReturn();
+
+        gameManager.Initialize();
+        player.Initialize();
+        enemyStage.EnemyInitialied();
 
         Destroy(this.gameObject);
     }

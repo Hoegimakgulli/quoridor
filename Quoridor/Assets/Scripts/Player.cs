@@ -96,6 +96,8 @@ public class Player : MonoBehaviour
         canAction = true;
         canAttack = true;
 
+        ResetPreview();
+
         previousWallInfo = new int[3];
         tempMapGraph = new int[81, 81];
     }
@@ -408,7 +410,7 @@ public class Player : MonoBehaviour
             RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, ((Vector2)playerMovablePositions[i]).normalized, GameManager.gridSize * playerMovablePositions[i].magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
             RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, ((Vector2)playerMovablePositions[i]).normalized, GameManager.gridSize * playerMovablePositions[i].magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
             bool fullBlock = false;
-            Debug.Log($"{semiWallHit.Length}, {i}");
+            // Debug.Log($"{semiWallHit.Length}, {i}");
             if (outerWallHit)
             {
                 playerPreviews[i].SetActive(false);
@@ -481,6 +483,7 @@ public class Player : MonoBehaviour
                     {
                         playerAttackPreviews[i].transform.position = transform.position + GameManager.gridSize * (Vector3)(Vector2)playerAttackablePositions[i];
                         playerAttackPreviews[i].GetComponent<SpriteRenderer>().color = Color.red;
+                        playerAttackPreviews[i].GetComponent<BoxCollider2D>().enabled = true;
                         playerAttackPreviews[i].SetActive(true);
                         continue;
                     }
@@ -488,6 +491,7 @@ public class Player : MonoBehaviour
             }
             playerAttackPreviews[i].transform.position = transform.position + GameManager.gridSize * (Vector3)(Vector2)playerAttackablePositions[i];
             playerAttackPreviews[i].GetComponent<SpriteRenderer>().color = Color.grey;
+            playerAttackPreviews[i].GetComponent<BoxCollider2D>().enabled = false;
             playerAttackPreviews[i].SetActive(true);
         }
     }
