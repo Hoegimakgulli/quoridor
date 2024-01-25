@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using DG.Tweening;
 
@@ -153,7 +154,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         if (AttackCanEnemy() && state == EState.Attack)
         {
             Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")); // enemy 위치에서 player까지 ray쏘기
+            RaycastHit2D hit = Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Player").FirstOrDefault(); ; // enemy 위치에서 player까지 ray쏘기
+            Debug.Log(hit.transform.tag);
             if (hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
             {
                 Debug.Log("Player Dead");
