@@ -50,6 +50,34 @@ public class GameManager : MonoBehaviour
         // DebugMap();
         player = Instantiate(playerPrefab, playerPosition * gridSize, Quaternion.identity);
     }
+    public void Initialize()
+    {
+        enemyPositions.Clear();
+        enemyObjects.Clear();
+        playerPosition = new Vector3(0, -4, 0);
+        Turn = 1; // 턴 초기화
+        for (int i = 0; i < mapGraph.GetLength(0); i++) // 맵 그래프 초기화
+        {
+            int row = i / 9;
+            int col = i % 9;
+            if (row > 0)
+            {
+                mapGraph[i, (row - 1) * 9 + col] = 1;
+            }
+            if (row < 8)
+            {
+                mapGraph[i, (row + 1) * 9 + col] = 1;
+            }
+            if (col > 0)
+            {
+                mapGraph[i, row * 9 + (col - 1)] = 1;
+            }
+            if (col < 8)
+            {
+                mapGraph[i, row * 9 + (col + 1)] = 1;
+            }
+        }
+    }
     void Update()
     {
         if (Turn % 2 == 0 && Input.GetKey(KeyCode.Space)) //[디버그용] space 키를 통해 적턴 넘기기
