@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,8 +7,8 @@ using UnityEngine.UI;
 [System.Serializable]
 public class Path
 {
-    // Áß¾Ó ÁÂÇ¥»ó (0, 0) ½ÃÀÛÀ¸·Î x, y ÁÂÇ¥
-    // G = ½ÃÀÛÀ¸·ÎºÎÅÍ ÀÌµ¿ÇÑ °Å¸®, H = °¡·Î, ¼¼·Î·Î º®À» ¹«½ÃÇÏ°í Player±îÁö ÀÌµ¿ÇÑ °Å¸®
+    // ì¤‘ì•™ ì¢Œí‘œìƒ (0, 0) ì‹œì‘ìœ¼ë¡œ x, y ì¢Œí‘œ
+    // G = ì‹œì‘ìœ¼ë¡œë¶€í„° ì´ë™í•œ ê±°ë¦¬, H = ê°€ë¡œ, ì„¸ë¡œë¡œ ë²½ì„ ë¬´ì‹œí•˜ê³  Playerê¹Œì§€ ì´ë™í•œ ê±°ë¦¬
     public int x, y, G, H;
 
     public Path(int _x, int _y)
@@ -19,7 +19,7 @@ public class Path
 
     public Path ParentNode;
 
-    // F = G, H ÃÑ ÇÕ»ê°ª
+    // F = G, H ì´ í•©ì‚°ê°’
     public int F
     {
         get
@@ -31,13 +31,13 @@ public class Path
 
 public class EnemyManager : MonoBehaviour
 {
-    public List<GameObject> enemyPrefabs; // ±âº» À¯´Ö ¿ÀºêÁ§Æ®µé ¸®½ºÆ® ³Ö¾îµÎ±â
-    public List<GameObject> loyalEnemyPrefabs; // »óÀ§ °í±Ş À¯´Ö ¿ÀºêÁ§Æ®µé ¸®½ºÆ® ³Ö¾îµÎ±â
+    public List<GameObject> enemyPrefabs; // ê¸°ë³¸ ìœ ë‹› ì˜¤ë¸Œì íŠ¸ë“¤ ë¦¬ìŠ¤íŠ¸ ë„£ì–´ë‘ê¸°
+    public List<GameObject> loyalEnemyPrefabs; // ìƒìœ„ ê³ ê¸‰ ìœ ë‹› ì˜¤ë¸Œì íŠ¸ë“¤ ë¦¬ìŠ¤íŠ¸ ë„£ì–´ë‘ê¸°
 
     // public static int gameManager.currentStage = 0;
-    public GameObject warningSignBox; // °æ°í Ç¥±â ´ã¾ÆµÎ´Â ¹Ú½º
+    public GameObject warningSignBox; // ê²½ê³  í‘œê¸° ë‹´ì•„ë‘ëŠ” ë°•ìŠ¤
     public GameObject enemyUiCanvas;
-    public const float gridSize = 1.3f; // ±×¸®µåÀÇ Å©±â
+    public const float gridSize = 1.3f; // ê·¸ë¦¬ë“œì˜ í¬ê¸°
 
     private bool enemyTurnAnchor = true;
     //private bool enemyWarningSignAnchor = true;
@@ -50,7 +50,7 @@ public class EnemyManager : MonoBehaviour
         Instantiate(EnemyStatePanel, enemyUi.transform);
         Debug.Log("ui Spawned");
         gameManager = transform.gameObject.GetComponent<GameManager>();
-        GameManager.enemyObjects.Clear(); // Àû À§Ä¡ ¹× °´Ã¼ Á¤º¸ ÃÊ±âÈ­
+        GameManager.enemyObjects.Clear(); // ì  ìœ„ì¹˜ ë° ê°ì²´ ì •ë³´ ì´ˆê¸°í™”
         GameManager.enemyPositions.Clear();
     }
 
@@ -71,17 +71,17 @@ public class EnemyManager : MonoBehaviour
             testMove();
         }
 
-        // Àû ÅÏÀÏ¶§ (ÀÌµ¿ ¹× °ø°İÈ®ÀÎ)
+        // ì  í„´ì¼ë•Œ (ì´ë™ ë° ê³µê²©í™•ì¸)
         if (GameManager.Turn % 2 == 0 && enemyTurnAnchor)
         {
             //enemyWarningSignAnchor = true;
             enemyTurnAnchor = false;
-            // °æ°ísign ÃÊ±âÈ­
+            // ê²½ê³ sign ì´ˆê¸°í™”
             foreach (Transform child in GameObject.FindWithTag("WarningBox").transform)
             {
                 Destroy(child.gameObject);
             }
-            // ¿ÀºêÁ§Æ® Ä«¿îÆ® ÃÊ±âÈ­
+            // ì˜¤ë¸Œì íŠ¸ ì¹´ìš´íŠ¸ ì´ˆê¸°í™”
             /*
             for (int count = 0; count < GameManager.enemyObjects.Count; count++)
             {
@@ -91,7 +91,7 @@ public class EnemyManager : MonoBehaviour
             StartCoroutine(StartEnemyTurn());
         }
 
-        // ÇÃ·¹ÀÌ¾î ÅÏÀÏ¶§ (Àû ¿òÁ÷ÀÓ °æ°í)
+        // í”Œë ˆì´ì–´ í„´ì¼ë•Œ (ì  ì›€ì§ì„ ê²½ê³ )
         /*
         if(GameManager.Turn % 2 == 1 && enemyWarningSignAnchor)
         {
@@ -111,7 +111,7 @@ public class EnemyManager : MonoBehaviour
     Path StartNode, TargetNode, CurNode;
     List<Path> OpenList, ClosedList;
 
-    // A* ¾Ë°í¸®Áò
+    // A* ì•Œê³ ë¦¬ì¦˜
     public void PathFinding(GameObject startObj, GameObject endObj)
     {
         sizeX = topRight.x - bottomLeft.x + 1;
@@ -126,7 +126,7 @@ public class EnemyManager : MonoBehaviour
             }
         }
 
-        // startPos, endPos ±âÁ¸ positionÀ» girdSize·Î ³ª´²¼­ Á¤¼öÈ­ ½ÃÄÑÁØ ´ÙÀ½ ÁÂÇ¥°è (0, 0)À» ¿ŞÂÊ ¾Æ·¡ °¡ÀåÀÚ¸®·Î ¹Ù²ãÁÜ
+        // startPos, endPos ê¸°ì¡´ positionì„ girdSizeë¡œ ë‚˜ëˆ ì„œ ì •ìˆ˜í™” ì‹œì¼œì¤€ ë‹¤ìŒ ì¢Œí‘œê³„ (0, 0)ì„ ì™¼ìª½ ì•„ë˜ ê°€ì¥ìë¦¬ë¡œ ë°”ê¿”ì¤Œ
         Vector2 trimPos;
         trimPos = startObj.transform.position / GameManager.gridSize;
         startPos = new Vector2Int(Mathf.FloorToInt(trimPos.x) + 4, Mathf.FloorToInt(trimPos.y) + 4);
@@ -136,14 +136,14 @@ public class EnemyManager : MonoBehaviour
         StartNode = PathArray[startPos.x - bottomLeft.x, startPos.y - bottomLeft.y];
         TargetNode = PathArray[targetPos.x - bottomLeft.x, targetPos.y - bottomLeft.y];
 
-        // ½ÃÀÛ°ú ³¡ ³ëµå, ¿­¸°¸®½ºÆ®¿Í ´İÈù¸®½ºÆ®, ¸¶Áö¸·¸®½ºÆ® ÃÊ±âÈ­
+        // ì‹œì‘ê³¼ ë ë…¸ë“œ, ì—´ë¦°ë¦¬ìŠ¤íŠ¸ì™€ ë‹«íŒë¦¬ìŠ¤íŠ¸, ë§ˆì§€ë§‰ë¦¬ìŠ¤íŠ¸ ì´ˆê¸°í™”
         OpenList = new List<Path>() { StartNode };
         ClosedList = new List<Path>();
         FinalPathList = new List<Path>();
 
         while (OpenList.Count > 0)
         {
-            // ¿­¸°¸®½ºÆ® Áß °¡Àå F°¡ ÀÛ°í F°¡ °°´Ù¸é H°¡ ÀÛÀº °É ÇöÀç³ëµå·Î ÇÏ°í ¿­¸°¸®½ºÆ®¿¡¼­ ´İÈù¸®½ºÆ®·Î ¿Å±â±â
+            // ì—´ë¦°ë¦¬ìŠ¤íŠ¸ ì¤‘ ê°€ì¥ Fê°€ ì‘ê³  Fê°€ ê°™ë‹¤ë©´ Hê°€ ì‘ì€ ê±¸ í˜„ì¬ë…¸ë“œë¡œ í•˜ê³  ì—´ë¦°ë¦¬ìŠ¤íŠ¸ì—ì„œ ë‹«íŒë¦¬ìŠ¤íŠ¸ë¡œ ì˜®ê¸°ê¸°
             CurNode = OpenList[0];
             for (int i = 1; i < OpenList.Count; i++)
             {
@@ -154,7 +154,7 @@ public class EnemyManager : MonoBehaviour
             ClosedList.Add(CurNode);
 
 
-            // ¸¶Áö¸·
+            // ë§ˆì§€ë§‰
             if (CurNode == TargetNode)
             {
                 Path TargetCurNode = TargetNode.ParentNode;
@@ -166,24 +166,24 @@ public class EnemyManager : MonoBehaviour
                 FinalPathList.Add(StartNode);
                 FinalPathList.Reverse();
 
-                //for (int i = 0; i < FinalPathList.Count; i++) print(i + "¹øÂ°´Â " + FinalPathList[i].x + ", " + FinalPathList[i].y);
+                //for (int i = 0; i < FinalPathList.Count; i++) print(i + "ë²ˆì§¸ëŠ” " + FinalPathList[i].x + ", " + FinalPathList[i].y);
                 return;
             }
 
             if (allowDiagonal)
             {
-                // ´ÙÀ½¿¡ µé¾î°¥ ÁÂÇ¥ Àü´Ş
-                OpenListAdd(CurNode.x + 1, CurNode.y + 1); // ¿À¸¥ÂÊ À§
-                OpenListAdd(CurNode.x - 1, CurNode.y + 1); // ¿ŞÂÊ À§
-                OpenListAdd(CurNode.x - 1, CurNode.y - 1); // ¿ŞÂÊ ¾Æ·¡
-                OpenListAdd(CurNode.x + 1, CurNode.y - 1); // ¿À¸¥ÂÊ ¾Æ·¡
+                // ë‹¤ìŒì— ë“¤ì–´ê°ˆ ì¢Œí‘œ ì „ë‹¬
+                OpenListAdd(CurNode.x + 1, CurNode.y + 1); // ì˜¤ë¥¸ìª½ ìœ„
+                OpenListAdd(CurNode.x - 1, CurNode.y + 1); // ì™¼ìª½ ìœ„
+                OpenListAdd(CurNode.x - 1, CurNode.y - 1); // ì™¼ìª½ ì•„ë˜
+                OpenListAdd(CurNode.x + 1, CurNode.y - 1); // ì˜¤ë¥¸ìª½ ì•„ë˜
             }
 
-            // ¡è ¡æ ¡é ¡ç
-            OpenListAdd(CurNode.x, CurNode.y + 1); // À§
-            OpenListAdd(CurNode.x + 1, CurNode.y); // ¿À¸¥ÂÊ
-            OpenListAdd(CurNode.x, CurNode.y - 1); // ¾Æ·¡
-            OpenListAdd(CurNode.x - 1, CurNode.y); // ¿ŞÂÊ
+            // â†‘ â†’ â†“ â†
+            OpenListAdd(CurNode.x, CurNode.y + 1); // ìœ„
+            OpenListAdd(CurNode.x + 1, CurNode.y); // ì˜¤ë¥¸ìª½
+            OpenListAdd(CurNode.x, CurNode.y - 1); // ì•„ë˜
+            OpenListAdd(CurNode.x - 1, CurNode.y); // ì™¼ìª½
         }
 
         if (FinalPathList.Count == 0)
@@ -195,42 +195,42 @@ public class EnemyManager : MonoBehaviour
     public GameManager gameManager;
     void OpenListAdd(int checkX, int checkY)
     {
-        // graph »ó (0,0) == 0°ú °°À½
+        // graph ìƒ (0,0) == 0ê³¼ ê°™ìŒ
         int startGraphPosition = (int)(CurNode.y * 9 + CurNode.x);
         int endGraphPosition = (int)(checkY * 9 + checkX);
-        // »óÇÏÁÂ¿ì ¹üÀ§¸¦ ¹ş¾î³ªÁö ¾Ê°í, º®ÀÌ ¾Æ´Ï¸é¼­, ´İÈù¸®½ºÆ®¿¡ ¾ø´Ù¸é
+        // ìƒí•˜ì¢Œìš° ë²”ìœ„ë¥¼ ë²—ì–´ë‚˜ì§€ ì•Šê³ , ë²½ì´ ì•„ë‹ˆë©´ì„œ, ë‹«íŒë¦¬ìŠ¤íŠ¸ì— ì—†ë‹¤ë©´
         if (checkX >= bottomLeft.x && checkX < topRight.x + 1 && checkY >= bottomLeft.y && checkY < topRight.y + 1 && !ClosedList.Contains(PathArray[checkX - bottomLeft.x, checkY - bottomLeft.y]))
         {
-            // start ÁöÁ¡À¸·Î ºÎÅÍ end ÁöÁ¡ »çÀÌ¿¡ º®ÀÌ ÀÖ´ÂÁö È®ÀÎ
+            // start ì§€ì ìœ¼ë¡œ ë¶€í„° end ì§€ì  ì‚¬ì´ì— ë²½ì´ ìˆëŠ”ì§€ í™•ì¸
             if (gameManager.mapGraph[startGraphPosition, endGraphPosition] == 0) return;
             if (CheckEnemyPos(new Vector2((checkX - 4) * GameManager.gridSize, (checkY - 4) * GameManager.gridSize))) return;
-            // ´ë°¢¼± Çã¿ë½Ã, º® »çÀÌ·Î Åë°ú ¾ÈµÊ
+            // ëŒ€ê°ì„  í—ˆìš©ì‹œ, ë²½ ì‚¬ì´ë¡œ í†µê³¼ ì•ˆë¨
             if (allowDiagonal)
             {
                 if (gameManager.mapGraph[startGraphPosition, startGraphPosition + (checkX - CurNode.x)] == 0)
                 {
                     if (checkY - CurNode.y == 1)
                     {
-                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition + 9] == 0) return; // ¾Æ·¡¿¡¼­ À§·Î ¿Ã¶ó°¡´Â °æ¿ì
+                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition + 9] == 0) return; // ì•„ë˜ì—ì„œ ìœ„ë¡œ ì˜¬ë¼ê°€ëŠ” ê²½ìš°
                     }
                     else if (checkY - CurNode.y == -1)
                     {
-                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition - 9] == 0) return; // À§¿¡¼­ ¾Æ·¡·Î ³»·Á°¡´Â °æ¿ì
+                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition - 9] == 0) return; // ìœ„ì—ì„œ ì•„ë˜ë¡œ ë‚´ë ¤ê°€ëŠ” ê²½ìš°
                     }
                 }
             }
 
-            // ÄÚ³Ê¸¦ °¡·ÎÁú·¯ °¡Áö ¾ÊÀ»½Ã, ÀÌµ¿ Áß¿¡ ¼öÁ÷¼öÆò Àå¾Ö¹°ÀÌ ÀÖÀ¸¸é ¾ÈµÊ
+            // ì½”ë„ˆë¥¼ ê°€ë¡œì§ˆëŸ¬ ê°€ì§€ ì•Šì„ì‹œ, ì´ë™ ì¤‘ì— ìˆ˜ì§ìˆ˜í‰ ì¥ì• ë¬¼ì´ ìˆìœ¼ë©´ ì•ˆë¨
             if (dontCrossCorner)
             {
                 //if (PathArray[CurNode.x - bottomLeft.x, checkY - bottomLeft.y].isWall || PathArray[checkX - bottomLeft.x, CurNode.y - bottomLeft.y].isWall) return;
             }
 
-            // ÀÌ¿ô³ëµå¿¡ ³Ö°í, Á÷¼±Àº 10, ´ë°¢¼±Àº 14ºñ¿ë
+            // ì´ì›ƒë…¸ë“œì— ë„£ê³ , ì§ì„ ì€ 10, ëŒ€ê°ì„ ì€ 14ë¹„ìš©
             Path NeighborNode = PathArray[checkX - bottomLeft.x, checkY - bottomLeft.y];
             int MoveCost = CurNode.G + (CurNode.x - checkX == 0 || CurNode.y - checkY == 0 ? 10 : 14);
 
-            // ÀÌµ¿ºñ¿ëÀÌ ÀÌ¿ô³ëµåGº¸´Ù ÀÛ°Å³ª ¶Ç´Â ¿­¸°¸®½ºÆ®¿¡ ÀÌ¿ô³ëµå°¡ ¾ø´Ù¸é G, H, ParentNode¸¦ ¼³Á¤ ÈÄ ¿­¸°¸®½ºÆ®¿¡ Ãß°¡
+            // ì´ë™ë¹„ìš©ì´ ì´ì›ƒë…¸ë“œGë³´ë‹¤ ì‘ê±°ë‚˜ ë˜ëŠ” ì—´ë¦°ë¦¬ìŠ¤íŠ¸ì— ì´ì›ƒë…¸ë“œê°€ ì—†ë‹¤ë©´ G, H, ParentNodeë¥¼ ì„¤ì • í›„ ì—´ë¦°ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
             if (MoveCost < NeighborNode.G || !OpenList.Contains(NeighborNode))
             {
                 NeighborNode.G = MoveCost;
@@ -273,11 +273,11 @@ public class EnemyManager : MonoBehaviour
         {
             currentEnemyState = GameManager.enemyObjects[count].GetComponent<Enemy>();
 
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ÀÇ Çàµ¿·ÂÀº ¡æ " + currentEnemyState.moveCtrl[1]);
-            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // ·£´ıÀ¸·Î µé¾î¿À´Â ¹«ÀÛÀ§ Çàµ¿·Â 0 ~ Àû Çàµ¿·Â È¸º¹ ÃÖ´ëÄ¡
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ÀÇ º¯µ¿ Çàµ¿·ÂÀº ¡æ " + currentEnemyState.moveCtrl[1]);
+            //Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ì˜ í–‰ë™ë ¥ì€ â†’ " + currentEnemyState.moveCtrl[1]);
+            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // ëœë¤ìœ¼ë¡œ ë“¤ì–´ì˜¤ëŠ” ë¬´ì‘ìœ„ í–‰ë™ë ¥ 0 ~ ì  í–‰ë™ë ¥ íšŒë³µ ìµœëŒ€ì¹˜
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ì˜ ë³€ë™ í–‰ë™ë ¥ì€ â†’ " + currentEnemyState.moveCtrl[1]);
 
-            //currentEnemyState.moveCtrl[1] += 10; // test ¿ë Ãß°¡
+            //currentEnemyState.moveCtrl[1] += 10; // test ìš© ì¶”ê°€
 
             if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
             {
@@ -286,7 +286,7 @@ public class EnemyManager : MonoBehaviour
                 currentEnemyState.state = Enemy.EState.Move;
                 PathFinding(currenEnemy, player);
                 currentEnemyState.EnemyMove(FinalPathList);
-                currentEnemyState.moveCtrl[1] = 0; // ÇöÀç Çàµ¿·Â ÃÊ±âÈ­
+                currentEnemyState.moveCtrl[1] = 0; // í˜„ì¬ í–‰ë™ë ¥ ì´ˆê¸°í™”
                 /*
                 foreach(Transform child in GameObject.FindWithTag("WarningBox").transform)
                 {
@@ -324,9 +324,9 @@ public class EnemyManager : MonoBehaviour
         {
             currentEnemyState = GameManager.enemyObjects[count].GetComponent<Enemy>();
 
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ÀÇ Çàµ¿·ÂÀº ¡æ " + currentEnemyState.moveCtrl[1]);
-            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // È¸º¹ÇÏ´Â Àû Çàµ¿·Â
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ÀÇ º¯µ¿ Çàµ¿·ÂÀº ¡æ " + currentEnemyState.moveCtrl[1]);
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ì˜ í–‰ë™ë ¥ì€ â†’ " + currentEnemyState.moveCtrl[1]);
+            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // íšŒë³µí•˜ëŠ” ì  í–‰ë™ë ¥
+            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "ì˜ ë³€ë™ í–‰ë™ë ¥ì€ â†’ " + currentEnemyState.moveCtrl[1]);
         }
     }
 
@@ -388,8 +388,73 @@ public class EnemyManager : MonoBehaviour
 
     IEnumerator StartEnemyTurn()
     {
-        yield return new WaitForSeconds(2);
-        MoveCtrlUpdate();
+        //yield return new WaitForSeconds(0.01f);
+        //MoveCtrlUpdate();
+        yield return StartCoroutine(MoveCtrlUpdateCoroutine());
         enemyTurnAnchor = true;
+    }
+
+
+
+
+
+
+
+
+    //ì  ì›€ì§ì„ ìƒíƒœì°½ ì• ë‹ˆë©”ì´ì…˜ì— ë§ì¶° ìˆœì°¨ì ìœ¼ë¡œ ì›€ì§ì´ë„ë¡ ìˆ˜ì • (ì´ê·œë¹ˆ)
+    IEnumerator MoveCtrlUpdateCoroutine()
+    {
+        UiManager uiManager = GetComponent<UiManager>();
+        List<int> originSortingList = new List<int>(); //ì ë“¤ì´ ì›€ì§ì´ê¸° ì „ì— í–‰ë™ë ¥ ìˆœì„œë¡œ ë¶„ë¥˜ë˜ì–´ìˆë˜ ë¦¬ìŠ¤íŠ¸
+        for (int i = 0; i < uiManager.sortingList.Count; i++)
+        {
+            originSortingList.Add(uiManager.sortingList[i]);
+        }
+
+        Enemy currentEnemyState;
+        int count;
+        int originMoveCtrl;  //ì›ë˜ í–‰ë™ë ¥.
+        for (count = 0; count < GameManager.enemyObjects.Count; count++)
+        {
+            currentEnemyState = GameManager.enemyObjects[originSortingList[count]].GetComponent<Enemy>();
+            originMoveCtrl = currentEnemyState.moveCtrl[1];
+
+            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "ì˜ í–‰ë™ë ¥ì€ â†’ " + currentEnemyState.moveCtrl[1]);
+            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // ëœë¤ìœ¼ë¡œ ë“¤ì–´ì˜¤ëŠ” ë¬´ì‘ìœ„ í–‰ë™ë ¥ 0 ~ ì  í–‰ë™ë ¥ íšŒë³µ ìµœëŒ€ì¹˜
+            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "ì˜ ë³€ë™ í–‰ë™ë ¥ì€ â†’ " + currentEnemyState.moveCtrl[1]);
+
+            uiManager.SortEnemyStates(); //í–‰ë™ë ¥ì— ë”°ë¼ ì  ìƒíƒœì°½ ìˆœì„œ ì •ë ¬
+            yield return StartCoroutine(uiManager.CountMovectrlAnim(originSortingList[count], originMoveCtrl, currentEnemyState.moveCtrl[1])); //ì›ë˜ í–‰ë™ë ¥ì—ì„œ ë°”ë€ í–‰ë™ë ¥ê¹Œì§€ ìˆ«ìê°€ ë°”ë€ŒëŠ” ì• ë‹ˆë©”ì´ì…˜
+            originMoveCtrl = currentEnemyState.moveCtrl[1]; //ì—¬ê¸°ì„œë¶€í„° originMoveCtrlì€ ë°”ë€ í›„ì˜ í–‰ë™ë ¥
+
+            if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
+            {
+                GameObject currenEnemy = GameManager.enemyObjects[originSortingList[count]];
+                GameObject player = GameObject.FindWithTag("Player");
+                currentEnemyState.state = Enemy.EState.Move;
+                PathFinding(currenEnemy, player);
+                currentEnemyState.EnemyMove(FinalPathList);
+                currentEnemyState.moveCtrl[1] = -1; //ìƒíƒœì°½ ìˆœì„œë¥¼ í–‰ë™ë ¥ ìˆœìœ¼ë¡œ ì •ë ¬í–ˆì„ ë•Œ, ë°©ê¸ˆ ì´ë™í•œ ì ì˜ ìˆœì„œê°€ ê°€ì¥ ì•„ë˜ë¡œ ë‚´ë ¤ì˜¤ë„ë¡ í–‰ë™ë ¥ì„ ë§ˆì´ë„ˆìŠ¤ë¡œ ìˆ˜ì •.
+                uiManager.SortEnemyStates(); //ë°©ê¸ˆ ì´ë™í•œ ì ì˜ ìƒíƒœì°½ì´ ì•„ë˜ë¡œ ë‚´ë ¤ì˜¤ë„ë¡ ë¦¬ìŠ¤íŠ¸ë¥¼ ì¬ì •ë ¬
+                currentEnemyState.moveCtrl[1] = originMoveCtrl - currentEnemyState.moveCtrl[0]; //ì ì˜ í–‰ë™ë ¥ ê°ì†Œ
+                yield return StartCoroutine(uiManager.ReloadState(originSortingList[count], currentEnemyState.moveCtrl[1]));
+
+                if (!turnCheck)
+                {
+                    turnCheck = true;
+                    GameManager.Turn++;
+                }
+            }
+
+            else
+            {
+                if (!turnCheck)
+                {
+                    turnCheck = true;
+                    GameManager.Turn++;
+
+                }
+            }
+        }
     }
 }
