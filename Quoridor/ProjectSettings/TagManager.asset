@@ -10,6 +10,7 @@ TagManager:
   - Enemy
   - PlayerAttackPreview
   - WarningBox
+  - WallStorage
   layers:
   - Default
   - TransparentFX
