@@ -1,9 +1,10 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using static UnityEngine.UI.Image;
+using Unity.VisualScripting;
 
 public class UiManager : MonoBehaviour
 {
@@ -21,6 +22,8 @@ public class UiManager : MonoBehaviour
     public float uiMoveTime = 0.2f; //적 상태창 움직이는 시간 
     public bool popLock = false; //임시 변수. 플레이어 및 적턴 알려주는 팝업 통제용.
     public List<int> sortingList = new List<int>(); //행동력 순서로 EnemyState를 정렬할 리스트. 각 배열의 숫자는 몇 번째 적인지를 나타냄.
+    private GameObject explosionEffect;
+    private List<RectTransform> particlesRT = new List<RectTransform>();
 
 
     private void Awake()
@@ -34,6 +37,12 @@ public class UiManager : MonoBehaviour
         panelBox[1] = GameObject.Find("HistoryPanel");
         historyBox[0] = panelBox[1].transform.GetChild(0).transform.GetChild(0).gameObject; // History -> playerBox 접근
         historyBox[1] = panelBox[1].transform.GetChild(0).transform.GetChild(1).gameObject; // History -> enemyBox 접근
+        explosionEffect = panelBox[0].transform.parent.GetChild(3).GetChild(2).gameObject;
+        for(int i = 0; i < explosionEffect.transform.childCount; i++)
+        {
+            particlesRT.Add(explosionEffect.transform.GetChild(i).GetComponent<RectTransform>());
+        }
+        explosionEffect.SetActive(false);
     }
 
     private void Update()
@@ -221,6 +230,20 @@ public class UiManager : MonoBehaviour
         enemyStates[enemyNum].GetChild(3).GetComponent<Image>().DOFade(1, uiMoveTime * 4);
         yield return StartCoroutine(QuakeAnim(enemyStates[enemyNum], uiMoveTime * 4));
         GameObject destroyState = enemyStates[enemyNum].gameObject;
+        
+        //UI 터지는 부분
+        explosionEffect.SetActive(true);
+        RectTransform statesPanelRT = enemyStates[0].parent.parent.GetComponent<RectTransform>();
+        explosionEffect.GetComponent<RectTransform>().anchoredPosition = statesPanelRT.anchoredPosition + new Vector2(0, statesPanelRT.rect.height/2 + enemyStates[enemyNum].anchoredPosition.y);
+        foreach(RectTransform particle in particlesRT)
+        {
+            particle.anchoredPosition = Vector2.zero;
+            particle.GetComponent<Image>().DOFade(1, 0);
+            float angle = Random.Range(0, Mathf.PI * 2);
+            particle.DOAnchorPos(new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * 300, uiMoveTime*2);
+            particle.GetComponent<Image>().DOFade(0, uiMoveTime*2);
+        }
+
         enemyStates.RemoveAt(enemyNum);
         Destroy(destroyState);
         for(int i = sortingList.Count - 1; i >= 0; i--)
@@ -236,6 +259,8 @@ public class UiManager : MonoBehaviour
         }
         if(GameManager.enemyObjects.Count != 0)
             StartCoroutine(SwapStatesAnim(0));
+        yield return new WaitForSeconds(uiMoveTime*2);
+        explosionEffect.SetActive(false);
     }
 
     //UI 흔들리는 애니메이션 (흔들 UI의 RectTransform, 흔들 시간)
