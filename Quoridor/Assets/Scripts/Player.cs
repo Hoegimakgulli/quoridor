@@ -56,9 +56,12 @@ public class Player : MonoBehaviour
     [SerializeField]
     GameObject playerUI;
 
+    GameObject wallStorage;
+
     void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        wallStorage = GameObject.Find("WallStorage");
         transform.position = GameManager.gridSize * gameManager.playerPosition; //플레이어 위치 초기화 (처음위치는 게임메니저에서 설정)
         for (int i = 0; i < playerMovablePositions.Count; i++) // 플레이어 미리보기 -> 미리소환하여 비활성화 해놓기
         {
@@ -70,13 +73,32 @@ public class Player : MonoBehaviour
             playerAttackPreviews.Add(Instantiate(playerAttackPreviewPrefab, transform.position, Quaternion.identity));
             playerAttackPreviews[i].SetActive(false);
         }
+        for (int i = 0; i < maxWallCount; i++)
+        {
+            Instantiate(playerWallPrefab, wallStorage.transform).SetActive(false);
+        }
         playerWallPreview = Instantiate(playerWallPreviewPrefab, transform.position, Quaternion.identity); // 플레이어 벽 미리보기 -> 미리소환하여 비활성화 해놓기
         playerWallPreview.SetActive(false);
         tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵그래프 저장
 
         playerUI = Instantiate(playerUI); // [디버그용]
     }
+    public void Initialize()
+    {
+        transform.position = GameManager.gridSize * new Vector3(0, -4, 0);
+        wallCount = 0;
 
+        for (int i = 0; i < wallStorage.transform.childCount; i++)
+        {
+            wallStorage.transform.GetChild(i).gameObject.SetActive(false);
+        }
+
+        canAction = true;
+        canAttack = true;
+
+        previousWallInfo = new int[3];
+        tempMapGraph = new int[81, 81];
+    }
     // Update is called once per frame
     void Update()
     {
@@ -196,7 +218,10 @@ public class Player : MonoBehaviour
     {
         if (!playerWallPreview.GetComponent<PreviewWall>().isBlock && playerWallPreview.tag != "CantBuild" && playerWallPreview.activeInHierarchy) //갇혀있거나 겹쳐있거나 비활성화 되어있지않다면
         {
-            Instantiate(playerWallPrefab, playerWallPreview.transform.position, playerWallPreview.transform.rotation); // 벽설치
+            GameObject playerWall = wallStorage.transform.GetChild(wallCount).gameObject; // 벽설치
+            playerWall.SetActive(true);
+            playerWall.transform.position = playerWallPreview.transform.position;
+            playerWall.transform.rotation = playerWallPreview.transform.rotation;
             gameManager.playerPosition = transform.position / GameManager.gridSize;
             tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
             wallCount++; // 설치한 벽 개수 +1
@@ -383,7 +408,7 @@ public class Player : MonoBehaviour
             RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, ((Vector2)playerMovablePositions[i]).normalized, GameManager.gridSize * playerMovablePositions[i].magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
             RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, ((Vector2)playerMovablePositions[i]).normalized, GameManager.gridSize * playerMovablePositions[i].magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
             bool fullBlock = false;
-            // Debug.Log($"{(bool)tokenHit} - {(tokenHit ? tokenHit.collider.gameObject.name : i)}");
+            Debug.Log($"{semiWallHit.Length}, {i}");
             if (outerWallHit)
             {
                 playerPreviews[i].SetActive(false);

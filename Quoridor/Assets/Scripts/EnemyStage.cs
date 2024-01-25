@@ -69,6 +69,12 @@ public class EnemyStage : MonoBehaviour
         }
     }
 
+    public void EnemyInitialied()
+    {
+        totalEnemyCount = stageEnemySettig[gameManager.currentStage].TotalReturn();
+        StageEnemySpawn();
+    }
+
     // 스테이지에 소환되는 유닛이 변경될때 건드리면 되는 함수
     public void SpawnSettingStart()
     {

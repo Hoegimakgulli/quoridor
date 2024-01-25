@@ -100,6 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8158980e98240324ca207c078297073b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uiManager: {fileID: 0}
   hp: 2
   maxHp: 0
   moveCtrl: 0a0000000000000002000000
