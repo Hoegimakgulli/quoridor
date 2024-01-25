@@ -76,7 +76,16 @@ public class Player : MonoBehaviour
 
         playerUI = Instantiate(playerUI); // [디버그용]
     }
+    public void Initialize()
+    {
+        wallCount = maxWallCount;
 
+        canAction = true;
+        canAttack = true;
+
+        previousWallInfo = new int[3];
+        tempMapGraph = new int[81, 81];
+    }
     // Update is called once per frame
     void Update()
     {
