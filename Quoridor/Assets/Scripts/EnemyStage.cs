@@ -1,10 +1,10 @@
-using JetBrains.Annotations;
+ï»¿using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// ½ºÅ×ÀÌÁö¸¶´Ù µî±Ş¿¡ µû¶ó À¯´ÖÀÇ ¼ö¸¦ Á¤ÇØµÎ±â
+// ìŠ¤í…Œì´ì§€ë§ˆë‹¤ ë“±ê¸‰ì— ë”°ë¼ ìœ ë‹›ì˜ ìˆ˜ë¥¼ ì •í•´ë‘ê¸°
 public class SpawnList
 {
     public int[] values = new int[4]; // 0 = normal, 1 = champion, 2 = named, 3 = boss;
@@ -23,12 +23,12 @@ public class SpawnList
     }
 }
 
-// ½ºÅ×ÀÌÁö Àû °ü·ÃÇØ¼­ º¯¼ö °ü¸® ½ºÅ©¸³Æ®
+// ìŠ¤í…Œì´ì§€ ì  ê´€ë ¨í•´ì„œ ë³€ìˆ˜ ê´€ë¦¬ ìŠ¤í¬ë¦½íŠ¸
 public class EnemyStage : MonoBehaviour
 {
     public static int totalEnemyCount = 0;
 
-    // key == ÇöÀç ½ºÅ×ÀÌÁö, value == Áö±İ »ı¼ºÇØ¾ßÇÏ´Â À¯´Ö Å¬·¡½º
+    // key == í˜„ì¬ ìŠ¤í…Œì´ì§€, value == ì§€ê¸ˆ ìƒì„±í•´ì•¼í•˜ëŠ” ìœ ë‹› í´ë˜ìŠ¤
     public Dictionary<int, SpawnList> stageEnemySettig = new Dictionary<int, SpawnList>();
     public List<GameObject> normalEnemys;
     public List<GameObject> championEnemys;
@@ -44,8 +44,8 @@ public class EnemyStage : MonoBehaviour
     {
         gameManager = transform.GetComponent<GameManager>();
         stageEnemySettig.Clear();
-        SpawnSettingStart(); // ½ºÅ×ÀÌÁö¸¶´Ù µî±Şº° ¼ÒÈ¯ À¯´Ö ¼ö ¼³Á¤
-        ShareEnemys(); // enemy ½ºÅ©¸³Æ® ¾È¿¡ ÀÖ´Â value¿¡ µû¶ó µî±Ş ¸®½ºÆ® ÀúÀå
+        SpawnSettingStart(); // ìŠ¤í…Œì´ì§€ë§ˆë‹¤ ë“±ê¸‰ë³„ ì†Œí™˜ ìœ ë‹› ìˆ˜ ì„¤ì •
+        ShareEnemys(); // enemy ìŠ¤í¬ë¦½íŠ¸ ì•ˆì— ìˆëŠ” valueì— ë”°ë¼ ë“±ê¸‰ ë¦¬ìŠ¤íŠ¸ ì €ì¥
 
         if (stageEnemySettig.ContainsKey(gameManager.currentStage))
         {
@@ -54,14 +54,14 @@ public class EnemyStage : MonoBehaviour
         }
         else
         {
-            // µñ¼Å³Ê¸®¿¡ °ªÀÌ Á¸ÀçÇÏÁö ¾ÊÀ»¶§ ( key == ÇöÀç ½ºÅ×ÀÌÁö )
-            Debug.LogError("ÁöÁ¤µÈ ½ºÅ×ÀÌÁö°¡ ¾Æ´Õ´Ï´Ù ´Ù½Ã È®ÀÎÇØÁÖ¼¼¿ä");
+            // ë”•ì…”ë„ˆë¦¬ì— ê°’ì´ ì¡´ì¬í•˜ì§€ ì•Šì„ë•Œ ( key == í˜„ì¬ ìŠ¤í…Œì´ì§€ )
+            Debug.LogError("ì§€ì •ëœ ìŠ¤í…Œì´ì§€ê°€ ì•„ë‹™ë‹ˆë‹¤ ë‹¤ì‹œ í™•ì¸í•´ì£¼ì„¸ìš”");
         }
     }
 
     public void Update()
     {
-        // ¸ğµç Àû À¯´ÖÀÌ »ç¸ÁÇßÀ»¶§
+        // ëª¨ë“  ì  ìœ ë‹›ì´ ì‚¬ë§í–ˆì„ë•Œ
         if (totalEnemyCount == 0)
         {
             Instantiate(stageUI);
@@ -69,7 +69,7 @@ public class EnemyStage : MonoBehaviour
         }
     }
 
-    // ½ºÅ×ÀÌÁö¿¡ ¼ÒÈ¯µÇ´Â À¯´ÖÀÌ º¯°æµÉ¶§ °Çµå¸®¸é µÇ´Â ÇÔ¼ö
+    // ìŠ¤í…Œì´ì§€ì— ì†Œí™˜ë˜ëŠ” ìœ ë‹›ì´ ë³€ê²½ë ë•Œ ê±´ë“œë¦¬ë©´ ë˜ëŠ” í•¨ìˆ˜
     public void SpawnSettingStart()
     {
         stageEnemySettig.Add(1, new SpawnList(2, 0, 0, 0));
@@ -84,7 +84,7 @@ public class EnemyStage : MonoBehaviour
         stageEnemySettig.Add(10, new SpawnList(1, 2, 3, 0));
     }
 
-    // ³ë¸» À¯´Ö, Á¤¿¹ À¯´Öµé enemy½ºÅ©¸³Æ®¿¡¼­ µî±Şº°·Î ¸®½ºÆ®¿¡ ³Ö¾îµÎ´Â ÇÔ¼ö
+    // ë…¸ë§ ìœ ë‹›, ì •ì˜ˆ ìœ ë‹›ë“¤ enemyìŠ¤í¬ë¦½íŠ¸ì—ì„œ ë“±ê¸‰ë³„ë¡œ ë¦¬ìŠ¤íŠ¸ì— ë„£ì–´ë‘ëŠ” í•¨ìˆ˜
     public void ShareEnemys()
     {
         foreach (GameObject child in EM.enemyPrefabs)
@@ -128,10 +128,14 @@ public class EnemyStage : MonoBehaviour
         }
     }
 
-    public GameObject enemyStatePrefab; // Àû ±â¹° »óÅÂ ÆÇ³Ú¾È¿¡ µé¾î°¡´Â ±âº» »§Æ² ÀÌ¶ó°í »ı°¢;
-
+    public GameObject enemyStatePrefab; // ì  ê¸°ë¬¼ ìƒíƒœ íŒë„¬ì•ˆì— ë“¤ì–´ê°€ëŠ” ê¸°ë³¸ ë¹µí‹€ ì´ë¼ê³  ìƒê°;
+    private UiManager uiManager;
     public void StageEnemySpawn()
     {
+        uiManager = GetComponent<UiManager>();
+        //ì  ìƒíƒœì°½ ë¦¬ì…‹
+        uiManager.ResetEnemyStates();
+
         SpawnList currentSpawn = stageEnemySettig[gameManager.currentStage];
         List<GameObject> currentValues;
 
@@ -153,7 +157,7 @@ public class EnemyStage : MonoBehaviour
                     currentValues = bossEnemys;
                     break;
                 default:
-                    Debug.LogError("Àûµé ¼ÒÈ¯½Ã ¾Æ¹«°Íµµ ÇÒ´ç ¹ŞÁö ¸øÇß½À´Ï´Ù. / error : EnemyStage");
+                    Debug.LogError("ì ë“¤ ì†Œí™˜ì‹œ ì•„ë¬´ê²ƒë„ í• ë‹¹ ë°›ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. / error : EnemyStage");
                     currentValues = normalEnemys;
                     break;
             }
@@ -165,23 +169,30 @@ public class EnemyStage : MonoBehaviour
                 {
                     enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0);
                 }
-                while (GameManager.enemyPositions.Contains(enemyPosition) && GameManager.enemyPositions.Count != 0); // ÀÌ¹Ì ¼ÒÈ¯µÈ ÀûÀÇ À§Ä¡¶û ¾È °ãÄ¥¶§
+                while (GameManager.enemyPositions.Contains(enemyPosition) && GameManager.enemyPositions.Count != 0); // ì´ë¯¸ ì†Œí™˜ëœ ì ì˜ ìœ„ì¹˜ë‘ ì•ˆ ê²¹ì¹ ë•Œ
                 GameManager.enemyPositions.Add(enemyPosition);
                 GameObject currentEnemyObj = Instantiate(currentValues[Random.Range(0, currentValues.Count)], GameManager.gridSize * GameManager.enemyPositions[GameManager.enemyPositions.Count - 1], Quaternion.identity);
                 GameManager.enemyObjects.Add(currentEnemyObj);
 
-                // À¯´Ö ÆÇ³Ú¾È¿¡ º¸µåÀ§¿¡ ÀÖ´Â Àûµé µ¥ÀÌÅÍ Á¤º¸¸¦ ³Ö´Â ºÎºĞ
+                // ìœ ë‹› íŒë„¬ì•ˆì— ë³´ë“œìœ„ì— ìˆëŠ” ì ë“¤ ë°ì´í„° ì •ë³´ë¥¼ ë„£ëŠ” ë¶€ë¶„
                 Enemy currentEnemey = currentEnemyObj.GetComponent<Enemy>();
                 currentEnemey.moveCtrl[1] = Random.Range(0, 3);
 
-                // Àû Á¤º¸ UI ÆÇ³Ú¿¡ Ç¥½ÃÇÏ´Â ºÎºĞ
-                GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("EnemyStateContent").transform);
+                // ì  ì •ë³´ UI íŒë„¬ì— í‘œì‹œí•˜ëŠ” ë¶€ë¶„
+                //GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("EnemyStateContent").transform);
+                GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("Canvas(Clone)").transform.GetChild(3).GetChild(1).GetChild(0));
+                /*
                 currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = currentEnemyObj.GetComponent<SpriteRenderer>().sprite;
                 currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().color = currentEnemyObj.GetComponent<SpriteRenderer>().color;
-                currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "Çàµ¿·Â " + currentEnemey.moveCtrl[1] + " / 10";
+                currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "í–‰ë™ë ¥ " + currentEnemey.moveCtrl[1] + " / 10";
                 currentEnemey.maxHp = currentEnemey.hp;
-                currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "Ã¼·Â " + currentEnemey.hp + " / " + currentEnemey.maxHp;
+                currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "ì²´ë ¥ " + currentEnemey.hp + " / " + currentEnemey.maxHp;
+                */
+                uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, currentEnemey); //ì  ê°ê°ì˜ ìƒíƒœì°½ì„ ë§Œë“¤ì–´ë‚´ëŠ” í•¨ìˆ˜
             }
         }
+        uiManager.CreateSortingList(GameManager.enemyObjects.Count);
+        uiManager.SortEnemyStates(); //ìƒíƒœì°½ ìˆœì„œ ì •ë ¬ (í–‰ë™ë ¥ ê¸°ì¤€ìœ¼ë¡œ)
+        uiManager.DeploymentEnemyStates(); //ìƒíƒœì°½ ê°ê° ë°°ì¹˜
     }
 }

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
@@ -221,8 +221,11 @@ public class Player : MonoBehaviour
                         if (enemyHit.transform.CompareTag("Enemy"))
                         {
                             Enemy enemy = enemyHit.transform.GetComponent<Enemy>();
-                            enemy.hp -= atk;
-                            if (enemy.hp <= 0) enemy.DieEnemy();
+
+                            //적 체력 줄이기, 사망처리 모두 Enemy에서 관리하도록 수정 (이규빈)
+                            enemy.AttackedEnemy(atk);
+                            //enemy.hp -= atk;
+                            //if (enemy.hp <= 0) enemy.DieEnemy();
                             Debug.Log($"{enemyHit.transform.name}의 현재 체력 {enemy.hp}");
                             canAttack = false;
                             return;
