@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using DG.Tweening;
+using System;
 
 public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 {
@@ -154,12 +155,16 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         if (AttackCanEnemy() && state == EState.Attack)
         {
             Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
+            RaycastHit2D hitWall = Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, GameManager.gridSize * Math.Abs((playerPos - (Vector2)transform.position).magnitude), LayerMask.GetMask("Wall")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Wall").FirstOrDefault();
             RaycastHit2D hit = Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Player").FirstOrDefault(); ; // enemy 위치에서 player까지 ray쏘기
-            Debug.Log(hit.transform.tag);
-            if (hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
+            Debug.Log(hitWall.transform.tag);
+            if(!(hitWall.transform.tag == "Wall"))
             {
-                Debug.Log("Player Dead");
-                Destroy(hit.transform.gameObject);
+                if (hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
+                {
+                    Debug.Log("Player Dead");
+                    Destroy(hit.transform.gameObject);
+                }
             }
         }
         else
@@ -177,13 +182,23 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         Vector2 enemyPos = transform.position / GameManager.gridSize;
         enemyPos = new Vector2Int(Mathf.FloorToInt(enemyPos.x), Mathf.FloorToInt(enemyPos.y));
 
-        for (attackCount = 0; attackCount < attackablePoints.Length; ++attackCount)
+
+        Vector2 playerPosT = GameObject.FindGameObjectWithTag("Player").transform.position;
+        RaycastHit2D hitWall = Physics2D.Raycast(transform.position, playerPosT - (Vector2)transform.position, GameManager.gridSize * Math.Abs((playerPosT - (Vector2)transform.position).magnitude), LayerMask.GetMask("Wall"));
+
+        if (hitWall)
         {
-            currentAttackPoint = enemyPos + attackablePoints[attackCount];
-            if (playerPos == currentAttackPoint)
+            if (!(hitWall.transform.tag == "Wall"))
             {
-                Debug.Log("공격 가능");
-                return true;
+                for (attackCount = 0; attackCount < attackablePoints.Length; ++attackCount)
+                {
+                    currentAttackPoint = enemyPos + attackablePoints[attackCount];
+                    if (playerPos == currentAttackPoint)
+                    {
+                        Debug.Log("공격 가능");
+                        return true;
+                    }
+                }
             }
         }
         return false;
