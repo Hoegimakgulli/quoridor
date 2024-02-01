@@ -99,7 +99,7 @@ public class Player : MonoBehaviour
         ResetPreview();
 
         previousWallInfo = new int[3];
-        tempMapGraph = new int[81, 81];
+        tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵그래프 저장
     }
     // Update is called once per frame
     void Update()
