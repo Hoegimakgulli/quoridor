@@ -391,7 +391,15 @@ public class EnemyManager : MonoBehaviour
         //yield return new WaitForSeconds(0.01f);
         //MoveCtrlUpdate();
         yield return StartCoroutine(MoveCtrlUpdateCoroutine());
+        UiManager uiManager = GetComponent<UiManager>();
+        //while (uiManager.)
+        //enemyTurnAnchor = true;
+    }
+
+    public void EnemyTurnAnchorTrue()
+    {
         enemyTurnAnchor = true;
+        GameManager.Turn++;
     }
 
 
@@ -424,9 +432,15 @@ public class EnemyManager : MonoBehaviour
             //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
 
             uiManager.SortEnemyStates(); //행동력에 따라 적 상태창 순서 정렬
-            yield return StartCoroutine(uiManager.CountMovectrlAnim(originSortingList[count], originMoveCtrl, currentEnemyState.moveCtrl[1])); //원래 행동력에서 바뀐 행동력까지 숫자가 바뀌는 애니메이션
+            yield return StartCoroutine(uiManager.CountMovectrlAnim(originSortingList[count], originMoveCtrl, currentEnemyState.moveCtrl[1], false)); //원래 행동력에서 바뀐 행동력까지 숫자가 바뀌는 애니메이션
             originMoveCtrl = currentEnemyState.moveCtrl[1]; //여기서부터 originMoveCtrl은 바뀐 후의 행동력
-
+            if(count == GameManager.enemyObjects.Count-1)
+            {
+                if (currentEnemyState.moveCtrl[0] > currentEnemyState.moveCtrl[1])
+                {
+                    EnemyTurnAnchorTrue();
+                }
+            }
             if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
             {
                 GameObject currenEnemy = GameManager.enemyObjects[originSortingList[count]];
@@ -437,16 +451,16 @@ public class EnemyManager : MonoBehaviour
                 currentEnemyState.moveCtrl[1] = -1; //상태창 순서를 행동력 순으로 정렬했을 때, 방금 이동한 적의 순서가 가장 아래로 내려오도록 행동력을 마이너스로 수정.
                 uiManager.SortEnemyStates(); //방금 이동한 적의 상태창이 아래로 내려오도록 리스트를 재정렬
                 currentEnemyState.moveCtrl[1] = originMoveCtrl - currentEnemyState.moveCtrl[0]; //적의 행동력 감소
-                yield return StartCoroutine(uiManager.ReloadState(originSortingList[count], currentEnemyState.moveCtrl[1]));
+                yield return StartCoroutine(uiManager.ReloadState(originSortingList[count], currentEnemyState.moveCtrl[1], count));
 
-                if (!turnCheck)
+                /*if (!turnCheck)
                 {
                     turnCheck = true;
                     GameManager.Turn++;
-                }
+                }*/
             }
 
-            else
+            /*else
             {
                 if (!turnCheck)
                 {
@@ -454,7 +468,7 @@ public class EnemyManager : MonoBehaviour
                     GameManager.Turn++;
 
                 }
-            }
+            }*/
         }
     }
 }

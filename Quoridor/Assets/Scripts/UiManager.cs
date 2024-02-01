@@ -193,15 +193,15 @@ public class UiManager : MonoBehaviour
         }
     }
 
-    //행동력 올라가는 애니메이션  (몇번째 enemy인지, 시작 행동력, 목표 행동력)
-    public IEnumerator CountMovectrlAnim(int enemyNum, int start, int goal)
+    //행동력 올라가는 애니메이션  (몇번째 enemy인지, 시작 행동력, 목표 행동력, 마지막 적의 움직임인지)
+    public IEnumerator CountMovectrlAnim(int enemyNum, int start, int goal, bool finalMove)
     {
         Enemy enemy = GameManager.enemyObjects[enemyNum].GetComponent<Enemy>();
         if (goal > 10) goal = 10;
         enemyStates[enemyNum].GetComponent<Image>().DOFade(1, 0); //밝아지는 연출
         DOVirtual.Int(start, goal, uiMoveTime, ((x) => { enemyStates[enemyNum].GetChild(1).GetComponent<Text>().text = "행동력 : " + x + " / " + enemy.moveCtrl[0]; })).SetEase(Ease.InCubic);
         yield return new WaitForSeconds(uiMoveTime);
-        yield return StartCoroutine(SwapStatesAnim(enemyNum));
+        yield return StartCoroutine(SwapStatesAnim(enemyNum, finalMove));
     }
 
     public void StartCountEnemyHpAnim(int i, int originHP, int hp) //코루틴을 실행한 스크립트가 사라지면 코루틴이 멈춰버리므로 uiManager에서 코루틴을 호출
@@ -257,8 +257,10 @@ public class UiManager : MonoBehaviour
                 sortingList.RemoveAt(i);
             }
         }
-        if(GameManager.enemyObjects.Count != 0)
-            StartCoroutine(SwapStatesAnim(0));
+        if (GameManager.enemyObjects.Count != 0)
+        {
+            StartCoroutine(SwapStatesAnim(0, false));
+        }
         yield return new WaitForSeconds(uiMoveTime*2);
         explosionEffect.SetActive(false);
     }
@@ -272,8 +274,8 @@ public class UiManager : MonoBehaviour
     }
     
 
-    //행동력에 따라 적들 상태창 스왑
-    public IEnumerator SwapStatesAnim(int enemyNum)
+    //행동력에 따라 적들 상태창 스왑 (몇번째 enemy인지, 마지막 적의 움직임인지)
+    public IEnumerator SwapStatesAnim(int enemyNum, bool isFinalMove)
     {
         float firstPosition = enemyStates[0].rect.height * -0.7f;
         enemyStates[sortingList[0]].DOAnchorPosY(firstPosition, uiMoveTime);
@@ -285,20 +287,24 @@ public class UiManager : MonoBehaviour
         }
         yield return new WaitForSeconds(uiMoveTime);
         enemyStates[enemyNum].GetComponent<Image>().DOFade(0.392f, 0);
+        if (isFinalMove) GetComponent<EnemyManager>().EnemyTurnAnchorTrue();
     }
     
-    // 행동력을 사용한 적의 상태창을 맨 아래로 내리고 나머지는 위로 올림.
-    public IEnumerator ReloadState(int enemyNum, int goal)
+    // 행동력을 사용한 적의 상태창을 맨 아래로 내리고 나머지는 위로 올림. (몇번째 적인지, 얼마로 바꿀건지, 몇번째 이동 실행인지)
+    public IEnumerator ReloadState(int enemyNum, int goal, int count)
     {
         enemyStates[enemyNum].DOAnchorPosX(enemyStates[enemyNum].anchoredPosition.x + 400, uiMoveTime);
         //CanvasGroup cg;
         //cg = enemyStates[enemyNum]
         yield return new WaitForSeconds(uiMoveTime);
-        yield return StartCoroutine(SwapStatesAnim(enemyNum));
+        yield return StartCoroutine(SwapStatesAnim(enemyNum, false));
         enemyStates[enemyNum].GetChild(1).GetComponent<Text>().text = "행동력 : " + 0 + " / " + GameManager.enemyObjects[enemyNum].GetComponent<Enemy>().moveCtrl[0];
         enemyStates[enemyNum].DOAnchorPosX(enemyStates[enemyNum].anchoredPosition.x - 400, uiMoveTime);
         yield return new WaitForSeconds(uiMoveTime);
 
-        yield return StartCoroutine(CountMovectrlAnim(enemyNum, 0, goal));
+        if(count == GameManager.enemyObjects.Count - 1)
+            yield return StartCoroutine(CountMovectrlAnim(enemyNum, 0, goal, true));
+        else
+            yield return StartCoroutine(CountMovectrlAnim(enemyNum, 0, goal, false));
     }
 }
