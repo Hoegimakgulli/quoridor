@@ -4,21 +4,24 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public enum EPlayerControlStatus { None, Move, Build, Attack, Ability };
+    public EPlayerControlStatus playerControlStatus = EPlayerControlStatus.None;
+
     public static int Turn = 1; // 현재 턴
     public const float gridSize = 1.3f; // 그리드의 크기
 
     public Vector3 playerPosition = new Vector3(0, -4, 0); // 플레이어의 위치
-    public List<Vector3> enemyPositions = new List<Vector3>(); // 적들의 위치 정보 저장
+
+    public static List<Vector3> enemyPositions = new List<Vector3>();    // 모든 적들 위치 정보 저장
+    public static List<GameObject> enemyObjects = new List<GameObject>(); // 모든 적 기물 오브젝트 저장
 
     public int[,] mapGraph = new int[81, 81]; //DFS용 맵 그래프
 
     public int currentStage;
 
     GameObject player;
-    List<GameObject> enemy = new List<GameObject>();
 
     public GameObject playerPrefab;
-    public List<GameObject> enemyPrefabs;
 
     void Awake()
     {
@@ -46,18 +49,34 @@ public class GameManager : MonoBehaviour
         }
         // DebugMap();
         player = Instantiate(playerPrefab, playerPosition * gridSize, Quaternion.identity);
-        int enemyCost = currentStage + 2;
-        while(enemyCost != 0){
-            int randomNumber = Random.Range(0, enemyPrefabs.Count);
-            int cost = enemyPrefabs[randomNumber].GetComponent<Enemy>().cost;
-            if(enemyCost - cost >= 0){
-                Vector3 enemyPosition;
-                do
-                    {enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0);}
-                while(enemyPositions.Contains(enemyPosition) && enemyPositions.Count != 0);
-                enemyPositions.Add(enemyPosition);
-                enemy.Add(Instantiate(enemyPrefabs[randomNumber], gridSize * enemyPositions[enemyPositions.Count - 1], Quaternion.identity));
-                enemyCost -= cost;
+    }
+    public void Initialize()
+    {
+        enemyPositions.Clear();
+        enemyObjects.Clear();
+        playerPosition = new Vector3(0, -4, 0);
+        playerControlStatus = EPlayerControlStatus.None;
+        Turn = 1; // 턴 초기화
+        mapGraph = new int[81, 81];
+        for (int i = 0; i < mapGraph.GetLength(0); i++) // 맵 그래프 초기화
+        {
+            int row = i / 9;
+            int col = i % 9;
+            if (row > 0)
+            {
+                mapGraph[i, (row - 1) * 9 + col] = 1;
+            }
+            if (row < 8)
+            {
+                mapGraph[i, (row + 1) * 9 + col] = 1;
+            }
+            if (col > 0)
+            {
+                mapGraph[i, row * 9 + (col - 1)] = 1;
+            }
+            if (col < 8)
+            {
+                mapGraph[i, row * 9 + (col + 1)] = 1;
             }
         }
     }
@@ -73,7 +92,7 @@ public class GameManager : MonoBehaviour
     {
         bool[] visited = new bool[81];
         int playerGraphPosition = (int)((playerPosition.y + 4) * 9 + playerPosition.x + 4);
-        
+
         void DFS(int now)
         {
             visited[now] = true;
@@ -88,9 +107,10 @@ public class GameManager : MonoBehaviour
         }
         DFS(playerGraphPosition);
         // Debug.Log(visited[enemyGraphPosition]);
-        foreach(Vector3 enemyPosition in enemyPositions){
+        foreach (Vector3 enemyPosition in enemyPositions)
+        {
             int enemyGraphPosition = (int)((enemyPosition.y + 4) * 9 + enemyPosition.x + 4);
-            if(!visited[enemyGraphPosition]) return false;
+            if (!visited[enemyGraphPosition]) return false;
         }
         return true;
     }
