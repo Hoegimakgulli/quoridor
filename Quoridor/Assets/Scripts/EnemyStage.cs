@@ -50,6 +50,7 @@ public class EnemyStage : MonoBehaviour
         if (stageEnemySettig.ContainsKey(gameManager.currentStage))
         {
             totalEnemyCount = stageEnemySettig[gameManager.currentStage].TotalReturn();
+            //if (!EM.LoadEnemyData())
             StageEnemySpawn();
         }
         else
@@ -177,12 +178,16 @@ public class EnemyStage : MonoBehaviour
                 }
                 while (GameManager.enemyPositions.Contains(enemyPosition) && GameManager.enemyPositions.Count != 0); // 이미 소환된 적의 위치랑 안 겹칠때
                 GameManager.enemyPositions.Add(enemyPosition);
-                GameObject currentEnemyObj = Instantiate(currentValues[Random.Range(0, currentValues.Count)], GameManager.gridSize * GameManager.enemyPositions[GameManager.enemyPositions.Count - 1], Quaternion.identity);
+                int value = Random.Range(0, currentValues.Count);
+                GameObject currentEnemyObj = Instantiate(currentValues[value], GameManager.gridSize * GameManager.enemyPositions[GameManager.enemyPositions.Count - 1], Quaternion.identity);
                 GameManager.enemyObjects.Add(currentEnemyObj);
 
                 // 유닛 판넬안에 보드위에 있는 적들 데이터 정보를 넣는 부분
                 Enemy currentEnemey = currentEnemyObj.GetComponent<Enemy>();
                 currentEnemey.moveCtrl[1] = Random.Range(0, 3);
+                currentEnemey.type = value;
+                currentEnemey.index = count;
+
 
                 // 적 정보 UI 판넬에 표시하는 부분
                 //GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("EnemyStateContent").transform);

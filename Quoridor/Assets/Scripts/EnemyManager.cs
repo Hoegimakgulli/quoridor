@@ -1,8 +1,12 @@
-﻿using System.Collections;
+﻿using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.IO;
 
 [System.Serializable]
 public class Path
@@ -400,6 +404,60 @@ public class EnemyManager : MonoBehaviour
     {
         enemyTurnAnchor = true;
         GameManager.Turn++;
+        SaveEnemyData();
+    }
+    public void SaveEnemyData()
+    {
+        var json = new JObject();
+        var enemys = new JArray();
+        for (int i = 0; i < GameManager.enemyObjects.Count; i++)
+        {
+            var enemyData = new JObject();
+            Enemy enemy = GameManager.enemyObjects[i].GetComponent<Enemy>();
+            int hp = enemy.hp;
+            int type = enemy.type;
+            int moveCtrl1 = enemy.moveCtrl[1];
+            float x = GameManager.enemyPositions[i].x;
+            float y = GameManager.enemyPositions[i].y;
+
+            enemyData.Add("hp", hp);
+            enemyData.Add("type", type);
+            enemyData.Add("moveCtrl1", moveCtrl1);
+            enemyData.Add("x", x);
+            enemyData.Add("y", y);
+
+            enemys.Add(enemyData);
+        }
+        json.Add("enemys", enemys);
+        string result = json.ToString();
+        Debug.Log("SaveEnemyData: " + result);
+        File.WriteAllText(Application.persistentDataPath + "/data.json", result);
+    }
+    public bool LoadEnemyData()
+    {
+        if (!File.Exists(Application.persistentDataPath + "/data.json"))
+        {
+            Debug.Log("LoadEnemyData: false");
+            return false;
+        }
+        string data = File.ReadAllText(Application.persistentDataPath + "/data.json");
+
+        JObject json = JObject.Parse(data);
+        var enemys = json["enemys"];
+        foreach (JObject enemyData in enemys)
+        {
+            int hp = int.Parse(enemyData["hp"].ToString());
+            int type = int.Parse(enemyData["type"].ToString()); // EnemyStage.stageEnemySettig을 고려한 설계 필요
+            int moveCtrl1 = int.Parse(enemyData["moveCtrl1"].ToString());
+            float x = float.Parse(enemyData["x"].ToString());
+            float y = float.Parse(enemyData["y"].ToString());
+            Debug.Log($"hp: {hp}, type: {type}, mv1: {moveCtrl1}, x:{x}, y:{y}");
+
+
+        }
+
+        Debug.Log("LoadEnemyData: " + data);
+        return true;
     }
 
 
@@ -434,7 +492,7 @@ public class EnemyManager : MonoBehaviour
             uiManager.SortEnemyStates(); //행동력에 따라 적 상태창 순서 정렬
             yield return StartCoroutine(uiManager.CountMovectrlAnim(originSortingList[count], originMoveCtrl, currentEnemyState.moveCtrl[1], false)); //원래 행동력에서 바뀐 행동력까지 숫자가 바뀌는 애니메이션
             originMoveCtrl = currentEnemyState.moveCtrl[1]; //여기서부터 originMoveCtrl은 바뀐 후의 행동력
-            if(count == GameManager.enemyObjects.Count-1)
+            if (count == GameManager.enemyObjects.Count - 1)
             {
                 if (currentEnemyState.moveCtrl[0] > currentEnemyState.moveCtrl[1])
                 {

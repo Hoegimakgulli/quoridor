@@ -12,6 +12,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     //-------------- Enemy Values --------------//
     public int hp;                                    // 받아야하는 총 체력
     public int maxHp;
+    [HideInInspector] public int type;
+    public int index; // 리스트 인덱스
     public int[] moveCtrl = new int[3];               // 0 = 요구 행동력, 1 = 현재 채워져 있는 행동력, 2 = 랜덤 행동력 충전 최대치
     public Vector2Int[] moveablePoints;
     public Vector2Int[] attackablePoints;
@@ -81,14 +83,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
             if (count != 1)
             {
-                for (int posCount = 0; count < GameManager.enemyPositions.Count; count++)
-                {
-                    if (GameManager.enemyPositions[posCount] == transform.position)
-                    {
-                        GameManager.enemyPositions[posCount] = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
-                    }
-                }
                 transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+                GameManager.enemyPositions[index] = new Vector3(transform.position.x / GameManager.gridSize, transform.position.y / GameManager.gridSize, 0f);
             }
             state = EState.Attack;
             AttackPlayer();
@@ -118,19 +114,19 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     {
         int originHP = hp;
         hp -= playerAtk;
-        for(int i = 0; i < GameManager.enemyObjects.Count; i++)
+        for (int i = 0; i < GameManager.enemyObjects.Count; i++)
         {
             if (GameManager.enemyObjects[i] == gameObject)
             {
                 uiManager.StartCountEnemyHpAnim(i, originHP, hp);
             }
         }
-        if(hp <= 0)
+        if (hp <= 0)
         {
             DieEnemy();
         }
     }
-    
+
     public void DieEnemy()
     {
         foreach (GameObject child in GameManager.enemyObjects)
@@ -157,8 +153,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
             RaycastHit2D hitWall = Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, GameManager.gridSize * Math.Abs((playerPos - (Vector2)transform.position).magnitude), LayerMask.GetMask("Wall")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Wall").FirstOrDefault();
             RaycastHit2D hit = Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Player").FirstOrDefault(); ; // enemy 위치에서 player까지 ray쏘기
-            
-            if(!hitWall)
+
+            if (!hitWall)
             {
                 if (hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
                 {
