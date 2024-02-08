@@ -130,7 +130,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     //--------------- Die 시작 ---------------//
     // Attack 받았을 때 실행하는 함수
-    public void AttackedEnemy(int playerAtk)
+    public bool AttackedEnemy(int playerAtk)
     {
         int originHP = hp;
         hp -= playerAtk;
@@ -144,7 +144,9 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         if(hp <= 0)
         {
             DieEnemy();
+            return true;
         }
+        return false;
     }
     
     public void DieEnemy()
@@ -179,6 +181,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 if (hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
                 {
                     Debug.Log("Player Dead");
+                    
                     Destroy(hit.transform.gameObject);
                 }
             }
