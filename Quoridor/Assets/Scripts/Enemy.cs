@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using DG.Tweening;
 using System;
+using DG.Tweening.Core.Easing;
 
 public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 {
@@ -49,6 +50,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         }
     }
 
+    public GameManager gameManager;
+
     // A* 알고리즘
     public void GetShortRoad(List<Path> path)
     {
@@ -90,6 +93,19 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 }
                 transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
             }
+
+            gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+
+            if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
+            {
+                int currentShieldPos = (int)(fixPos.x + (fixPos.y * 9)); // mapgraph 형식으로 다듬기
+                if (currentShieldPos + 9 < 81) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
+                {
+                    gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 0; // 초기화 1
+                    gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 0; // 초기화 2
+                }
+            }
+
             state = EState.Attack;
             AttackPlayer();
         }

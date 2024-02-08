@@ -185,6 +185,17 @@ public class EnemyStage : MonoBehaviour
                     }
                 }
                 while (GameManager.enemyPositions.Contains(enemyPosition) && GameManager.enemyPositions.Count != 0); // 이미 소환된 적의 위치랑 안 겹칠때
+
+                if (tmpCurrentObj.name.Contains("EnemyShieldSoldier")) // 소환되는 오브젝트가 방패병일 경우 맵그래프 변경
+                {
+                    int currentShieldPos = (int)(enemyPosition.x + 4 + ((enemyPosition.y + 4) * 9)); // mapgraph 좌표로 변환
+                    if (currentShieldPos + 9 < 81) // 만약 쉴드가 보드만 외벽에 붙어있는지 확인 조건식에 부합하면 벽취급으로 변환
+                    {
+                        gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 0;
+                        gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 0;
+                    }
+                }
+
                 GameManager.enemyPositions.Add(enemyPosition);
                 GameObject currentEnemyObj = Instantiate(tmpCurrentObj, GameManager.gridSize * GameManager.enemyPositions[GameManager.enemyPositions.Count - 1], Quaternion.identity);
                 GameManager.enemyObjects.Add(currentEnemyObj);

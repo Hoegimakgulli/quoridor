@@ -402,13 +402,6 @@ public class EnemyManager : MonoBehaviour
         GameManager.Turn++;
     }
 
-
-
-
-
-
-
-
     //적 움직임 상태창 애니메이션에 맞춰 순차적으로 움직이도록 수정 (이규빈)
     IEnumerator MoveCtrlUpdateCoroutine()
     {
