@@ -117,10 +117,11 @@ public class EnemyManager : MonoBehaviour
         if (startObj.name.Contains("EnemyShieldSoldier")) // 만약 이동하는 객체가 방패병일 경우 벽처리로 해놨던 방패를 비활성화 후 이동 실시
         {
             int currentShieldPos = Mathf.FloorToInt(startObj.transform.position.x / GameManager.gridSize) + 4 + ((Mathf.FloorToInt(startObj.transform.position.y / GameManager.gridSize) + 4) * 9); // mapgraph 형식으로 다듬기
-            if(currentShieldPos + 9 < 81) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
+            if (currentShieldPos + 9 < 81 && startObj.GetComponent<Enemy>().ShieldTrue == true) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
             {
                 gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 1; // 초기화 1
                 gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
+                startObj.GetComponent<Enemy>().ShieldTrue = false;
             }
         }
 
