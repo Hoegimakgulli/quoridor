@@ -114,6 +114,16 @@ public class EnemyManager : MonoBehaviour
     // A* 알고리즘
     public void PathFinding(GameObject startObj, GameObject endObj)
     {
+        if (startObj.name.Contains("EnemyShieldSoldier")) // 만약 이동하는 객체가 방패병일 경우 벽처리로 해놨던 방패를 비활성화 후 이동 실시
+        {
+            int currentShieldPos = Mathf.FloorToInt(startObj.transform.position.x / GameManager.gridSize) + 4 + ((Mathf.FloorToInt(startObj.transform.position.y / GameManager.gridSize) + 4) * 9); // mapgraph 형식으로 다듬기
+            if(currentShieldPos + 9 < 81) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
+            {
+                gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 1; // 초기화 1
+                gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
+            }
+        }
+
         sizeX = topRight.x - bottomLeft.x + 1;
         sizeY = topRight.y - bottomLeft.y + 1;
         PathArray = new Path[sizeX, sizeY];
@@ -401,13 +411,6 @@ public class EnemyManager : MonoBehaviour
         enemyTurnAnchor = true;
         GameManager.Turn++;
     }
-
-
-
-
-
-
-
 
     //적 움직임 상태창 애니메이션에 맞춰 순차적으로 움직이도록 수정 (이규빈)
     IEnumerator MoveCtrlUpdateCoroutine()

@@ -136,6 +136,7 @@ public class EnemyStage : MonoBehaviour
 
     public GameObject enemyStatePrefab; // 적 기물 상태 판넬안에 들어가는 기본 빵틀 이라고 생각;
     private UiManager uiManager;
+
     public void StageEnemySpawn()
     {
         uiManager = GetComponent<UiManager>();
@@ -145,7 +146,7 @@ public class EnemyStage : MonoBehaviour
         SpawnList currentSpawn = stageEnemySettig[gameManager.currentStage];
         List<GameObject> currentValues;
 
-        for (int spawnCount = 0; spawnCount < currentSpawn.values.Length; spawnCount++)
+        for (int spawnCount = 0; spawnCount < currentSpawn.values.Length; spawnCount++) // 현재 어떤 등급의 적들이 소환되어야하는지 정하기
         {
             int enemyValue = spawnCount;
             switch (enemyValue)
@@ -171,13 +172,33 @@ public class EnemyStage : MonoBehaviour
             for (int count = 0; count < currentSpawn.values[spawnCount]; count++)
             {
                 Vector3 enemyPosition;
+                GameObject tmpCurrentObj = currentValues[Random.Range(0, currentValues.Count)]; // 랜덤으로 적 오브젝트 생성 현재 소환되야하는 기물 등급에 따라서 결정됨
                 do
                 {
-                    enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0);
+                    if (tmpCurrentObj.name.Contains("EnemyCavalry")) // 기마병 한정 소환 위치 조정
+                    {
+                        enemyPosition = new Vector3(Random.Range(-4, 5), 4, 0);
+                    }
+                    else
+                    {
+                        enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0);
+                    }
                 }
                 while (GameManager.enemyPositions.Contains(enemyPosition) && GameManager.enemyPositions.Count != 0); // 이미 소환된 적의 위치랑 안 겹칠때
+
+                if (tmpCurrentObj.name.Contains("EnemyShieldSoldier")) // 소환되는 오브젝트가 방패병일 경우 맵그래프 변경
+                {
+                    int currentShieldPos = (int)(enemyPosition.x + 4 + ((enemyPosition.y + 4) * 9)); // mapgraph 좌표로 변환
+                    if (currentShieldPos + 9 < 81) // 만약 쉴드가 보드만 외벽에 붙어있는지 확인 조건식에 부합하면 벽취급으로 변환
+                    {
+                        gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 0;
+                        gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 0;
+                    }
+                }
+
                 GameManager.enemyPositions.Add(enemyPosition);
-                GameObject currentEnemyObj = Instantiate(currentValues[Random.Range(0, currentValues.Count)], GameManager.gridSize * GameManager.enemyPositions[GameManager.enemyPositions.Count - 1], Quaternion.identity);
+
+                GameObject currentEnemyObj = Instantiate(tmpCurrentObj, GameManager.gridSize * GameManager.enemyPositions[GameManager.enemyPositions.Count - 1], Quaternion.identity);
                 GameManager.enemyObjects.Add(currentEnemyObj);
 
                 // 유닛 판넬안에 보드위에 있는 적들 데이터 정보를 넣는 부분
@@ -185,15 +206,7 @@ public class EnemyStage : MonoBehaviour
                 currentEnemey.moveCtrl[1] = Random.Range(0, 3);
 
                 // 적 정보 UI 판넬에 표시하는 부분
-                //GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("EnemyStateContent").transform);
                 GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("Canvas(Clone)").transform.GetChild(3).GetChild(1).GetChild(0));
-                /*
-                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = currentEnemyObj.GetComponent<SpriteRenderer>().sprite;
-                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().color = currentEnemyObj.GetComponent<SpriteRenderer>().color;
-                currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "행동력 " + currentEnemey.moveCtrl[1] + " / 10";
-                currentEnemey.maxHp = currentEnemey.hp;
-                currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "체력 " + currentEnemey.hp + " / " + currentEnemey.maxHp;
-                */
                 uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, currentEnemey); //적 각각의 상태창을 만들어내는 함수
             }
         }
