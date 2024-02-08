@@ -197,6 +197,7 @@ public class EnemyStage : MonoBehaviour
                 }
 
                 GameManager.enemyPositions.Add(enemyPosition);
+
                 GameObject currentEnemyObj = Instantiate(tmpCurrentObj, GameManager.gridSize * GameManager.enemyPositions[GameManager.enemyPositions.Count - 1], Quaternion.identity);
                 GameManager.enemyObjects.Add(currentEnemyObj);
 

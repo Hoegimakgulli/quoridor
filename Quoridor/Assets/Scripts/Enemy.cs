@@ -9,7 +9,7 @@ using DG.Tweening.Core.Easing;
 public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 {
     public UiManager uiManager;
-
+    // enemyValues
     //-------------- Enemy Values --------------//
     public int hp;                                    // 받아야하는 총 체력
     public int maxHp;

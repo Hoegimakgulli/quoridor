@@ -1,6 +1,15 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+public struct enemyValues
+{
+    int hp;
+    int moveCtrl;
+    int uniqueNum;
+    int spawnNum;
+    Vector3 position;
+}
 
 public class GameManager : MonoBehaviour
 {
@@ -12,8 +21,9 @@ public class GameManager : MonoBehaviour
 
     public Vector3 playerPosition = new Vector3(0, -4, 0); // 플레이어의 위치
 
-    public static List<Vector3> enemyPositions = new List<Vector3>();    // 모든 적들 위치 정보 저장
-    public static List<GameObject> enemyObjects = new List<GameObject>(); // 모든 적 기물 오브젝트 저장
+    public static List<Vector3> enemyPositions = new List<Vector3>();    // 모든 적들 위치 정보 저장      폐기처분 예정
+    public static List<GameObject> enemyObjects = new List<GameObject>(); // 모든 적 기물 오브젝트 저장   폐기처분 예정
+    public static List<enemyValues> enemyValueList = new List<enemyValues>();
 
     public int[,] mapGraph = new int[81, 81]; //DFS용 맵 그래프
 
