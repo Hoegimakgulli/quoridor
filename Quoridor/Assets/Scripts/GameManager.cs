@@ -2,13 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct enemyValues
+public class enemyValues
 {
-    int hp;
-    int moveCtrl;
-    int uniqueNum;
-    int spawnNum;
-    Vector3 position;
+    public int hp;
+    public int moveCtrl;
+    public int uniqueNum;
+    public int spawnNum;
+    public Vector3 position;
+
+    public enemyValues(int hp, int moveCtrl, int uniqueNum, int spawnNum, Vector3 position)
+    {
+        this.hp = hp;
+        this.moveCtrl = moveCtrl;
+        this.uniqueNum = uniqueNum;
+        this.spawnNum = spawnNum;
+        this.position = position;
+    }
 }
 
 public class GameManager : MonoBehaviour
@@ -96,6 +105,10 @@ public class GameManager : MonoBehaviour
         {
             Turn++;
         }
+
+        if (Input.GetKeyDown(KeyCode.I)){
+            DebugMap();
+        }
     }
     //DFS 알고리즘을 이용한 벽에 갇혀있는지 체크
     public bool CheckStuck()
@@ -136,6 +149,14 @@ public class GameManager : MonoBehaviour
                 for (int col = 0; col < 9; col++)
                 {
                     rowInfo = rowInfo + " " + mapGraph[i, row * 9 + col].ToString();
+                    if (mapGraph[i, row * 9 + col] == 1)
+                    {
+                        Vector3 start = new Vector3((i % 9) - 4, (i / 9) - 4, 0) * gridSize;
+                        Vector3 end = new Vector3(col - 4, row - 4, 0) * gridSize;
+                        Vector3 dir = end - start;
+                        Vector3 interval = (i % 2 == 0) ? Vector3.zero : new Vector3(0.1f, 0.1f, 0);
+                        Debug.DrawRay(start + interval, dir.normalized, Color.green, 1f);
+                    }
                 }
                 log += rowInfo + '\n';
             }
