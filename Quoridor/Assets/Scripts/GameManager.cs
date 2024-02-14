@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class enemyValues
@@ -106,9 +107,7 @@ public class GameManager : MonoBehaviour
             Turn++;
         }
 
-        if (Input.GetKeyDown(KeyCode.I)){
-            DebugMap();
-        }
+        if (Input.GetKeyDown(KeyCode.D)) DebugMap();
     }
     //DFS 알고리즘을 이용한 벽에 갇혀있는지 체크
     public bool CheckStuck()
