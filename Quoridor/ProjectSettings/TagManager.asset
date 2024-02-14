@@ -9,8 +9,8 @@ TagManager:
   - CantBuild
   - Enemy
   - PlayerAttackPreview
-  - WarningBox
   - WallStorage
+  - EnemyBox
   layers:
   - Default
   - TransparentFX

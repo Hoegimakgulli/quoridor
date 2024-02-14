@@ -85,11 +85,11 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
             if (count != 1)
             {
-                for (int posCount = 0; count < GameManager.enemyPositions.Count; count++)
+                for (int posCount = 0; count < GameManager.enemyValueList.Count; count++)
                 {
-                    if (GameManager.enemyPositions[posCount] == transform.position)
+                    if (GameManager.enemyValueList[posCount].position == transform.position)
                     {
-                        GameManager.enemyPositions[posCount] = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+                        GameManager.enemyValueList[posCount].position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
                     }
                 }
                 transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
@@ -136,6 +136,15 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     {
         int originHP = hp;
         hp -= playerAtk;
+
+        foreach(enemyValues child in GameManager.enemyValueList)
+        {
+            if(child.position == gameObject.transform.position)
+            {
+                child.hp = hp;
+            }
+        }
+
         for(int i = 0; i < GameManager.enemyObjects.Count; i++)
         {
             if (GameManager.enemyObjects[i] == gameObject)
@@ -162,12 +171,11 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
             }
         }
-        foreach (GameObject child in GameManager.enemyObjects)
+        foreach (enemyValues child in GameManager.enemyValueList)
         {
-            if (child == gameObject)
+            if (child.position == gameObject.transform.position)
             {
-                GameManager.enemyPositions.Remove(child.transform.position);
-                GameManager.enemyObjects.Remove(child);
+                GameManager.enemyValueList.Remove(child);
                 break;
             }
         }

@@ -2,13 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct enemyValues
+public class enemyValues
 {
-    int hp;
-    int moveCtrl;
-    int uniqueNum;
-    int spawnNum;
-    Vector3 position;
+    public int hp;
+    public int moveCtrl;
+    public int uniqueNum;
+    public int spawnNum;
+    public Vector3 position;
+
+    public enemyValues(int hp, int moveCtrl, int uniqueNum, int spawnNum, Vector3 position)
+    {
+        this.hp = hp;
+        this.moveCtrl = moveCtrl;
+        this.uniqueNum = uniqueNum;
+        this.spawnNum = spawnNum;
+        this.position = position;
+    }
 }
 
 public class GameManager : MonoBehaviour

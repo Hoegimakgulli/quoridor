@@ -31,11 +31,10 @@ public class Path
 
 public class EnemyManager : MonoBehaviour
 {
-    public List<GameObject> enemyPrefabs; // 기본 유닛 오브젝트들 리스트 넣어두기
-    public List<GameObject> loyalEnemyPrefabs; // 상위 고급 유닛 오브젝트들 리스트 넣어두기
+    public List<GameObject> enemyPrefabs; // 모든 유닛들 통합으로 관리
 
     // public static int gameManager.currentStage = 0;
-    public GameObject warningSignBox; // 경고 표기 담아두는 박스
+    public GameObject enemyBox; // 경고 표기 담아두는 박스
     public GameObject enemyUiCanvas;
     public const float gridSize = 1.3f; // 그리드의 크기
 
@@ -46,17 +45,18 @@ public class EnemyManager : MonoBehaviour
 
     private void Awake()
     {
+        Instantiate(enemyBox);
         GameObject enemyUi = Instantiate(enemyUiCanvas);
         Instantiate(EnemyStatePanel, enemyUi.transform);
         Debug.Log("ui Spawned");
         gameManager = transform.gameObject.GetComponent<GameManager>();
+        GameManager.enemyValueList.Clear();
         GameManager.enemyObjects.Clear(); // 적 위치 및 객체 정보 초기화
         GameManager.enemyPositions.Clear();
     }
 
     private void Start()
     {
-        Instantiate(warningSignBox);
     }
 
     void Update()
@@ -76,11 +76,6 @@ public class EnemyManager : MonoBehaviour
         {
             //enemyWarningSignAnchor = true;
             enemyTurnAnchor = false;
-            // 경고sign 초기화
-            foreach (Transform child in GameObject.FindWithTag("WarningBox").transform)
-            {
-                Destroy(child.gameObject);
-            }
             // 오브젝트 카운트 초기화
             /*
             for (int count = 0; count < GameManager.enemyObjects.Count; count++)
@@ -256,12 +251,13 @@ public class EnemyManager : MonoBehaviour
     private GameObject blockEmemyObj;
     private bool CheckEnemyPos(Vector2 currentPos)
     {
-        foreach (GameObject enemy in GameManager.enemyObjects)
+        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
+        foreach (Transform enemy in enemyBox.transform)
         {
-            Vector2 enemyPos = enemy.transform.position;
+            Vector2 enemyPos = enemy.position;
             if (currentPos == enemyPos && currentPos != new Vector2((TargetNode.x - 4) * GameManager.gridSize, (TargetNode.y - 4) * GameManager.gridSize))
             {
-                blockEmemyObj = enemy;
+                blockEmemyObj = enemy.gameObject;
                 return true;
             }
         }
@@ -426,36 +422,36 @@ public class EnemyManager : MonoBehaviour
         Enemy currentEnemyState;
         int count;
         int originMoveCtrl;  //원래 행동력.
-        for (count = 0; count < GameManager.enemyObjects.Count; count++)
+        for (count = 0; count < GameManager.enemyValueList.Count; count++)
         {
-            currentEnemyState = GameManager.enemyObjects[originSortingList[count]].GetComponent<Enemy>();
-            originMoveCtrl = currentEnemyState.moveCtrl[1];
+            currentEnemyState = FindValuesObj(GameManager.enemyValueList[count].position).GetComponent<Enemy>();
+            originMoveCtrl = GameManager.enemyValueList[count].moveCtrl;
 
             //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
-            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
+            GameManager.enemyValueList[count].moveCtrl += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
             //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
 
             uiManager.SortEnemyStates(); //행동력에 따라 적 상태창 순서 정렬
-            yield return StartCoroutine(uiManager.CountMovectrlAnim(originSortingList[count], originMoveCtrl, currentEnemyState.moveCtrl[1], false)); //원래 행동력에서 바뀐 행동력까지 숫자가 바뀌는 애니메이션
-            originMoveCtrl = currentEnemyState.moveCtrl[1]; //여기서부터 originMoveCtrl은 바뀐 후의 행동력
-            if(count == GameManager.enemyObjects.Count-1)
+            yield return StartCoroutine(uiManager.CountMovectrlAnim(originSortingList[count], originMoveCtrl, GameManager.enemyValueList[count].moveCtrl, false)); //원래 행동력에서 바뀐 행동력까지 숫자가 바뀌는 애니메이션
+            originMoveCtrl = GameManager.enemyValueList[count].moveCtrl; //여기서부터 originMoveCtrl은 바뀐 후의 행동력
+            if(count == GameManager.enemyValueList.Count-1)
             {
-                if (currentEnemyState.moveCtrl[0] > currentEnemyState.moveCtrl[1])
+                if (currentEnemyState.moveCtrl[0] > GameManager.enemyValueList[count].moveCtrl)
                 {
                     EnemyTurnAnchorTrue();
                 }
             }
-            if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
+            if (currentEnemyState.moveCtrl[0] <= GameManager.enemyValueList[count].moveCtrl)
             {
-                GameObject currenEnemy = GameManager.enemyObjects[originSortingList[count]];
+                GameObject currenEnemy = FindValuesObj(GameManager.enemyValueList[originSortingList[count]].position);
                 GameObject player = GameObject.FindWithTag("Player");
                 currentEnemyState.state = Enemy.EState.Move;
                 PathFinding(currenEnemy, player);
                 currentEnemyState.EnemyMove(FinalPathList);
-                currentEnemyState.moveCtrl[1] = -1; //상태창 순서를 행동력 순으로 정렬했을 때, 방금 이동한 적의 순서가 가장 아래로 내려오도록 행동력을 마이너스로 수정.
+                GameManager.enemyValueList[count].moveCtrl = -1; //상태창 순서를 행동력 순으로 정렬했을 때, 방금 이동한 적의 순서가 가장 아래로 내려오도록 행동력을 마이너스로 수정.
                 uiManager.SortEnemyStates(); //방금 이동한 적의 상태창이 아래로 내려오도록 리스트를 재정렬
-                currentEnemyState.moveCtrl[1] = originMoveCtrl - currentEnemyState.moveCtrl[0]; //적의 행동력 감소
-                yield return StartCoroutine(uiManager.ReloadState(originSortingList[count], currentEnemyState.moveCtrl[1], count));
+                GameManager.enemyValueList[count].moveCtrl = originMoveCtrl - currentEnemyState.moveCtrl[0]; //적의 행동력 감소
+                yield return StartCoroutine(uiManager.ReloadState(originSortingList[count], GameManager.enemyValueList[count].moveCtrl, count));
 
                 /*if (!turnCheck)
                 {
@@ -474,5 +470,19 @@ public class EnemyManager : MonoBehaviour
                 }
             }*/
         }
+    }
+
+    public GameObject FindValuesObj(Vector3 position)
+    {
+        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
+        foreach(Transform child in enemyBox.transform)
+        {
+            if(child.position == position)
+            {
+                return child.gameObject;
+            }
+        }
+        Debug.LogError("enemyManager error : 어떤 Enemy 스크립트를 찾지 못했습니다.");
+        return null;
     }
 }

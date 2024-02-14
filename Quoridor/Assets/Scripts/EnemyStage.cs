@@ -50,7 +50,7 @@ public class EnemyStage : MonoBehaviour
         if (stageEnemySettig.ContainsKey(gameManager.currentStage))
         {
             totalEnemyCount = stageEnemySettig[gameManager.currentStage].TotalReturn();
-            StageEnemySpawn();
+            StageEnemySelect();
         }
         else
         {
@@ -72,7 +72,7 @@ public class EnemyStage : MonoBehaviour
     public void EnemyInitialied()
     {
         totalEnemyCount = stageEnemySettig[gameManager.currentStage].TotalReturn();
-        StageEnemySpawn();
+        StageEnemySelect();
     }
 
     // 스테이지에 소환되는 유닛이 변경될때 건드리면 되는 함수
@@ -112,32 +112,12 @@ public class EnemyStage : MonoBehaviour
                     break;
             }
         }
-
-        foreach (GameObject child in EM.loyalEnemyPrefabs)
-        {
-            int enemyValue = (int)child.GetComponent<Enemy>().value;
-            switch (enemyValue)
-            {
-                case 0:
-                    normalEnemys.Add(child);
-                    break;
-                case 1:
-                    championEnemys.Add(child);
-                    break;
-                case 2:
-                    namedEnemys.Add(child);
-                    break;
-                case 3:
-                    bossEnemys.Add(child);
-                    break;
-            }
-        }
     }
 
     public GameObject enemyStatePrefab; // 적 기물 상태 판넬안에 들어가는 기본 빵틀 이라고 생각;
     private UiManager uiManager;
 
-    public void StageEnemySpawn()
+    public void StageEnemySelect()
     {
         uiManager = GetComponent<UiManager>();
         //적 상태창 리셋
@@ -186,9 +166,17 @@ public class EnemyStage : MonoBehaviour
                 }
                 while (GameManager.enemyPositions.Contains(enemyPosition) && GameManager.enemyPositions.Count != 0); // 이미 소환된 적의 위치랑 안 겹칠때
 
+                // enemyValues 클래스에 값 넣어주기
+                Enemy tmpCurrentObjEnemy = tmpCurrentObj.GetComponent<Enemy>();
+                tmpCurrentObjEnemy.moveCtrl[1] = Random.Range(0, tmpCurrentObjEnemy.moveCtrl[2] + 1);
+                enemyValues enemyItem = new enemyValues(tmpCurrentObjEnemy.maxHp, tmpCurrentObjEnemy.moveCtrl[1], StageEnemySelectNum(tmpCurrentObj.name), spawnCount, enemyPosition * GameManager.gridSize); // 기본 적 구조체 생성
+                GameManager.enemyValueList.Add(enemyItem); // 구조체 리스트에 넣어주기
+
                 GameManager.enemyPositions.Add(enemyPosition);
 
-                GameObject currentEnemyObj = Instantiate(tmpCurrentObj, GameManager.gridSize * GameManager.enemyPositions[GameManager.enemyPositions.Count - 1], Quaternion.identity);
+                // 적들 소환하는 부분 수정 예정
+                Debug.Log(GameObject.FindWithTag("EnemyBox"));
+                GameObject currentEnemyObj = Instantiate(tmpCurrentObj, GameManager.gridSize * GameManager.enemyPositions[GameManager.enemyPositions.Count - 1], Quaternion.identity, GameObject.FindWithTag("EnemyBox").transform);
                 GameManager.enemyObjects.Add(currentEnemyObj);
 
                 if (tmpCurrentObj.name.Contains("EnemyShieldSoldier")) // 소환되는 오브젝트가 방패병일 경우 맵그래프 변경
@@ -202,17 +190,34 @@ public class EnemyStage : MonoBehaviour
                     }
                 }
 
-                // 유닛 판넬안에 보드위에 있는 적들 데이터 정보를 넣는 부분
-                Enemy currentEnemey = currentEnemyObj.GetComponent<Enemy>();
-                currentEnemey.moveCtrl[1] = Random.Range(0, 3);
-
                 // 적 정보 UI 판넬에 표시하는 부분
                 GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("Canvas(Clone)").transform.GetChild(3).GetChild(1).GetChild(0));
-                uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, currentEnemey); //적 각각의 상태창을 만들어내는 함수
+                uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, tmpCurrentObjEnemy); //적 각각의 상태창을 만들어내는 함수
+
+                //--------------------------------------------------
             }
         }
         uiManager.CreateSortingList(GameManager.enemyObjects.Count);
         uiManager.SortEnemyStates(); //상태창 순서 정렬 (행동력 기준으로)
         uiManager.DeploymentEnemyStates(); //상태창 각각 배치
+    }
+
+    public int StageEnemySelectNum(string name)
+    {
+        int selectNum = 0;
+        foreach(GameObject child in EM.enemyPrefabs)
+        {
+            if (child.name.Contains(name))
+            {
+                break;
+            }
+            selectNum++;
+        }
+        return selectNum;
+    }
+
+    public void StageEnemySpawn()
+    {
+
     }
 }
