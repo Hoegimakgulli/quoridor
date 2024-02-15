@@ -53,13 +53,31 @@ public class PlayerAbility : MonoBehaviour
     public List<IAbility> abilities = new List<IAbility>() { };
 
     public List<int> startAbilities = new List<int>();
-
+#if UNITY_EDITOR
+    public List<int> debugAbility = new List<int>() { 0, 0 };
+#endif
     private void Start()
     {
         player = GetComponent<Player>();
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
 
         foreach (var startAbility in startAbilities) AddAbility(startAbility);
+    }
+    private void Update()
+    {
+#if UNITY_EDITOR
+        if (debugAbility.Count == 2) debugAbility[1] = debugAbility[0];
+        else if (debugAbility.Count > 2)
+        {
+            AddAbility(debugAbility[0]);
+            debugAbility.RemoveAt(0);
+        }
+        else if (debugAbility.Count < 2)
+        {
+            RemoveAbility(debugAbility[0]);
+            debugAbility.Add(0);
+        }
+#endif
     }
     public void Reset()
     {
