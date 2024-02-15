@@ -141,29 +141,29 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         int originHP = hp;
         hp -= playerAtk;
 
-        foreach(enemyValues child in GameManager.enemyValueList)
+        foreach (enemyValues child in GameManager.enemyValueList)
         {
-            if(child.position == gameObject.transform.position)
+            if (child.position == gameObject.transform.position)
             {
                 child.hp = hp;
             }
         }
 
-        for(int i = 0; i < GameManager.enemyObjects.Count; i++)
+        for (int i = 0; i < GameManager.enemyObjects.Count; i++)
         {
             if (GameManager.enemyObjects[i] == gameObject)
             {
                 uiManager.StartCountEnemyHpAnim(i, originHP, hp);
             }
         }
-        if(hp <= 0)
+        if (hp <= 0)
         {
             DieEnemy();
             return true;
         }
         return false;
     }
-    
+
     public void DieEnemy()
     {
         if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
@@ -198,14 +198,12 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
             RaycastHit2D hitWall = Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, GameManager.gridSize * Math.Abs((playerPos - (Vector2)transform.position).magnitude), LayerMask.GetMask("Wall")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Wall").FirstOrDefault();
             RaycastHit2D hit = Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Player").FirstOrDefault(); ; // enemy 위치에서 player까지 ray쏘기
-            
-            if(!hitWall)
+
+            if (!hitWall)
             {
                 if (hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
                 {
-                    Debug.Log("Player Dead");
-                    
-                    Destroy(hit.transform.gameObject);
+                    hit.transform.GetComponent<Player>().Die();
                 }
             }
         }
