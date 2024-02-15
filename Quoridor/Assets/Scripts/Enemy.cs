@@ -204,12 +204,16 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     Sequence shakeSequence;
     public GameObject fadeObj;
+    public GameObject highlightObj; //이규빈 작성함. 적 기물 하이라이트를 위한 오브젝트
+    private SpriteRenderer highlightSPR;
     public bool useShake = true;
 
     public void Start()
     {
         uiManager = GameObject.Find("GameManager").GetComponent<UiManager>();
         Material tmpObj = Instantiate(fadeObj, transform.position, Quaternion.identity, transform).GetComponent<SpriteRenderer>().material;
+        highlightSPR = Instantiate(highlightObj, transform.position + new Vector3(0,0,0.1f), Quaternion.identity, transform).GetComponent<SpriteRenderer>(); //이규빈 작성
+        highlightSPR.DOFade(0, 0);
         shakeSequence = DOTween.Sequence()
             .SetAutoKill(false)
             .OnStart(() =>
@@ -236,5 +240,17 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         shakeSequence.Restart();
         yield return new WaitForSeconds(shakeSequence.Duration());
         useShake = true;
+    }
+
+    // 이규빈 작성 함수
+    public IEnumerator FadeInOutLoop(float fadeTime)
+    {
+        //for (int i = 0; i < 3; i++)
+        {
+            highlightSPR.DOFade(1, fadeTime);
+            yield return new WaitForSeconds(fadeTime);
+            highlightSPR.DOFade(0, fadeTime);
+            yield return new WaitForSeconds(fadeTime);
+        }
     }
 }

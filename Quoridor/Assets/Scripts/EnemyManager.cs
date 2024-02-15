@@ -36,18 +36,19 @@ public class EnemyManager : MonoBehaviour
 
     // public static int gameManager.currentStage = 0;
     public GameObject warningSignBox; // 경고 표기 담아두는 박스
-    public GameObject enemyUiCanvas;
+    //public GameObject enemyUiCanvas;
     public const float gridSize = 1.3f; // 그리드의 크기
 
     private bool enemyTurnAnchor = true;
     //private bool enemyWarningSignAnchor = true;
 
-    public GameObject EnemyStatePanel;
+    //public GameObject EnemyStatePanel;
 
     private void Awake()
     {
-        GameObject enemyUi = Instantiate(enemyUiCanvas);
-        Instantiate(EnemyStatePanel, enemyUi.transform);
+        //GameObject enemyUi = Instantiate(enemyUiCanvas);
+        //RectTransform enemyStatePanelRT = Instantiate(EnemyStatePanel, enemyUi.transform).GetComponent<RectTransform>();
+        //enemyStatePanelRT.anchoredPosition = new Vector3();
         Debug.Log("ui Spawned");
         gameManager = transform.gameObject.GetComponent<GameManager>();
         GameManager.enemyObjects.Clear(); // 적 위치 및 객체 정보 초기화
@@ -396,10 +397,12 @@ public class EnemyManager : MonoBehaviour
         //enemyTurnAnchor = true;
     }
 
+    //적 턴이 전부 끝났을 때 호출됨.
     public void EnemyTurnAnchorTrue()
     {
         enemyTurnAnchor = true;
         GameManager.Turn++;
+        gameManager.PlayerTurnSet(); //플레이어 턴이 시작됨을 알림
     }
 
 

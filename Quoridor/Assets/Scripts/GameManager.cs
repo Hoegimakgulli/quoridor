@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,7 +19,9 @@ public class GameManager : MonoBehaviour
 
     public int currentStage;
 
-    GameObject player;
+    public GameObject player;
+    public PlayerActionUI playerActionUI;
+    public UiManager uiManager;
 
     public GameObject playerPrefab;
 
@@ -49,6 +51,12 @@ public class GameManager : MonoBehaviour
         }
         // DebugMap();
         player = Instantiate(playerPrefab, playerPosition * gridSize, Quaternion.identity);
+        playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
+        uiManager = GetComponent<UiManager>();
+    }
+    private void Start()
+    {
+        //playerActionUI.ActiveUI(); //플레이어 행동 UI 등장 애니메이션 실행
     }
     public void Initialize()
     {
@@ -132,5 +140,12 @@ public class GameManager : MonoBehaviour
             log += '\n';
         }
         Debug.Log(log);
+    }
+
+    //적턴이 끝나고 플레이어 턴이 시작될 때 실행될 것들
+    public void PlayerTurnSet()
+    {
+        playerActionUI.ActiveUI();
+        uiManager.turnEndButton.SetActive(true);
     }
 }

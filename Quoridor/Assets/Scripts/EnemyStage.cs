@@ -194,11 +194,13 @@ public class EnemyStage : MonoBehaviour
                 currentEnemey.maxHp = currentEnemey.hp;
                 currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "체력 " + currentEnemey.hp + " / " + currentEnemey.maxHp;
                 */
-                uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, currentEnemey); //적 각각의 상태창을 만들어내는 함수
+                uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, currentEnemey, count); //적 각각의 상태창을 만들어내는 함수
             }
         }
+
         uiManager.CreateSortingList(GameManager.enemyObjects.Count);
         uiManager.SortEnemyStates(); //상태창 순서 정렬 (행동력 기준으로)
         uiManager.DeploymentEnemyStates(); //상태창 각각 배치
+        gameManager.PlayerTurnSet(); //플레이어 턴 시작 시 실행되어야 할것잉 모여있는 함수 (규빈 작성)
     }
 }

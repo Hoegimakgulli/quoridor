@@ -182,6 +182,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6551029922462568091, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
+      propertyPath: playerUI
+      value: 
+      objectReference: {fileID: 9184223724802934377, guid: 3bd7a89b7a7cfbd48b3e099fdab42f23, type: 3}
+    - target: {fileID: 6551029922462568091, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
+      propertyPath: uiCanvas
+      value: 
+      objectReference: {fileID: 7471301692746399857, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
+    - target: {fileID: 6551029922462568091, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
+      propertyPath: enemyUiCanvas
+      value: 
+      objectReference: {fileID: 7471301692746399857, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
 --- !u!1 &143488365
