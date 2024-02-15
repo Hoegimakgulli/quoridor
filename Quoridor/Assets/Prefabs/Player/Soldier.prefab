@@ -73,8 +73,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -2038800333
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 0.037156474, g: 0.3962264, b: 0, a: 1}
@@ -100,31 +100,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   touchState: 0
-  playerMovablePositions:
-  - {x: 1, y: 0}
-  - {x: -1, y: 0}
-  - {x: 0, y: 1}
-  - {x: 0, y: -1}
-  playerAttackablePositions:
+  movablePositions:
   - {x: 0, y: 1}
   - {x: 0, y: -1}
   - {x: 1, y: 0}
   - {x: -1, y: 0}
+  attackablePositions:
+  - {x: 0, y: 1}
+  - {x: 0, y: -1}
+  - {x: -1, y: 0}
+  - {x: 1, y: 0}
   - {x: -1, y: 1}
   - {x: 1, y: 1}
   - {x: -1, y: 2}
   - {x: 0, y: 2}
   - {x: 1, y: 2}
-  playerPreviewPrefab: {fileID: 5098181600813880054, guid: d10e7e6af139c7c4a9d057daf35bfa49, type: 3}
-  playerAttackPreviewPrefab: {fileID: 5098181600813880054, guid: 91c6004da0f97ca4082a1dbab2d1ef93, type: 3}
-  playerWallPreviewPrefab: {fileID: 5879755730228247319, guid: e8844f7765fdfff49b11ca83176f8965, type: 3}
-  playerWallPrefab: {fileID: 5879755730228247319, guid: ee6cd5c0aa2e1f548a932bc64466f071, type: 3}
+  attackPositions:
+  - {x: 0, y: 0}
+  playerPrefabs: {fileID: -4575386158165884492, guid: c326a163d107be846ae5e25375241a98, type: 3}
   historyIndexPrefab: {fileID: 5329310402557728128, guid: 11bdaa3a34949a145a0831452b4935ce, type: 3}
   playerOrder: 1
   atk: 1
   wallCount: 0
   maxWallCount: 10
   canAction: 1
+  shouldMove: 0
+  canAttack: 1
   playerUI: {fileID: 9073970126025145945, guid: 19eaef6fa2704a74fa9a65f72b4eb639, type: 3}
 --- !u!114 &6981726980268562845
 MonoBehaviour:
@@ -138,6 +139,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8056a45962f05a345869613922d10029, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  targetEnemy: {fileID: 0}
+  abilitiesID: 
+  startAbilities: 06000000
 --- !u!58 &-7823754267734906027
 CircleCollider2D:
   m_ObjectHideFlags: 0

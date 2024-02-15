@@ -5,7 +5,6 @@ using UnityEngine;
 public interface IAbility
 {
     PlayerAbility.EAbilityType abilityType { get; }
-    bool isEnable { get; set; }
     bool canEvent { get; set; }
     bool Event();
     void Reset();
