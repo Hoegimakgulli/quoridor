@@ -4,11 +4,12 @@ using System.Linq;
 using UnityEngine;
 using DG.Tweening;
 using System;
+using DG.Tweening.Core.Easing;
 
 public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 {
     public UiManager uiManager;
-
+    // enemyValues
     //-------------- Enemy Values --------------//
     public int hp;                                    // 받아야하는 총 체력
     public int maxHp;
@@ -25,6 +26,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public EState state = EState.Idle;
     public ECharacteristic characteristic = ECharacteristic.Forward;
     public EValue value = EValue.Normal;
+    public bool ShieldTrue = false; // 방패병 한정 변수
 
 
     //--------------- Move 시작 ---------------//
@@ -48,6 +50,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             }
         }
     }
+
+    public GameManager gameManager;
 
     // A* 알고리즘
     public void GetShortRoad(List<Path> path)
@@ -81,15 +85,33 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
             if (count != 1)
             {
-                for (int posCount = 0; count < GameManager.enemyPositions.Count; count++)
+                Debug.Log("Enemy Values Count : " + GameManager.enemyValueList.Count);
+                for (int posCount = 0; posCount < GameManager.enemyValueList.Count; posCount++)
                 {
-                    if (GameManager.enemyPositions[posCount] == transform.position)
+                    Debug.Log("Enemy Move Start");
+                    if (GameManager.enemyValueList[posCount].position == transform.position)
                     {
-                        GameManager.enemyPositions[posCount] = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+                        Debug.Log("Enemy Move Check");
+                        transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+                        GameManager.enemyValueList[posCount].position = transform.position;
+                        break;
                     }
                 }
-                transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
             }
+
+            gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+
+            if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
+            {
+                int currentShieldPos = (int)(fixPos.x + (fixPos.y * 9)); // mapgraph 형식으로 다듬기
+                if (currentShieldPos + 9 < 81 && gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] == 1) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
+                {
+                    gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 0; // 초기화 1
+                    gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 0; // 초기화 2
+                    ShieldTrue = true;
+                }
+            }
+
             state = EState.Attack;
             AttackPlayer();
         }
@@ -114,10 +136,19 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     //--------------- Die 시작 ---------------//
     // Attack 받았을 때 실행하는 함수
-    public void AttackedEnemy(int playerAtk)
+    public bool AttackedEnemy(int playerAtk)
     {
         int originHP = hp;
         hp -= playerAtk;
+
+        foreach(enemyValues child in GameManager.enemyValueList)
+        {
+            if(child.position == gameObject.transform.position)
+            {
+                child.hp = hp;
+            }
+        }
+
         for(int i = 0; i < GameManager.enemyObjects.Count; i++)
         {
             if (GameManager.enemyObjects[i] == gameObject)
@@ -128,17 +159,27 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         if(hp <= 0)
         {
             DieEnemy();
+            return true;
         }
+        return false;
     }
     
     public void DieEnemy()
     {
-        foreach (GameObject child in GameManager.enemyObjects)
+        if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
         {
-            if (child == gameObject)
+            int currentShieldPos = (int)((transform.position.x / GameManager.gridSize + 4) + ((transform.position.y / GameManager.gridSize) * 9)); // mapgraph 형식으로 다듬기
+            if (currentShieldPos + 9 < 81) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
             {
-                GameManager.enemyPositions.Remove(child.transform.position);
-                GameManager.enemyObjects.Remove(child);
+                gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 1; // 초기화 1
+                gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
+            }
+        }
+        foreach (enemyValues child in GameManager.enemyValueList)
+        {
+            if (child.position == gameObject.transform.position)
+            {
+                GameManager.enemyValueList.Remove(child);
                 break;
             }
         }
@@ -163,6 +204,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 if (hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
                 {
                     Debug.Log("Player Dead");
+                    
                     Destroy(hit.transform.gameObject);
                 }
             }
