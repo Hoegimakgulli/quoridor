@@ -122,6 +122,7 @@ MonoBehaviour:
   characteristic: 0
   value: 1
   fadeObj: {fileID: 7248978748911905669, guid: 0a81cd17b60d94c4f980f09fb5e1515d, type: 3}
+  highlightObj: {fileID: 7248978748911905669, guid: 3edeef0dc73b22444bcfa321cd9e9e7c, type: 3}
   useShake: 1
 --- !u!50 &1698861018963945704
 Rigidbody2D:

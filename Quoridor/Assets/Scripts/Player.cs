@@ -38,7 +38,7 @@ public class Player : MonoBehaviour
     public int atk;
 
     [SerializeField]
-    int wallCount = 0;
+    public int wallCount = 0;
     public int maxWallCount;
 
     int minWallLength = 1;
@@ -46,7 +46,7 @@ public class Player : MonoBehaviour
     int[] wallInfo = new int[3]; // 벽 위치 정보, 회전 정보 저장
 
     public bool canAction = true;
-    bool canAttack = true;
+    public bool canAttack = true;
     int ablilityCount = 1;
 
     int[] previousWallInfo = new int[3];
@@ -57,9 +57,11 @@ public class Player : MonoBehaviour
     GameObject playerUI;
 
     GameObject wallStorage;
+    PlayerActionUI playerActionUI;
 
     void Start()
     {
+        playerActionUI = transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         wallStorage = GameObject.Find("WallStorage");
         transform.position = GameManager.gridSize * gameManager.playerPosition; //플레이어 위치 초기화 (처음위치는 게임메니저에서 설정)
@@ -81,7 +83,7 @@ public class Player : MonoBehaviour
         playerWallPreview.SetActive(false);
         tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵그래프 저장
 
-        playerUI = Instantiate(playerUI); // [디버그용]
+        //playerUI = Instantiate(playerUI); // [디버그용]
     }
     public void Initialize()
     {
@@ -205,8 +207,15 @@ public class Player : MonoBehaviour
                     transform.position = previewHit.transform.position; //플레이어 위치 이동
                     gameManager.playerPosition = transform.position / GameManager.gridSize; //플레이어 위치정보 저장
                     canAction = false; // 이동이나 벽 설치 불가
+                    playerActionUI.ActiveUI(); //플레이어 행동 UI 등장 애니메이션
                     return;
                 }
+            }
+            else //다른 곳 클릭 시 다시 선택으로
+            {
+                gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
+                playerActionUI.ActiveUI();
+                ResetPreview();
             }
         }
     }
@@ -255,10 +264,17 @@ public class Player : MonoBehaviour
                             //if (enemy.hp <= 0) enemy.DieEnemy();
                             Debug.Log($"{enemyHit.transform.name}의 현재 체력 {enemy.hp}");
                             canAttack = false;
+                            playerActionUI.ActiveUI(); //플레이어 행동 UI 등장 애니메이션
                             return;
                         }
                     }
                 }
+            }
+            else //다른데 클릭하면 다시 선택화면으로
+            {
+                gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
+                playerActionUI.ActiveUI();
+                ResetPreview();
             }
         }
     }

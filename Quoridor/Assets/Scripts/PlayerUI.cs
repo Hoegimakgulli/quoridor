@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -11,11 +11,11 @@ public class PlayerUI : MonoBehaviour
 
     //건설 완료버튼과 팝업 창들은 인스펙터에서 연결해주세요.
     [SerializeField]
-    GameObject buttonComplete;
+    GameObject buttonComplete; //벽 확정할거냐
     [SerializeField]
-    GameObject warningPopUp;
+    GameObject warningPopUp; //아직 안움직임
     [SerializeField]
-    GameObject abilityInfoPopUp;
+    GameObject abilityInfoPopUp; //능력 안내
 
     bool isAbilityClick = false;
     float timer = 0f;
@@ -38,25 +38,25 @@ public class PlayerUI : MonoBehaviour
         }
         else timer = 0;
     }
-    public void OnMoveClick() // 이동 버튼 클릭하였을 때
+    /*public void OnMoveClick() // 이동 버튼 클릭하였을 때
     {
         gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Move;
         player.ResetPreview();
         buttonComplete.SetActive(false);
-    }
+    }*/
     public void OnBuildClick() // 건설 버튼 클릭하였을 때
     {
-        gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Build;
-        player.ResetPreview();
+        //gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Build;
+        //player.ResetPreview();
         buttonComplete.GetComponent<Button>().interactable = false;
         buttonComplete.SetActive(true);
     }
-    public void OnAttackClick() // 공격 버튼 클릭하였을 때
+    /*public void OnAttackClick() // 공격 버튼 클릭하였을 때
     {
         gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Attack;
         player.ResetPreview();
         buttonComplete.SetActive(false);
-    }
+    }*/
     // 능력 버튼 제작시 Event Trigger 라는 컴포넌트 추가해 PointerDown과 PointerUp에서 이벤트 실행되게 해주세요
     public void OnAbilityPointerDown() // 능력 버튼 누르면
     {
@@ -76,7 +76,7 @@ public class PlayerUI : MonoBehaviour
         }
         isAbilityClick = false;
     }
-    public void OnTurnClick() // 턴 종료 버튼 클릭하였을 때
+    /*public void OnTurnClick() // 턴 종료 버튼 클릭하였을 때
     {
         if (player.canAction) warningPopUp.SetActive(true);
         else
@@ -84,7 +84,7 @@ public class PlayerUI : MonoBehaviour
             EnemyManager.turnCheck = false;
             GameManager.Turn++;
         }
-    }
+    }*/
     public void OnTurnClickInPopUp() // 턴 진행 버튼 클릭하였을 때 (팝업내에서)
     {
         EnemyManager.turnCheck = false;

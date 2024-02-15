@@ -198,7 +198,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8158980e98240324ca207c078297073b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cost: 1
+  uiManager: {fileID: 0}
   hp: 1
   maxHp: 0
   moveCtrl: 0a0000000000000001000000
@@ -216,6 +216,7 @@ MonoBehaviour:
   characteristic: 0
   value: 0
   fadeObj: {fileID: 7248978748911905669, guid: 0a81cd17b60d94c4f980f09fb5e1515d, type: 3}
+  highlightObj: {fileID: 7248978748911905669, guid: 3edeef0dc73b22444bcfa321cd9e9e7c, type: 3}
   useShake: 1
 --- !u!50 &1698861018963945704
 Rigidbody2D:
