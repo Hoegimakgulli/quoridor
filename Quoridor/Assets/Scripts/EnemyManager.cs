@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -46,8 +46,8 @@ public class EnemyManager : MonoBehaviour
     private void Awake()
     {
         Instantiate(enemyBox);
-        GameObject enemyUi = Instantiate(enemyUiCanvas);
-        Instantiate(EnemyStatePanel, enemyUi.transform);
+        //GameObject enemyUi = Instantiate(enemyUiCanvas);
+        //Instantiate(EnemyStatePanel, enemyUi.transform);
         Debug.Log("ui Spawned");
         gameManager = transform.gameObject.GetComponent<GameManager>();
         GameManager.enemyValueList.Clear();

@@ -199,7 +199,7 @@ public class EnemyStage : MonoBehaviour
                 currentEnemey.maxHp = currentEnemey.hp;
                 currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "체력 " + currentEnemey.hp + " / " + currentEnemey.maxHp;
                 */
-                uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, currentEnemey, count); //적 각각의 상태창을 만들어내는 함수
+                uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, tmpCurrentObj.GetComponent<Enemy>(), count); //적 각각의 상태창을 만들어내는 함수
             }
         }
 
