@@ -85,14 +85,18 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
             if (count != 1)
             {
-                for (int posCount = 0; count < GameManager.enemyValueList.Count; count++)
+                Debug.Log("Enemy Values Count : " + GameManager.enemyValueList.Count);
+                for (int posCount = 0; posCount < GameManager.enemyValueList.Count; posCount++)
                 {
+                    Debug.Log("Enemy Move Start");
                     if (GameManager.enemyValueList[posCount].position == transform.position)
                     {
-                        GameManager.enemyValueList[posCount].position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+                        Debug.Log("Enemy Move Check");
+                        transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+                        GameManager.enemyValueList[posCount].position = transform.position;
+                        break;
                     }
                 }
-                transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
             }
 
             gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();

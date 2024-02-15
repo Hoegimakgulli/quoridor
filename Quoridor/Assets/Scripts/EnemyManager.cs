@@ -443,7 +443,7 @@ public class EnemyManager : MonoBehaviour
             }
             if (currentEnemyState.moveCtrl[0] <= GameManager.enemyValueList[count].moveCtrl)
             {
-                GameObject currenEnemy = FindValuesObj(GameManager.enemyValueList[originSortingList[count]].position);
+                GameObject currenEnemy = FindValuesObj(GameManager.enemyValueList[count].position);
                 GameObject player = GameObject.FindWithTag("Player");
                 currentEnemyState.state = Enemy.EState.Move;
                 PathFinding(currenEnemy, player);
@@ -477,6 +477,7 @@ public class EnemyManager : MonoBehaviour
         GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         foreach(Transform child in enemyBox.transform)
         {
+            Debug.Log(child.position);
             if(child.position == position)
             {
                 return child.gameObject;
