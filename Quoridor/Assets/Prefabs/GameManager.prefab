@@ -48,9 +48,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerControlStatus: 0
-  playerPosition: {x: 0, y: -4, z: 0}
   currentStage: 1
-  playerPrefab: {fileID: 5098181600813880054, guid: 292c15a3cc637f44cbf46380a44037e5, type: 3}
+  playerCharacters: {fileID: 6786839763304644929, guid: 3e6891d2695acba42bc360431bc03880, type: 3}
 --- !u!114 &6551029922462568091
 MonoBehaviour:
   m_ObjectHideFlags: 0

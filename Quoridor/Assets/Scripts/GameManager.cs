@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
 
     GameObject player;
 
-    public GameObject playerPrefab;
+    public PlayerCharacters playerCharacters;
 
     void Awake()
     {
@@ -69,7 +69,7 @@ public class GameManager : MonoBehaviour
             }
         }
         // DebugMap();
-        player = Instantiate(playerPrefab, playerPosition * gridSize, Quaternion.identity);
+        player = Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], playerPosition * gridSize, Quaternion.identity);
         Debug.Log(player.transform.position);
     }
     public void Initialize()
