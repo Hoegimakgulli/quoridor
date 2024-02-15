@@ -14,25 +14,29 @@ public class UiManager : MonoBehaviour
     public static int turnAnchor = 0; // GameManager에 있는 Turn과 비교하는 비교군
 
     // 이규빈 생성 변수들
-    //public GameObject enemyStatePre;
-    //public EnemyManager enemyManager;
+    public GameObject uiCanvas;
+    private GameManager gameManager;
     private List<RectTransform> enemyStates = new List<RectTransform>(); //적 상태창들의 RectTransform
-    //private List<GameObject> enemies = new List<GameObject>();
-    //private List<Enemy> enemiesScript = new List<Enemy>();
     public float uiMoveTime = 0.2f; //적 상태창 움직이는 시간 
     public bool popLock = false; //임시 변수. 플레이어 및 적턴 알려주는 팝업 통제용.
     public List<int> sortingList = new List<int>(); //행동력 순서로 EnemyState를 정렬할 리스트. 각 배열의 숫자는 몇 번째 적인지를 나타냄.
     private GameObject explosionEffect;
     private List<RectTransform> particlesRT = new List<RectTransform>();
+    public GameObject turnEndButton;
+    public Text WallCountText;
 
 
     private void Awake()
     {
-
+        GameObject uiC = Instantiate(uiCanvas);
+        turnEndButton = uiC.transform.GetChild(4).gameObject;
+        turnEndButton.GetComponent<Button>().onClick.AddListener(() => PlayerTurnEnd());
+        WallCountText = uiC.transform.GetChild(5).GetChild(2).GetComponent<Text>();
     }
-
     private void Start()
     {
+        gameManager = GetComponent<GameManager>();
+        //playerUI = Instantiate(playerUI); //플레이어 UI 캔버스 소환
         panelBox[0] = GameObject.Find("TurnPanel");
         panelBox[1] = GameObject.Find("HistoryPanel");
         historyBox[0] = panelBox[1].transform.GetChild(0).transform.GetChild(0).gameObject; // History -> playerBox 접근
@@ -139,11 +143,12 @@ public class UiManager : MonoBehaviour
     }
 
 
-    //매개변수로 받아온 적의 상태창 생성
-    public void CreateEnemyState(GameObject currentEnemyState, GameObject currentEnemyObj, Enemy currentEnemey)
+    //매개변수로 받아온 적의 상태창 생성 (받아온 적의 상태창 오브젝트, 받아온 적의 오브젝트, 받아온 적의 Enemy 스크립트, 받아온 적이 몇번째로 소환된 적인지)
+    public void CreateEnemyState(GameObject currentEnemyState, GameObject currentEnemyObj, Enemy currentEnemey, int enemyNum)
     {
         //상태창 이미지, 수치들을 바꿈
         currentEnemyState.transform.GetChild(3).GetComponent<Image>().DOFade(0, 0); //맞았을 때 빨간색으로 깜빡이는 Panel을 투명하게
+        currentEnemyState.transform.GetChild(4).GetComponent<Image>().DOFade(0, 0); //상태창 하이라이팅 Panel을 투명하게
         currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = currentEnemyObj.GetComponent<SpriteRenderer>().sprite;
         currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().color = currentEnemyObj.GetComponent<SpriteRenderer>().color;
         currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "행동력 " + currentEnemey.moveCtrl[1] + " / 10";
@@ -151,6 +156,17 @@ public class UiManager : MonoBehaviour
         currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "체력 " + currentEnemey.hp + " / " + currentEnemey.maxHp;
         //상태창에 애니메이션 적용이 편리하도록 리스트에 Rect Transform을 넣어둠.
         enemyStates.Add(currentEnemyState.GetComponent<RectTransform>());
+        //currentEnemyState.GetComponent<Button>().onClick.AddListener(() => HighlightEnemy(enemyNum));
+        
+        //적 상태창 버튼에 적 기물 하이라이팅 함수를 연결
+        for(int i = 0; i < GameManager.enemyObjects.Count; i++)
+        {
+            if (GameManager.enemyObjects[i] == currentEnemyObj)
+            {
+                currentEnemyState.GetComponent<Button>().onClick.AddListener(() => HighlightEnemy(i));
+                break;
+            }
+        }
     }
 
     //정렬되지 않은 sortingList를 생성 (매개변수는 크기)
@@ -246,7 +262,21 @@ public class UiManager : MonoBehaviour
 
         enemyStates.RemoveAt(enemyNum);
         Destroy(destroyState);
-        for(int i = sortingList.Count - 1; i >= 0; i--)
+
+        //적 상태창 버튼에 적 기물 하이라이팅 함수를 연결
+        for(int i = 0; i < enemyStates.Count; i++)
+        {
+            enemyStates[i].GetComponent<Button>().onClick.RemoveAllListeners();
+            int iii = i;
+            enemyStates[i].GetComponent<Button>().onClick.AddListener(() => HighlightEnemy(iii));
+            //for(int j = 0; j < GameManager.enemyObjects.Count; j++)
+            //{
+
+            //}
+        }
+
+
+        for (int i = sortingList.Count - 1; i >= 0; i--)
         {
             if (sortingList[i] > enemyNum)
             {
@@ -289,7 +319,7 @@ public class UiManager : MonoBehaviour
         enemyStates[enemyNum].GetComponent<Image>().DOFade(0.392f, 0);
         if (isFinalMove) GetComponent<EnemyManager>().EnemyTurnAnchorTrue();
     }
-    
+
     // 행동력을 사용한 적의 상태창을 맨 아래로 내리고 나머지는 위로 올림. (몇번째 적인지, 얼마로 바꿀건지, 몇번째 이동 실행인지)
     public IEnumerator ReloadState(int enemyNum, int goal, int count)
     {
@@ -302,9 +332,37 @@ public class UiManager : MonoBehaviour
         enemyStates[enemyNum].DOAnchorPosX(enemyStates[enemyNum].anchoredPosition.x - 400, uiMoveTime);
         yield return new WaitForSeconds(uiMoveTime);
 
-        if(count == GameManager.enemyObjects.Count - 1)
+        if (count == GameManager.enemyObjects.Count - 1)
             yield return StartCoroutine(CountMovectrlAnim(enemyNum, 0, goal, true));
         else
             yield return StartCoroutine(CountMovectrlAnim(enemyNum, 0, goal, false));
+    }
+
+    //적 하이라이팅 (몇번째로 소환된 적인지)
+    public void HighlightEnemy(int enemyNum)
+    {
+        StartCoroutine(FadeInOutLoop(enemyNum));
+        StartCoroutine(GameManager.enemyObjects[enemyNum].GetComponent<Enemy>().FadeInOutLoop(uiMoveTime*2));
+    }
+
+    //적 하이라이팅 페이드 인/아웃 루프 (몇번째로 소환된 적인지)
+    private IEnumerator FadeInOutLoop(int enemyNum)
+    {
+        //for (int i = 0; i < 3; i++)
+        {
+            enemyStates[enemyNum].GetChild(4).GetComponent<Image>().DOFade(1, uiMoveTime*2);
+            yield return new WaitForSeconds(uiMoveTime*2);
+            enemyStates[enemyNum].GetChild(4).GetComponent<Image>().DOFade(0, uiMoveTime*2);
+            yield return new WaitForSeconds(uiMoveTime * 2);
+        }
+    }
+
+    //턴 종료 시 호출
+    public void PlayerTurnEnd()
+    {
+        EnemyManager.turnCheck = false;
+        GameManager.Turn++;
+        gameManager.playerActionUI.PassiveUI();
+        turnEndButton.SetActive(false);
     }
 }

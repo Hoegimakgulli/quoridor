@@ -192,14 +192,21 @@ public class EnemyStage : MonoBehaviour
 
                 // 적 정보 UI 판넬에 표시하는 부분
                 GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("Canvas(Clone)").transform.GetChild(3).GetChild(1).GetChild(0));
-                uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, tmpCurrentObjEnemy); //적 각각의 상태창을 만들어내는 함수
-
-                //--------------------------------------------------
+                /*
+                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = currentEnemyObj.GetComponent<SpriteRenderer>().sprite;
+                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().color = currentEnemyObj.GetComponent<SpriteRenderer>().color;
+                currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "행동력 " + currentEnemey.moveCtrl[1] + " / 10";
+                currentEnemey.maxHp = currentEnemey.hp;
+                currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "체력 " + currentEnemey.hp + " / " + currentEnemey.maxHp;
+                */
+                uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, tmpCurrentObj.GetComponent<Enemy>(), count); //적 각각의 상태창을 만들어내는 함수
             }
         }
+
         uiManager.CreateSortingList(GameManager.enemyObjects.Count);
         uiManager.SortEnemyStates(); //상태창 순서 정렬 (행동력 기준으로)
         uiManager.DeploymentEnemyStates(); //상태창 각각 배치
+        gameManager.PlayerTurnSet(); //플레이어 턴 시작 시 실행되어야 할것잉 모여있는 함수 (규빈 작성)
     }
 
     public int StageEnemySelectNum(string name)

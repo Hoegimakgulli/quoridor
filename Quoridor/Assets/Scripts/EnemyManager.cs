@@ -41,13 +41,13 @@ public class EnemyManager : MonoBehaviour
     private bool enemyTurnAnchor = true;
     //private bool enemyWarningSignAnchor = true;
 
-    public GameObject EnemyStatePanel;
+    //public GameObject EnemyStatePanel;
 
     private void Awake()
     {
         Instantiate(enemyBox);
-        GameObject enemyUi = Instantiate(enemyUiCanvas);
-        Instantiate(EnemyStatePanel, enemyUi.transform);
+        //GameObject enemyUi = Instantiate(enemyUiCanvas);
+        //Instantiate(EnemyStatePanel, enemyUi.transform);
         Debug.Log("ui Spawned");
         gameManager = transform.gameObject.GetComponent<GameManager>();
         GameManager.enemyValueList.Clear();
@@ -403,10 +403,12 @@ public class EnemyManager : MonoBehaviour
         //enemyTurnAnchor = true;
     }
 
+    //적 턴이 전부 끝났을 때 호출됨.
     public void EnemyTurnAnchorTrue()
     {
         enemyTurnAnchor = true;
         GameManager.Turn++;
+        gameManager.PlayerTurnSet(); //플레이어 턴이 시작됨을 알림
     }
 
     //적 움직임 상태창 애니메이션에 맞춰 순차적으로 움직이도록 수정 (이규빈)
