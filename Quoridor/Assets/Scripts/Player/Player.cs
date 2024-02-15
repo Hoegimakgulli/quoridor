@@ -44,6 +44,8 @@ public class Player : MonoBehaviour
     Vector2 wallStartPos = new Vector2(-50, -50);
     int[] wallInfo = new int[3]; // 벽 위치 정보, 회전 정보 저장
 
+    public bool shouldReset = true;
+
     public bool canAction = true;
     public bool shouldMove = false;
     public bool canAttack = true;
@@ -62,9 +64,12 @@ public class Player : MonoBehaviour
 
     PlayerAbility playerAbility;
 
+    void Awake()
+    {
+        playerActionUI = Instantiate(playerPrefabs.actionUI, transform).transform.GetChild(0).GetComponent<PlayerActionUI>();
+    }
     void Start()
     {
-        playerActionUI = transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         wallStorage = GameObject.Find("WallStorage");
         for (int i = 0; i < movablePositions.Count; i++) // 플레이어 미리보기 -> 미리소환하여 비활성화 해놓기
@@ -150,10 +155,11 @@ public class Player : MonoBehaviour
                 default:
                     break;
             }
+            shouldReset = true;
         }
         else // 플레이어 차례가 아니면
         {
-            Reset();
+            if (shouldReset) Reset();
         }
     }
     protected virtual void Reset()
@@ -164,6 +170,7 @@ public class Player : MonoBehaviour
         canAttack = true;
         ResetPreview();
         playerAbility.Reset();
+        shouldReset = false;
     }
     // 모바일 or 에디터 마우스 터치좌표 처리
     void TouchSetUp()
@@ -200,6 +207,7 @@ public class Player : MonoBehaviour
                     transform.position = previewHit.transform.position; //플레이어 위치 이동
                     GameManager.playerPosition = transform.position / GameManager.gridSize; //플레이어 위치정보 저장
                     canAction = false; // 이동이나 벽 설치 불가
+                    playerAbility.MoveEvent();
                     playerActionUI.ActiveUI(); //플레이어 행동 UI 등장 애니메이션
                     if (shouldMove) shouldMove = false;
                     return;

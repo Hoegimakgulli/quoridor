@@ -40,7 +40,7 @@ public class ReadOnlyAttribute : PropertyAttribute
 
 public class PlayerAbility : MonoBehaviour
 {
-    public enum EAbilityType { DiePassive, AttackPassive, KillPassive, Active }
+    public enum EAbilityType { DiePassive, MovePassive, AttackPassive, HitPassive, KillPassive, Active }
 
     Player player;
     GameManager gameManager;
@@ -86,9 +86,26 @@ public class PlayerAbility : MonoBehaviour
             ability.Reset();
         }
     }
+    public void MoveEvent()
+    {
+        foreach (var ability in abilities)
+        {
+            if (ability.abilityType == EAbilityType.MovePassive && ability.canEvent)
+            {
+                ability.Event();
+            }
+        }
+    }
     public void PostAttackEvent(bool isDead, Enemy hitEnemy)
     {
         targetEnemy = hitEnemy;
+        foreach (var ability in abilities)
+        {
+            if (ability.abilityType == EAbilityType.AttackPassive && ability.canEvent)
+            {
+                ability.Event();
+            }
+        }
         if (isDead)
         {
             foreach (var ability in abilities)
@@ -103,7 +120,7 @@ public class PlayerAbility : MonoBehaviour
         {
             foreach (var ability in abilities)
             {
-                if (ability.abilityType == EAbilityType.AttackPassive && ability.canEvent)
+                if (ability.abilityType == EAbilityType.HitPassive && ability.canEvent)
                 {
                     ability.Event();
                 }
@@ -202,7 +219,6 @@ public class PlayerAbility : MonoBehaviour
     class Reload : IAbility // 8.재장전
     {
         private EAbilityType mAbilityType = EAbilityType.KillPassive;
-        private bool mbEnable = true;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -210,7 +226,6 @@ public class PlayerAbility : MonoBehaviour
         public Reload(PlayerAbility playerAbility) { thisScript = playerAbility; }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
-        public bool isEnable { get { return mbEnable; } set { mbEnable = value; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -226,7 +241,6 @@ public class PlayerAbility : MonoBehaviour
     class EvasiveManeuver : IAbility // 33.회피 기동
     {
         private EAbilityType mAbilityType = EAbilityType.AttackPassive;
-        private bool mbEnable = true;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -241,7 +255,6 @@ public class PlayerAbility : MonoBehaviour
         }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
-        public bool isEnable { get { return mbEnable; } set { mbEnable = value; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -262,7 +275,6 @@ public class PlayerAbility : MonoBehaviour
     class KnockBack : IAbility // 36.넉백
     {
         private EAbilityType mAbilityType = EAbilityType.AttackPassive;
-        private bool mbEnable = true;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -270,7 +282,6 @@ public class PlayerAbility : MonoBehaviour
         public KnockBack(PlayerAbility playerAbility) { thisScript = playerAbility; }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
-        public bool isEnable { get { return mbEnable; } set { mbEnable = value; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {

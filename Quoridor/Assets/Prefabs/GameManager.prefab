@@ -49,6 +49,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerControlStatus: 0
   currentStage: 1
+  player: {fileID: 0}
+  playerActionUI: {fileID: 0}
+  uiManager: {fileID: 0}
   playerCharacters: {fileID: 6786839763304644929, guid: 3e6891d2695acba42bc360431bc03880, type: 3}
 --- !u!114 &6551029922462568091
 MonoBehaviour:
@@ -62,9 +65,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9885a4155447a6144924e6825c0fc7e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uiCanvas: {fileID: 7471301692746399857, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
   uiMoveTime: 0.2
   popLock: 0
   sortingList: 
+  turnEndButton: {fileID: 0}
+  WallCountText: {fileID: 0}
 --- !u!114 &8153990614069101066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,7 +101,6 @@ MonoBehaviour:
   - {fileID: 5098181600813880054, guid: 0e0fb8e97028bca46abdab99d0bc84c2, type: 3}
   enemyBox: {fileID: 5173989932051771109, guid: 427ba129aedc7bf45846f3347eb26b36, type: 3}
   enemyUiCanvas: {fileID: 7471301692746399857, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
-  EnemyStatePanel: {fileID: 5103136805041529522, guid: 2a5d1fcbd7b055a42b491af212caa37e, type: 3}
   FinalPathList: []
   bottomLeft: {x: 0, y: 0}
   topRight: {x: 8, y: 8}

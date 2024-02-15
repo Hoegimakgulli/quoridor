@@ -9,4 +9,5 @@ public class PlayerPrefabs : MonoBehaviour
     public GameObject attackHighlight;
     public GameObject wallPreview; // 플레이어 설치벽 위치 미리보기
     public GameObject wall; // 플레이어 설치벽
+    public GameObject actionUI;
 }

@@ -49,3 +49,4 @@ MonoBehaviour:
   attackHighlight: {fileID: 5098181600813880054, guid: 2fe296c14955f2b4b986d0db8080145c, type: 3}
   wallPreview: {fileID: 5879755730228247319, guid: e8844f7765fdfff49b11ca83176f8965, type: 3}
   wall: {fileID: 5879755730228247319, guid: ee6cd5c0aa2e1f548a932bc64466f071, type: 3}
+  actionUI: {fileID: 6165955300736283468, guid: 5bf927267836a6a47b2c3ff720766f82, type: 3}

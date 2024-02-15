@@ -144,7 +144,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetEnemy: {fileID: 0}
   abilitiesID: 
-  startAbilities: 06000000
+  startAbilities: 21000000
+  debugAbility: 0000000000000000
 --- !u!58 &-7823754267734906027
 CircleCollider2D:
   m_ObjectHideFlags: 0

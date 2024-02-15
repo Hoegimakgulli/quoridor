@@ -52,7 +52,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de198e0c09d2cd94d93d86d5067795b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiMoveDistance: 50
+  uiMoveDistance: 1
 --- !u!1 &1279630401781444325
 GameObject:
   m_ObjectHideFlags: 0
