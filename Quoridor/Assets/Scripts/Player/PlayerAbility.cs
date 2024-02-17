@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using Unity.VisualScripting;
 using UnityEditor.PackageManager;
 using UnityEngine;
+using UnityEngine.UI;
 #if UNITY_EDITOR
 namespace UnityEditor
 {
@@ -40,7 +41,7 @@ public class ReadOnlyAttribute : PropertyAttribute
 
 public class PlayerAbility : MonoBehaviour
 {
-    public enum EAbilityType { DiePassive, MovePassive, AttackPassive, HitPassive, KillPassive, Active }
+    public enum EAbilityType { ValuePassive, DiePassive, MovePassive, AttackPassive, HitPassive, KillPassive, InstantActive, TargetActive }
 
     Player player;
     GameManager gameManager;
@@ -56,6 +57,9 @@ public class PlayerAbility : MonoBehaviour
 #if UNITY_EDITOR
     public List<int> debugAbility = new List<int>() { 0, 0 };
 #endif
+
+    public bool shouldSetUpAbilityUI = true; // [임시 능력 UI]
+
     private void Start()
     {
         player = GetComponent<Player>();
@@ -79,12 +83,51 @@ public class PlayerAbility : MonoBehaviour
         }
 #endif
     }
+    public void ActiveEvent()
+    {
+        if (!shouldSetUpAbilityUI) return; // Do Once
+        // 능력 UI 활성화
+        Transform ContentBox = player.abilityUI.transform.GetChild(0).GetChild(0).GetChild(0);
+
+        ContentBox.GetComponent<RectTransform>().sizeDelta = new Vector2(player.abilityCount * 190f, 0); // 패널 크기 설정
+
+        int index = 0;
+        foreach (var ability in abilities)
+        {
+            if (ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive)
+            {
+                Button abilityButton = ContentBox.GetChild(index).GetComponent<Button>();
+                abilityButton.gameObject.SetActive(true);
+                abilityButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(index * 190f + 95f, 0);
+                int abilityIndex = abilities.IndexOf(ability);
+                abilityButton.transform.GetChild(0).GetComponent<Text>().text = abilitiesID[abilityIndex].ToString();
+                abilityButton.interactable = ability.canEvent;
+                abilityButton.onClick.RemoveAllListeners();
+                if (ability.abilityType == EAbilityType.InstantActive) abilityButton.onClick.AddListener(() => ability.Event());
+                else abilityButton.onClick.AddListener(() => TargetEvent(abilitiesID[abilityIndex]));
+                abilityButton.GetComponent<DisposableButton>().activeCondition = (ability as IActiveAbility).activeCondition;
+                index++;
+            }
+        }
+        shouldSetUpAbilityUI = false;
+    }
+    public void TargetEvent(int abilityID)
+    {
+        player.usingAbilityID = abilityID;
+        gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Ability;
+    }
     public void Reset()
     {
         foreach (var ability in abilities)
         {
             ability.Reset();
         }
+        for (int i = 0; i < player.abilityCount; i++) // 버튼마다 버튼 이름과 쿨타임에 따른 활성화여부 설정
+        {
+            Button abilityButton = player.abilityUI.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(i).GetComponent<Button>();
+            abilityButton.gameObject.SetActive(false);
+        }
+        shouldSetUpAbilityUI = true;
     }
     public void MoveEvent()
     {
@@ -146,11 +189,35 @@ public class PlayerAbility : MonoBehaviour
         bool isSuccess = true;
         switch (id)
         {
+            case 1:
+                abilities.Add(new AtkUp1(this));
+                break;
+            case 2:
+                abilities.Add(new AtkUp2(this));
+                break;
+            case 3:
+                abilities.Add(new WallUp1(this));
+                break;
+            case 4:
+                abilities.Add(new WallUp2(this));
+                break;
+            case 5:
+                abilities.Add(new WallUp3(this));
+                break;
             case 6:
                 abilities.Add(new Shield(this));
                 break;
+            case 7:
+                abilities.Add(new ToughSurvival(this));
+                break;
             case 8:
                 abilities.Add(new Reload(this));
+                break;
+            case 12:
+                abilities.Add(new PrecisionAttack(this));
+                break;
+            case 13:
+                abilities.Add(new SmokeGrenade(this));
                 break;
             case 33:
                 abilities.Add(new EvasiveManeuver(this));
@@ -164,6 +231,7 @@ public class PlayerAbility : MonoBehaviour
                 break;
         }
         if (isSuccess) abilitiesID.Add(id);
+        player.abilityCount = abilities.Count(ability => ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive);
     }
     public void RemoveAbility(int id)
     {
@@ -173,8 +241,151 @@ public class PlayerAbility : MonoBehaviour
             Debug.LogError("Cannot Found Ability");
             return;
         }
+        if (abilities[index].abilityType == EAbilityType.ValuePassive) abilities[index].Event();
         abilities.RemoveAt(index);
         abilitiesID.RemoveAt(index);
+        player.abilityCount = abilities.Count(ability => ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive);
+    }
+    class AtkUp1 : IAbility // 1.공격력 증가 +1
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private bool mbEvent = false;
+        private int mCount = 1;
+        private int mValue = 1;
+
+        PlayerAbility thisScript;
+        public AtkUp1(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            thisScript.player.atk += mValue;
+        }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.player.atk -= mValue;
+
+            return false;
+        }
+        public void Reset()
+        {
+            return;
+        }
+    }
+    class AtkUp2 : IAbility // 2.공격력 증가 +2
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private bool mbEvent = false;
+        private int mCount = 1;
+        private int mValue = 2;
+
+        PlayerAbility thisScript;
+        public AtkUp2(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            thisScript.player.atk += mValue;
+        }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.player.atk -= mValue;
+
+            return false;
+        }
+        public void Reset()
+        {
+            return;
+        }
+    }
+    class WallUp1 : IAbility // 3.벽 소지 +1
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private bool mbEvent = false;
+        private int mCount = 1;
+        private int mValue = 1;
+
+        PlayerAbility thisScript;
+        public WallUp1(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            thisScript.player.wallCount += mValue;
+            thisScript.player.maxWallCount += mValue;
+        }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.player.wallCount = (thisScript.player.wallCount - mValue < 0) ? 0 : (thisScript.player.wallCount - mValue);
+            thisScript.player.maxWallCount -= mValue;
+
+            return false;
+        }
+        public void Reset()
+        {
+            return;
+        }
+    }
+    class WallUp2 : IAbility // 4.벽 소지 +2
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private bool mbEvent = false;
+        private int mCount = 1;
+        private int mValue = 2;
+
+        PlayerAbility thisScript;
+        public WallUp2(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            thisScript.player.wallCount += mValue;
+            thisScript.player.maxWallCount += mValue;
+        }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.player.wallCount = (thisScript.player.wallCount - mValue < 0) ? 0 : (thisScript.player.wallCount - mValue);
+            thisScript.player.maxWallCount -= mValue;
+
+            return false;
+        }
+        public void Reset()
+        {
+            return;
+        }
+    }
+    class WallUp3 : IAbility // 5.벽 소지 +3
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private bool mbEvent = false;
+        private int mCount = 1;
+        private int mValue = 3;
+
+        PlayerAbility thisScript;
+        public WallUp3(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            thisScript.player.wallCount += mValue;
+            thisScript.player.maxWallCount += mValue;
+        }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.player.wallCount = (thisScript.player.wallCount - mValue < 0) ? 0 : (thisScript.player.wallCount - mValue);
+            thisScript.player.maxWallCount -= mValue;
+
+            return false;
+        }
+        public void Reset()
+        {
+            return;
+        }
     }
     class Shield : IAbility // 6.보호막
     {
@@ -216,6 +427,49 @@ public class PlayerAbility : MonoBehaviour
             }
         }
     }
+    class ToughSurvival : IAbility // 7.질긴 생존
+    {
+        private EAbilityType mAbilityType = EAbilityType.DiePassive;
+        private bool mbEvent = false;
+        private int mCount = 3;
+        private bool mbDidEvent = false;
+
+        PlayerAbility thisScript;
+        public ToughSurvival(PlayerAbility playerAbility) { thisScript = playerAbility; }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            mbDidEvent = true;
+            canEvent = false;
+
+            return false;
+        }
+        public void Reset()
+        {
+            if (mbDidEvent)
+            {
+                if (GameManager.Turn == 1)
+                {
+                    thisScript.RemoveAbility(7);
+                    return;
+                }
+                if (mCount > 0)
+                {
+                    mCount--;
+                }
+                else
+                {
+                    thisScript.player.Die();
+                }
+            }
+            else
+            {
+                canEvent = true;
+            }
+        }
+    }
     class Reload : IAbility // 8.재장전
     {
         private EAbilityType mAbilityType = EAbilityType.KillPassive;
@@ -230,6 +484,79 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             thisScript.player.canAttack = true;
+
+            return false;
+        }
+        public void Reset()
+        {
+            canEvent = true;
+        }
+    }
+    class PrecisionAttack : IAbility, IActiveAbility // 12.정밀 공격
+    {
+        private EAbilityType mAbilityType = EAbilityType.InstantActive;
+        private bool mbEvent = true;
+        private int mCount = 1;
+        private int mValue = 1;
+        private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.Attack;
+        private List<Vector2Int> mAttackRange = new List<Vector2Int>();
+        private List<Vector2Int> mAttackScale = new List<Vector2Int>();
+        private Vector2Int mTargetPos;
+
+        PlayerAbility thisScript;
+        public PrecisionAttack(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            playerAbility.shouldSetUpAbilityUI = true;
+        }
+        public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
+        public List<Vector2Int> attackRange { get { return mAttackRange; } }
+        public List<Vector2Int> attackScale { get { return mAttackScale; } }
+        public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.player.atk += mValue;
+
+            return false;
+        }
+        public void Reset()
+        {
+            thisScript.player.atk -= mValue;
+            canEvent = true;
+        }
+    }
+    class SmokeGrenade : IAbility, IActiveAbility // 13.연막탄
+    {
+        private EAbilityType mAbilityType = EAbilityType.TargetActive;
+        private bool mbEvent = true;
+        private int mCount = 1;
+        private int mValue = 1;
+        private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.Attack;
+        private List<Vector2Int> mAttackRange = new List<Vector2Int>(){
+            new Vector2Int(1, 0), new Vector2Int(2, 0), new Vector2Int(-1, 0), new Vector2Int(-2, 0), new Vector2Int(0, 1), new Vector2Int(0, 2), new Vector2Int(0, -1), new Vector2Int(0, -2), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
+        };
+        private List<Vector2Int> mAttackScale = new List<Vector2Int>(){
+            new Vector2Int(0, 0), new Vector2Int(1, 0), new Vector2Int(-1, 0),  new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
+        };
+        private Vector2Int mTargetPos;
+
+        PlayerAbility thisScript;
+        public SmokeGrenade(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            playerAbility.shouldSetUpAbilityUI = true;
+        }
+        public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
+        public List<Vector2Int> attackRange { get { return mAttackRange; } }
+        public List<Vector2Int> attackScale { get { return mAttackScale; } }
+        public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            Debug.Log($"{targetPos}");
 
             return false;
         }

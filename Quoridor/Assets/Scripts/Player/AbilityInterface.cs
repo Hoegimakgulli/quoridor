@@ -9,3 +9,10 @@ public interface IAbility
     bool Event();
     void Reset();
 }
+public interface IActiveAbility
+{
+    DisposableButton.ActiveCondition activeCondition { get; }
+    List<Vector2Int> attackRange { get; }
+    List<Vector2Int> attackScale { get; }
+    Vector2Int targetPos { get; set; }
+}
