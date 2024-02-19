@@ -53,6 +53,8 @@ public class PlayerAbility : MonoBehaviour
     public List<int> abilitiesID = new List<int>();
     public List<IAbility> abilities = new List<IAbility>() { };
 
+    public PlayerAbilityPrefabs abilityPrefabs;
+
     public List<int> startAbilities = new List<int>();
 #if UNITY_EDITOR
     public List<int> debugAbility = new List<int>() { 0, 0 };
@@ -106,6 +108,7 @@ public class PlayerAbility : MonoBehaviour
                 if (ability.abilityType == EAbilityType.InstantActive) abilityButton.onClick.AddListener(() => ability.Event());
                 else abilityButton.onClick.AddListener(() => TargetEvent(abilitiesID[abilityIndex]));
                 abilityButton.GetComponent<DisposableButton>().activeCondition = (ability as IActiveAbility).activeCondition;
+                abilityButton.GetComponent<DisposableButton>().isAlreadyUsed = !ability.canEvent;
                 index++;
             }
         }
@@ -311,7 +314,6 @@ public class PlayerAbility : MonoBehaviour
         public WallUp1(PlayerAbility playerAbility)
         {
             thisScript = playerAbility;
-            thisScript.player.wallCount += mValue;
             thisScript.player.maxWallCount += mValue;
         }
 
@@ -319,7 +321,6 @@ public class PlayerAbility : MonoBehaviour
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
-            thisScript.player.wallCount = (thisScript.player.wallCount - mValue < 0) ? 0 : (thisScript.player.wallCount - mValue);
             thisScript.player.maxWallCount -= mValue;
 
             return false;
@@ -340,7 +341,6 @@ public class PlayerAbility : MonoBehaviour
         public WallUp2(PlayerAbility playerAbility)
         {
             thisScript = playerAbility;
-            thisScript.player.wallCount += mValue;
             thisScript.player.maxWallCount += mValue;
         }
 
@@ -348,7 +348,6 @@ public class PlayerAbility : MonoBehaviour
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
-            thisScript.player.wallCount = (thisScript.player.wallCount - mValue < 0) ? 0 : (thisScript.player.wallCount - mValue);
             thisScript.player.maxWallCount -= mValue;
 
             return false;
@@ -369,7 +368,6 @@ public class PlayerAbility : MonoBehaviour
         public WallUp3(PlayerAbility playerAbility)
         {
             thisScript = playerAbility;
-            thisScript.player.wallCount += mValue;
             thisScript.player.maxWallCount += mValue;
         }
 
@@ -377,7 +375,6 @@ public class PlayerAbility : MonoBehaviour
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
-            thisScript.player.wallCount = (thisScript.player.wallCount - mValue < 0) ? 0 : (thisScript.player.wallCount - mValue);
             thisScript.player.maxWallCount -= mValue;
 
             return false;
@@ -496,7 +493,7 @@ public class PlayerAbility : MonoBehaviour
     {
         private EAbilityType mAbilityType = EAbilityType.InstantActive;
         private bool mbEvent = true;
-        private int mCount = 1;
+        private int mCount = 2;
         private int mValue = 1;
         private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.Attack;
         private List<Vector2Int> mAttackRange = new List<Vector2Int>();
@@ -519,12 +516,16 @@ public class PlayerAbility : MonoBehaviour
         {
             thisScript.player.atk += mValue;
 
+            mCount--;
+            canEvent = false;
             return false;
         }
         public void Reset()
         {
             thisScript.player.atk -= mValue;
-            canEvent = true;
+            if (GameManager.Turn == 1) mCount = 2;
+            if (mCount > 0) canEvent = true;
+            Debug.Log(canEvent);
         }
     }
     class SmokeGrenade : IAbility, IActiveAbility // 13.연막탄
@@ -557,6 +558,7 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             Debug.Log($"{targetPos}");
+            canEvent = false;
 
             return false;
         }

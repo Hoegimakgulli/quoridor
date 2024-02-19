@@ -126,10 +126,7 @@ public class Player : MonoBehaviour
             wallStorage.transform.GetChild(i).gameObject.SetActive(false);
         }
 
-        canAction = true;
-        canAttack = true;
-
-        ResetPreview();
+        Reset();
 
         previousWallInfo = new int[3];
         tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵그래프 저장
@@ -336,6 +333,10 @@ public class Player : MonoBehaviour
                 {
                     activeAbility.targetPos = new Vector2Int(Mathf.RoundToInt(previewHit.transform.position.x / GameManager.gridSize), Mathf.RoundToInt(previewHit.transform.position.y / GameManager.gridSize));
                     (activeAbility as IAbility).Event();
+                    usingAbilityID = 0;
+                    gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
+                    playerActionUI.ActiveUI();
+                    ResetPreview();
                 }
             }
             else //다른데 클릭하면 다시 선택화면으로
@@ -645,12 +646,11 @@ public class Player : MonoBehaviour
         }
         for (int i = 0; i < abilityScale.Count; i++)
         {
-            Vector2 atkDirection = ((Vector2)(previewHit.transform.position - transform.position) / GameManager.gridSize).normalized;
             Vector2 direction = (Vector2)abilityScale[i];
-            RaycastHit2D outerWallHit = Physics2D.Raycast(transform.position, (atkDirection + direction).normalized, GameManager.gridSize * (atkDirection + direction).magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
-            RaycastHit2D wallHit = Physics2D.Raycast(transform.position, (atkDirection + direction).normalized, GameManager.gridSize * (atkDirection + direction).magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
-            RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, (atkDirection + direction).normalized, GameManager.gridSize * (atkDirection + direction).magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
-            RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, (atkDirection + direction).normalized, GameManager.gridSize * (atkDirection + direction).magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
+            RaycastHit2D outerWallHit = Physics2D.Raycast(previewHit.transform.position, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
+            RaycastHit2D wallHit = Physics2D.Raycast(previewHit.transform.position, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
+            RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(previewHit.transform.position, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
+            RaycastHit2D tokenHit = Physics2D.RaycastAll(previewHit.transform.position, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
             // Debug.Log((atkDirection + direction).normalized);
             Vector3 newPosition = Vector3.zero;
 
@@ -663,7 +663,7 @@ public class Player : MonoBehaviour
             newPosition = direction;
             playerAbilityHighlights[i].transform.position = previewHit.transform.position + GameManager.gridSize * new Vector3(Mathf.Round(newPosition.x), Mathf.Round(newPosition.y), 0);
             playerAbilityHighlights[i].SetActive(true);
-            Debug.DrawRay(transform.position, (atkDirection + direction).normalized * (previewHit.transform.position - transform.position).magnitude, playerAbilityHighlights[i].GetComponent<SpriteRenderer>().color, 0.1f);
+            Debug.DrawRay(previewHit.transform.position, direction, playerAbilityHighlights[i].GetComponent<SpriteRenderer>().color, 0.1f);
             if (result[1] || isPenetration)
             {
                 playerAbilityHighlights[i].GetComponent<SpriteRenderer>().color = Color.cyan;
@@ -726,6 +726,10 @@ public class Player : MonoBehaviour
         foreach (GameObject preview in playerAbilityPreviews)
         {
             preview.SetActive(false);
+        }
+        foreach (GameObject highlight in playerAbilityHighlights)
+        {
+            highlight.SetActive(false);
         }
     }
     public virtual void Die()

@@ -7,13 +7,18 @@ public class DisposableButton : MonoBehaviour
 {
     public enum ActiveCondition { None, Action, Attack }
     Player player;
+    GameManager gameManager;
     Button button;
+    Text text;
     public ActiveCondition activeCondition = ActiveCondition.None;
-    bool isAlreadyUsed = false;
+    public bool isAlreadyUsed = false;
+    bool isTargetAbility = false;
     private void Start()
     {
         player = GameObject.FindWithTag("Player").GetComponent<Player>();
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         button = GetComponent<Button>();
+        text = transform.GetChild(0).GetComponent<Text>();
     }
     void Update()
     {
@@ -28,8 +33,18 @@ public class DisposableButton : MonoBehaviour
                     button.interactable = player.canAttack;
                     break;
                 default:
+                    button.interactable = true;
                     break;
             }
+        }
+        if (gameManager.playerControlStatus == GameManager.EPlayerControlStatus.Ability)
+        {
+            isTargetAbility = true;
+        }
+        else if (gameManager.playerControlStatus == GameManager.EPlayerControlStatus.None && isTargetAbility && text.text == player.usingAbilityID.ToString())
+        {
+            isAlreadyUsed = false;
+            isTargetAbility = false;
         }
     }
     private void OnDisable()
