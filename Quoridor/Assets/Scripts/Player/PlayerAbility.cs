@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -152,6 +152,12 @@ public class PlayerAbility : MonoBehaviour
             case 8:
                 abilities.Add(new Reload(this));
                 break;
+            case 9:
+                abilities.Add(new ChainLightning(this));
+                break;
+            case 10:
+                abilities.Add(new ChaineExplosion(this));
+                break;
             case 33:
                 abilities.Add(new EvasiveManeuver(this));
                 break;
@@ -176,6 +182,22 @@ public class PlayerAbility : MonoBehaviour
         abilities.RemoveAt(index);
         abilitiesID.RemoveAt(index);
     }
+
+    public GameObject FindValuesObj(Vector3 position)
+    {
+        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
+        foreach (Transform child in enemyBox.transform)
+        {
+            Debug.Log(child.position);
+            if (child.position == position)
+            {
+                return child.gameObject;
+            }
+        }
+        //Debug.LogError("enemyManager error : 어떤 Enemy 스크립트를 찾지 못했습니다.");
+        return null; // 위치에 아무런 오브젝트도 못찾았을 경우
+    }
+
     class Shield : IAbility // 6.보호막
     {
         private EAbilityType mAbilityType = EAbilityType.DiePassive;
@@ -238,6 +260,147 @@ public class PlayerAbility : MonoBehaviour
             canEvent = true;
         }
     }
+
+    class ChainLightning : IAbility // 9.체인라이트닝!!!!!!!!!!!!!!!!!!!!!!!!! 빠숑
+    {
+        private EAbilityType mAbilityType = EAbilityType.KillPassive;
+        private bool mbEvent = false;
+        private int mCount = 1;
+
+        PlayerAbility thisScript;
+        public ChainLightning(PlayerAbility playerAbility) { thisScript = playerAbility; }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            float dist = 10000000;
+            GameObject enemyObj = null;
+            enemyValues enemyValue = null;
+            foreach(enemyValues enemysPos in GameManager.enemyValueList) // 죽은 적 기준으로 가장 가까운 적 확인
+            {
+                if(dist > Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position))
+                {
+                    dist = Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position);
+                    enemyObj = thisScript.FindValuesObj(enemysPos.position);
+                    enemyValue = enemysPos;
+                }
+            }
+            // hp 깍아내는 코드 나중에 최적화 필요할듯
+            enemyObj.transform.GetComponent<Enemy>().hp -= 1;
+            enemyValue.hp -= 1;
+
+            return false;
+        }
+        public void Reset()
+        {
+            canEvent = true;
+        }
+    }
+
+    class ChaineExplosion : IAbility // 10.연쇄폭발
+    {
+        private EAbilityType mAbilityType = EAbilityType.KillPassive;
+        private bool mbEvent = false;
+        private int mCount = 1;
+
+        PlayerAbility thisScript;
+        private List<Vector2> exploablePosition = new List<Vector2>();
+        bool[] result;
+        public ChaineExplosion(PlayerAbility playerAbility) { thisScript = playerAbility; }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            // 초기 폭발 범위 확인 후 리스트 추가
+            exploablePosition.Add(new Vector2(0, 1));
+            exploablePosition.Add(new Vector2(1, 1));
+            exploablePosition.Add(new Vector2(1, 0));
+            exploablePosition.Add(new Vector2(1, -1));
+            exploablePosition.Add(new Vector2(0, -1));
+            exploablePosition.Add(new Vector2(-1, -1));
+            exploablePosition.Add(new Vector2(-1, 0));
+            exploablePosition.Add(new Vector2(-1, 1));
+
+            for (int i = 0; i < exploablePosition.Count; i++)
+            {
+                RaycastHit2D outerWallHit = Physics2D.Raycast(thisScript.targetEnemy.transform.position, ((Vector2)exploablePosition[i]).normalized, GameManager.gridSize * exploablePosition[i].magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
+                RaycastHit2D wallHit = Physics2D.Raycast(thisScript.targetEnemy.transform.position, ((Vector2)exploablePosition[i]).normalized, GameManager.gridSize * exploablePosition[i].magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
+                RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(thisScript.targetEnemy.transform.position, ((Vector2)exploablePosition[i]).normalized, GameManager.gridSize * exploablePosition[i].magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
+
+                bool fullBlock = false;
+                // Debug.Log($"{(bool)tokenHit} - {(tokenHit ? tokenHit.collider.gameObject.name : i)}");
+                while (true) // 타겟과 폭발범위 사이에 벽이 존재할경우 폭발 범위에서 제외 확인
+                {
+                    if (outerWallHit)
+                    {
+                        result = new bool[] { true, false };
+                        break;
+                    }
+                    if (!wallHit)
+                    { // 벽에 의해 완전히 막히지 않았고
+                        for (int j = 0; j < semiWallHit.Length; j++)
+                        { // 반벽이 2개가 겹쳐있을 경우에
+                            for (int k = j + 1; k < semiWallHit.Length; k++)
+                            {
+                                float wallDistance = Mathf.Abs(semiWallHit[j].distance - semiWallHit[k].distance);
+                                if (wallDistance > 0.1f) continue;
+                                if (semiWallHit[j].transform.rotation == semiWallHit[k].transform.rotation || Mathf.Abs(semiWallHit[j].distance - semiWallHit[k].distance) < 0.000001f)
+                                {
+                                    fullBlock = true; // 완전 막힘으로 처리
+                                    break;
+                                }
+                            }
+                            if (fullBlock) break;
+                        }
+                        if (!fullBlock)
+                        { // 완전 막히지 않았고 적이 공격 범주에 있다면 공격한다.
+                            result = new bool[] { false, true };
+                            break;
+                        }
+                    }
+                    result = new bool[] { false, false };
+                    break;
+                }
+                if (result[0]) // 외부벽에 막혀있는 판정일 경우 리스트에서 제외
+                {
+                    exploablePosition.RemoveAt(i);
+                }
+                else if (!result[1]) // 사이에 벽이 있다고 판단될 경우 리스트에서 제외
+                {
+                    exploablePosition.RemoveAt(i);
+                }
+                // 최종적으로 벽으로 걸러지지 않은 구역만 리스트안에 들어가게 됨
+            } // 폭발 가능한 구역 확인 후 리스트 재구성 ex) 벽으로 막혀있는 구역경우 폭발 범위에서 제외
+
+            for(int i = 0; i < exploablePosition.Count; i++)
+            {
+                Vector3 explosionPos = thisScript.targetEnemy.transform.position + ((Vector3)exploablePosition[i] * GameManager.gridSize);
+                GameObject enemyObj = thisScript.FindValuesObj(explosionPos);
+                if (enemyObj) // 만약 폭발 지점에 적이 존재했을 경우
+                {
+                    foreach(enemyValues child in GameManager.enemyValueList) // 리스트에서 찾아서 hp 다운
+                    {
+                        if(child.position == enemyObj.transform.position)
+                        {
+                            enemyObj.transform.GetComponent<Enemy>().hp -= 1;
+                            child.hp -= 1;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+        public void Reset()
+        {
+            canEvent = true;
+            exploablePosition.Clear();
+        }
+    }
+
+
     class EvasiveManeuver : IAbility // 33.회피 기동
     {
         private EAbilityType mAbilityType = EAbilityType.AttackPassive;
