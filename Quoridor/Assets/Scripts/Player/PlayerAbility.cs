@@ -542,6 +542,7 @@ public class PlayerAbility : MonoBehaviour
             new Vector2Int(0, 0), new Vector2Int(1, 0), new Vector2Int(-1, 0),  new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
         };
         private Vector2Int mTargetPos;
+        private List<GameObject> mTargetList = new List<GameObject>();
 
         PlayerAbility thisScript;
         public SmokeGrenade(PlayerAbility playerAbility)
@@ -565,6 +566,10 @@ public class PlayerAbility : MonoBehaviour
         public void Reset()
         {
             canEvent = true;
+            foreach (var pos in mAttackScale)
+            {
+                mTargetList.Add(GameObject.FindGameObjectsWithTag("Enemy").Where(enemyObject => enemyObject.transform.position == GameManager.ChangeCoord(targetPos + pos)).FirstOrDefault());
+            }
         }
     }
     class EvasiveManeuver : IAbility // 33.회피 기동
