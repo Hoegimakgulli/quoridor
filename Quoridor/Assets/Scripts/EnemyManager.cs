@@ -77,7 +77,7 @@ public class EnemyManager : MonoBehaviour
             //enemyWarningSignAnchor = true;
             enemyTurnAnchor = false;
             // 오브젝트 카운트 초기화
-            /*
+            /*      
             for (int count = 0; count < GameManager.enemyObjects.Count; count++)
             {
                 GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
