@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -44,6 +44,8 @@ public class GameManager : MonoBehaviour
     public UiManager uiManager;
 
     public PlayerCharacters playerCharacters;
+
+    public GameObject autoTrap;
 
     void Awake()
     {

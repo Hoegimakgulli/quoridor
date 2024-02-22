@@ -431,6 +431,7 @@ public class EnemyManager : MonoBehaviour
 
             //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
             GameManager.enemyValueList[count].moveCtrl += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
+            currentEnemyState.moveCtrl[1] = GameManager.enemyValueList[count].moveCtrl; // 기존 유닛에 들어오는 무브 컨트롤 수정
             //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
 
             uiManager.SortEnemyStates(); //행동력에 따라 적 상태창 순서 정렬
@@ -453,6 +454,7 @@ public class EnemyManager : MonoBehaviour
                 GameManager.enemyValueList[count].moveCtrl = -1; //상태창 순서를 행동력 순으로 정렬했을 때, 방금 이동한 적의 순서가 가장 아래로 내려오도록 행동력을 마이너스로 수정.
                 uiManager.SortEnemyStates(); //방금 이동한 적의 상태창이 아래로 내려오도록 리스트를 재정렬
                 GameManager.enemyValueList[count].moveCtrl = originMoveCtrl - currentEnemyState.moveCtrl[0]; //적의 행동력 감소
+                currentEnemyState.moveCtrl[1] = GameManager.enemyValueList[count].moveCtrl; // 현재 이동한 유닛 행동력 변경
                 yield return StartCoroutine(uiManager.ReloadState(originSortingList[count], GameManager.enemyValueList[count].moveCtrl, count));
 
                 /*if (!turnCheck)
