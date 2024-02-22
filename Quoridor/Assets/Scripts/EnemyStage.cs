@@ -182,7 +182,7 @@ public class EnemyStage : MonoBehaviour
     public int StageEnemySelectNum(string name)
     {
         int selectNum = 0;
-        foreach(GameObject child in EM.enemyPrefabs)
+        foreach (GameObject child in EM.enemyPrefabs)
         {
             if (child.name.Contains(name))
             {
@@ -195,7 +195,7 @@ public class EnemyStage : MonoBehaviour
 
     public void StageEnemySpawn()
     {
-        foreach(enemyValues child in GameManager.enemyValueList)
+        foreach (enemyValues child in GameManager.enemyValueList)
         {
             GameObject currentEnemyObj = Instantiate(EM.enemyPrefabs[child.uniqueNum], child.position, Quaternion.identity, GameObject.FindWithTag("EnemyBox").transform);
             if (EM.enemyPrefabs[child.uniqueNum].name.Contains("EnemyShieldSoldier")) // 소환되는 오브젝트가 방패병일 경우 맵그래프 변경
