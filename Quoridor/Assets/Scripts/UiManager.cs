@@ -16,6 +16,7 @@ public class UiManager : MonoBehaviour
     // 이규빈 생성 변수들
     public GameObject uiCanvas;
     private GameManager gameManager;
+    private EnemyManager enemyManager;
     private List<RectTransform> enemyStates = new List<RectTransform>(); //적 상태창들의 RectTransform
     public float uiMoveTime = 0.2f; //적 상태창 움직이는 시간 
     public bool popLock = false; //임시 변수. 플레이어 및 적턴 알려주는 팝업 통제용.
@@ -28,6 +29,7 @@ public class UiManager : MonoBehaviour
 
     private void Awake()
     {
+        enemyManager = GetComponent<EnemyManager>();
         GameObject uiC = Instantiate(uiCanvas);
         turnEndButton = uiC.transform.GetChild(4).gameObject;
         turnEndButton.GetComponent<Button>().onClick.AddListener(() => PlayerTurnEnd());
@@ -157,11 +159,12 @@ public class UiManager : MonoBehaviour
         //상태창에 애니메이션 적용이 편리하도록 리스트에 Rect Transform을 넣어둠.
         enemyStates.Add(currentEnemyState.GetComponent<RectTransform>());
         //currentEnemyState.GetComponent<Button>().onClick.AddListener(() => HighlightEnemy(enemyNum));
-        
+
         //적 상태창 버튼에 적 기물 하이라이팅 함수를 연결
-        for(int i = 0; i < GameManager.enemyObjects.Count; i++)
+        for (int i = 0; i < GameManager.enemyValueList.Count; i++)
         {
-            if (GameManager.enemyObjects[i] == currentEnemyObj)
+            Debug.Log(enemyManager.GetEnemyObject(i));
+            if (enemyManager.GetEnemyObject(i) == currentEnemyObj)
             {
                 currentEnemyState.GetComponent<Button>().onClick.AddListener(() => HighlightEnemy(i));
                 break;
@@ -181,12 +184,12 @@ public class UiManager : MonoBehaviour
     //적 상태창을 행동력 순서로 정렬
     public void SortEnemyStates()
     {
-        for (int i = 1; i < GameManager.enemyObjects.Count; i++)
+        for (int i = 1; i < GameManager.enemyValueList.Count; i++)
         {
             int key = sortingList[i];
             int j = i - 1;
 
-            while (j >= 0 && GameManager.enemyObjects[sortingList[j]].GetComponent<Enemy>().moveCtrl[1] < GameManager.enemyObjects[key].GetComponent<Enemy>().moveCtrl[1])
+            while (j >= 0 && GameManager.enemyValueList[sortingList[j]].moveCtrl < GameManager.enemyValueList[key].moveCtrl)
             {
                 sortingList[j + 1] = sortingList[j];
                 j--;
@@ -212,7 +215,7 @@ public class UiManager : MonoBehaviour
     //행동력 올라가는 애니메이션  (몇번째 enemy인지, 시작 행동력, 목표 행동력, 마지막 적의 움직임인지)
     public IEnumerator CountMovectrlAnim(int enemyNum, int start, int goal, bool finalMove)
     {
-        Enemy enemy = GameManager.enemyObjects[enemyNum].GetComponent<Enemy>();
+        Enemy enemy = enemyManager.GetEnemyObject(enemyNum).GetComponent<Enemy>();
         if (goal > 10) goal = 10;
         enemyStates[enemyNum].GetComponent<Image>().DOFade(1, 0); //밝아지는 연출
         DOVirtual.Int(start, goal, uiMoveTime, ((x) => { enemyStates[enemyNum].GetChild(1).GetComponent<Text>().text = "행동력 : " + x + " / " + enemy.moveCtrl[0]; })).SetEase(Ease.InCubic);
@@ -227,7 +230,7 @@ public class UiManager : MonoBehaviour
     //적 체력 내려가는 애니메이션 (몇번째 enemy인지, 처음 체력, 맞은 후 체력)
     public IEnumerator CountEnemyHpAnim(int enemyNum, int start ,int goal)
     {
-        Enemy enemy = GameManager.enemyObjects[enemyNum].GetComponent<Enemy>();
+        Enemy enemy = enemyManager.GetEnemyObject(enemyNum).GetComponent<Enemy>();  ////////////////GameManager.enemy
         if (goal < 0) goal = 0;
         enemyStates[enemyNum].GetChild(3).GetComponent<Image>().DOFade(1, 0);
         enemyStates[enemyNum].GetChild(3).GetComponent<Image>().DOFade(0, uiMoveTime * 5);
@@ -269,10 +272,6 @@ public class UiManager : MonoBehaviour
             enemyStates[i].GetComponent<Button>().onClick.RemoveAllListeners();
             int iii = i;
             enemyStates[i].GetComponent<Button>().onClick.AddListener(() => HighlightEnemy(iii));
-            //for(int j = 0; j < GameManager.enemyObjects.Count; j++)
-            //{
-
-            //}
         }
 
 
@@ -287,7 +286,7 @@ public class UiManager : MonoBehaviour
                 sortingList.RemoveAt(i);
             }
         }
-        if (GameManager.enemyObjects.Count != 0)
+        if(GameManager.enemyValueList.Count != 0)
         {
             StartCoroutine(SwapStatesAnim(0, false));
         }
@@ -328,11 +327,11 @@ public class UiManager : MonoBehaviour
         //cg = enemyStates[enemyNum]
         yield return new WaitForSeconds(uiMoveTime);
         yield return StartCoroutine(SwapStatesAnim(enemyNum, false));
-        enemyStates[enemyNum].GetChild(1).GetComponent<Text>().text = "행동력 : " + 0 + " / " + GameManager.enemyObjects[enemyNum].GetComponent<Enemy>().moveCtrl[0];
+        enemyStates[enemyNum].GetChild(1).GetComponent<Text>().text = "행동력 : " + 0 + " / " + enemyManager.GetEnemyObject(enemyNum).GetComponent<Enemy>().moveCtrl[0];  //GameManager.enemyObjects[enemyNum].GetComponent<Enemy>().moveCtrl[0];
         enemyStates[enemyNum].DOAnchorPosX(enemyStates[enemyNum].anchoredPosition.x - 400, uiMoveTime);
         yield return new WaitForSeconds(uiMoveTime);
 
-        if (count == GameManager.enemyObjects.Count - 1)
+        if (count == GameManager.enemyValueList.Count - 1)
             yield return StartCoroutine(CountMovectrlAnim(enemyNum, 0, goal, true));
         else
             yield return StartCoroutine(CountMovectrlAnim(enemyNum, 0, goal, false));
@@ -342,7 +341,7 @@ public class UiManager : MonoBehaviour
     public void HighlightEnemy(int enemyNum)
     {
         StartCoroutine(FadeInOutLoop(enemyNum));
-        StartCoroutine(GameManager.enemyObjects[enemyNum].GetComponent<Enemy>().FadeInOutLoop(uiMoveTime*2));
+        StartCoroutine(enemyManager.GetEnemyObject(enemyNum).GetComponent<Enemy>().FadeInOutLoop(uiMoveTime*2));
     }
 
     //적 하이라이팅 페이드 인/아웃 루프 (몇번째로 소환된 적인지)

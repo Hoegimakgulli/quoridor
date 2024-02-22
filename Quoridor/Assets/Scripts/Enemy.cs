@@ -149,9 +149,9 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             }
         }
 
-        for (int i = 0; i < GameManager.enemyObjects.Count; i++)
+        for (int i = 0; i < GameManager.enemyValueList.Count; i++)
         {
-            if (GameManager.enemyObjects[i] == gameObject)
+            if (GameObject.FindWithTag("EnemyBox").transform.GetChild(i).gameObject == gameObject)
             {
                 uiManager.StartCountEnemyHpAnim(i, originHP, hp);
             }
