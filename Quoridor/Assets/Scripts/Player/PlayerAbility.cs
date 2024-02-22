@@ -975,7 +975,7 @@ public class PlayerAbility : MonoBehaviour
     }
     class KnockBack : IAbility // 36.넉백
     {
-        private EAbilityType mAbilityType = EAbilityType.AttackPassive;
+        private EAbilityType mAbilityType = EAbilityType.HitPassive;
         private bool mbEvent = false;
         private int mCount = 1;
 

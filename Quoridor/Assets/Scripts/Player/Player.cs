@@ -578,7 +578,7 @@ public class Player : MonoBehaviour
             RaycastHit2D wallHit = Physics2D.Raycast(transform.position, (atkDirection + direction).normalized, GameManager.gridSize * (atkDirection + direction).magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
             RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, (atkDirection + direction).normalized, GameManager.gridSize * (atkDirection + direction).magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
             RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, (atkDirection + direction).normalized, GameManager.gridSize * (atkDirection + direction).magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
-            Debug.Log((atkDirection + direction).normalized);
+            // Debug.Log((atkDirection + direction).normalized);
             Vector3 newPosition = Vector3.zero;
 
             bool[] result = CheckRay(outerWallHit, wallHit, semiWallHit);

@@ -44,7 +44,7 @@ public class UiManager : MonoBehaviour
         historyBox[0] = panelBox[1].transform.GetChild(0).transform.GetChild(0).gameObject; // History -> playerBox 접근
         historyBox[1] = panelBox[1].transform.GetChild(0).transform.GetChild(1).gameObject; // History -> enemyBox 접근
         explosionEffect = panelBox[0].transform.parent.GetChild(3).GetChild(2).gameObject;
-        for(int i = 0; i < explosionEffect.transform.childCount; i++)
+        for (int i = 0; i < explosionEffect.transform.childCount; i++)
         {
             particlesRT.Add(explosionEffect.transform.GetChild(i).GetComponent<RectTransform>());
         }
@@ -135,7 +135,7 @@ public class UiManager : MonoBehaviour
     //적 상태창이 전부 사라질 때 꼭 호출
     public void ResetEnemyStates()
     {
-        for(int i = 0; i < enemyStates.Count; i++)
+        for (int i = 0; i < enemyStates.Count; i++)
         {
             Destroy(enemyStates[0]);
         }
@@ -175,7 +175,7 @@ public class UiManager : MonoBehaviour
     //정렬되지 않은 sortingList를 생성 (매개변수는 크기)
     public void CreateSortingList(int listSize)
     {
-        for(int i = 0; i < listSize; i++)
+        for (int i = 0; i < listSize; i++)
         {
             sortingList.Add(i);
         }
@@ -228,7 +228,7 @@ public class UiManager : MonoBehaviour
         StartCoroutine(CountEnemyHpAnim(i, originHP, hp));
     }
     //적 체력 내려가는 애니메이션 (몇번째 enemy인지, 처음 체력, 맞은 후 체력)
-    public IEnumerator CountEnemyHpAnim(int enemyNum, int start ,int goal)
+    public IEnumerator CountEnemyHpAnim(int enemyNum, int start, int goal)
     {
         Enemy enemy = enemyManager.GetEnemyObject(enemyNum).GetComponent<Enemy>();  ////////////////GameManager.enemy
         if (goal < 0) goal = 0;
@@ -236,38 +236,38 @@ public class UiManager : MonoBehaviour
         enemyStates[enemyNum].GetChild(3).GetComponent<Image>().DOFade(0, uiMoveTime * 5);
         DOVirtual.Int(start, goal, uiMoveTime * 5, ((x) => { enemyStates[enemyNum].GetChild(2).GetComponent<Text>().text = "체력 : " + x + " / " + enemy.maxHp; })).SetEase(Ease.OutCubic);
         yield return new WaitForSeconds(uiMoveTime * 5);
-        if(goal == 0) //적 사망
+        if (goal == 0) //적 사망
         {
             StartCoroutine(DyingEnemyAnim(enemyNum));
         }
         yield return null;
     }
-    
+
     //적 사망 시 상태창 애니메이션
     private IEnumerator DyingEnemyAnim(int enemyNum)
     {
         enemyStates[enemyNum].GetChild(3).GetComponent<Image>().DOFade(1, uiMoveTime * 4);
         yield return StartCoroutine(QuakeAnim(enemyStates[enemyNum], uiMoveTime * 4));
         GameObject destroyState = enemyStates[enemyNum].gameObject;
-        
+
         //UI 터지는 부분
         explosionEffect.SetActive(true);
         RectTransform statesPanelRT = enemyStates[0].parent.parent.GetComponent<RectTransform>();
-        explosionEffect.GetComponent<RectTransform>().anchoredPosition = statesPanelRT.anchoredPosition + new Vector2(0, statesPanelRT.rect.height/2 + enemyStates[enemyNum].anchoredPosition.y);
-        foreach(RectTransform particle in particlesRT)
+        explosionEffect.GetComponent<RectTransform>().anchoredPosition = statesPanelRT.anchoredPosition + new Vector2(0, statesPanelRT.rect.height / 2 + enemyStates[enemyNum].anchoredPosition.y);
+        foreach (RectTransform particle in particlesRT)
         {
             particle.anchoredPosition = Vector2.zero;
             particle.GetComponent<Image>().DOFade(1, 0);
             float angle = Random.Range(0, Mathf.PI * 2);
-            particle.DOAnchorPos(new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * 300, uiMoveTime*2);
-            particle.GetComponent<Image>().DOFade(0, uiMoveTime*2);
+            particle.DOAnchorPos(new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * 300, uiMoveTime * 2);
+            particle.GetComponent<Image>().DOFade(0, uiMoveTime * 2);
         }
 
         enemyStates.RemoveAt(enemyNum);
         Destroy(destroyState);
 
         //적 상태창 버튼에 적 기물 하이라이팅 함수를 연결
-        for(int i = 0; i < enemyStates.Count; i++)
+        for (int i = 0; i < enemyStates.Count; i++)
         {
             enemyStates[i].GetComponent<Button>().onClick.RemoveAllListeners();
             int iii = i;
@@ -280,17 +280,17 @@ public class UiManager : MonoBehaviour
             if (sortingList[i] > enemyNum)
             {
                 sortingList[i]--;
-            } 
+            }
             else if (sortingList[i] == enemyNum)
             {
                 sortingList.RemoveAt(i);
             }
         }
-        if(GameManager.enemyValueList.Count != 0)
+        if (GameManager.enemyValueList.Count != 0)
         {
             StartCoroutine(SwapStatesAnim(0, false));
         }
-        yield return new WaitForSeconds(uiMoveTime*2);
+        yield return new WaitForSeconds(uiMoveTime * 2);
         explosionEffect.SetActive(false);
     }
 
@@ -301,7 +301,7 @@ public class UiManager : MonoBehaviour
         rt.DOShakeAnchorPos(quakeTime, 10);
         yield return new WaitForSeconds(quakeTime);
     }
-    
+
 
     //행동력에 따라 적들 상태창 스왑 (몇번째 enemy인지, 마지막 적의 움직임인지)
     public IEnumerator SwapStatesAnim(int enemyNum, bool isFinalMove)
@@ -341,7 +341,7 @@ public class UiManager : MonoBehaviour
     public void HighlightEnemy(int enemyNum)
     {
         StartCoroutine(FadeInOutLoop(enemyNum));
-        StartCoroutine(enemyManager.GetEnemyObject(enemyNum).GetComponent<Enemy>().FadeInOutLoop(uiMoveTime*2));
+        StartCoroutine(enemyManager.GetEnemyObject(enemyNum).GetComponent<Enemy>().FadeInOutLoop(uiMoveTime * 2));
     }
 
     //적 하이라이팅 페이드 인/아웃 루프 (몇번째로 소환된 적인지)
@@ -349,9 +349,9 @@ public class UiManager : MonoBehaviour
     {
         //for (int i = 0; i < 3; i++)
         {
-            enemyStates[enemyNum].GetChild(4).GetComponent<Image>().DOFade(1, uiMoveTime*2);
-            yield return new WaitForSeconds(uiMoveTime*2);
-            enemyStates[enemyNum].GetChild(4).GetComponent<Image>().DOFade(0, uiMoveTime*2);
+            enemyStates[enemyNum].GetChild(4).GetComponent<Image>().DOFade(1, uiMoveTime * 2);
+            yield return new WaitForSeconds(uiMoveTime * 2);
+            enemyStates[enemyNum].GetChild(4).GetComponent<Image>().DOFade(0, uiMoveTime * 2);
             yield return new WaitForSeconds(uiMoveTime * 2);
         }
     }
