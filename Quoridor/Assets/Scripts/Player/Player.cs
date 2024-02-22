@@ -22,11 +22,15 @@ public class Player : MonoBehaviour
     [SerializeField]
     List<Vector2Int> attackPositions = new List<Vector2Int>() { Vector2Int.zero }; // 플레이어의 가능한 공격 좌표들
 
+    List<Vector2Int> allPositions = new List<Vector2Int>(); // 모든 좌표
+
     [SerializeField]
     PlayerPrefabs playerPrefabs; // 플레이어 관련 프리팹 모음
     List<GameObject> playerPreviews = new List<GameObject>();
     List<GameObject> playerAttackPreviews = new List<GameObject>();
     List<GameObject> playerAttackHighlights = new List<GameObject>();
+    List<GameObject> playerAbilityPreviews = new List<GameObject>();
+    List<GameObject> playerAbilityHighlights = new List<GameObject>();
     GameObject playerWallPreview;
     [SerializeField]
     GameObject historyIndexPrefab; // history 형식으로 저장되는 글 양식
@@ -48,9 +52,11 @@ public class Player : MonoBehaviour
 
     public bool canAction = true;
     public bool shouldMove = false;
+    public bool shouldBuild = false;
     public bool canAttack = true;
-    int ablilityCount = 1;
+    public int abilityCount = 0;
     protected bool canSignAbility = true;
+    public int usingAbilityID;
 
     int[] previousWallInfo = new int[3];
     int[,] tempMapGraph = new int[81, 81];
@@ -58,6 +64,10 @@ public class Player : MonoBehaviour
     /*[디버그용]*/
     [SerializeField]
     GameObject playerUI;
+    /*[임시 능력 UI]*/
+    public GameObject abilityUI;
+    [SerializeField]
+    GameObject abilityUIButton;
 
     GameObject wallStorage;
     PlayerActionUI playerActionUI;
@@ -82,21 +92,35 @@ public class Player : MonoBehaviour
             playerAttackPreviews.Add(Instantiate(playerPrefabs.attackPreview, transform.position, Quaternion.identity));
             playerAttackPreviews[i].SetActive(false);
         }
-        for (int i = 0; i < attackPositions.Count; i++) // 플레이어 공격 미리보기 -> 미리소환하여 비활성화 해놓기
+        for (int i = 0; i < attackPositions.Count; i++) // 플레이어 공격 하이라이트 -> 미리소환하여 비활성화 해놓기
         {
             playerAttackHighlights.Add(Instantiate(playerPrefabs.attackHighlight, transform.position, Quaternion.identity));
             playerAttackHighlights[i].SetActive(false);
         }
+        for (int i = 0; i < 81; i++) // 플레이어 능력 미리보기 -> 미리소환하여 비활성화 해놓기
+        {
+            playerAbilityPreviews.Add(Instantiate(playerPrefabs.attackPreview, new Vector3(i % 9 - 4, i / 9 - 4, 0) * GameManager.gridSize, Quaternion.identity));
+            playerAbilityPreviews[i].SetActive(false);
+        }
+        for (int i = 0; i < 81; i++) // 플레이어 능력 하이라이트 -> 미리소환하여 비활성화 해놓기
+        {
+            playerAbilityHighlights.Add(Instantiate(playerPrefabs.attackHighlight, new Vector3(i % 9 - 4, i / 9 - 4, 0) * GameManager.gridSize, Quaternion.identity));
+            playerAbilityHighlights[i].SetActive(false);
+        }
         for (int i = 0; i < maxWallCount; i++)
         {
             Instantiate(playerPrefabs.wall, wallStorage.transform).SetActive(false);
+        }
+        for (int i = 0; i < 81; i++)
+        {
+            allPositions.Add(new Vector2Int(i % 9 - 4, i / 9 - 4));
         }
         playerWallPreview = Instantiate(playerPrefabs.wallPreview, transform.position, Quaternion.identity); // 플레이어 벽 미리보기 -> 미리소환하여 비활성화 해놓기
         playerWallPreview.SetActive(false);
         tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵그래프 저장
 
         //playerUI = Instantiate(playerUI); // [디버그용]
-
+        abilityUI = Instantiate(abilityUI); // [임시 능력 UI]
         playerAbility = GetComponent<PlayerAbility>();
     }
     public void Initialize()
@@ -109,10 +133,7 @@ public class Player : MonoBehaviour
             wallStorage.transform.GetChild(i).gameObject.SetActive(false);
         }
 
-        canAction = true;
-        canAttack = true;
-
-        ResetPreview();
+        Reset();
 
         previousWallInfo = new int[3];
         tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵그래프 저장
@@ -130,8 +151,13 @@ public class Player : MonoBehaviour
                 // [디버그용] //
                 canvas.GetChild(1).GetComponent<Button>().interactable = canAction;                 // 건설 버튼
                 canvas.GetChild(2).GetComponent<Button>().interactable = canAction || shouldMove;   // 이동 버튼
-                canvas.GetChild(0).GetComponent<Button>().interactable = canAttack;                 // 공격 버튼
-                canvas.GetChild(3).GetComponent<Button>().interactable = ablilityCount == 0;        // 능력 버튼
+                canvas.GetChild(0).GetComponent<Button>().interactable = canAttack || shouldBuild;  // 공격 버튼
+                canvas.GetChild(3).GetComponent<Button>().interactable = abilityCount == 0;         // 능력 버튼
+            }
+            if (abilityCount > 0)
+            {   //[임시 능력 UI]
+                abilityUI.SetActive(true);
+                playerAbility.ActiveEvent();
             }
 
             touchPosition = Camera.main.ScreenToWorldPoint(touchPosition); //카메라에 찍힌 좌표를 월드좌표로
@@ -142,7 +168,7 @@ public class Player : MonoBehaviour
                     else ResetPreview();
                     break;
                 case GameManager.EPlayerControlStatus.Build:
-                    if (canAction) BuildWall();
+                    if (canAction || shouldBuild) BuildWall();
                     else ResetPreview();
                     break;
                 case GameManager.EPlayerControlStatus.Attack:
@@ -150,7 +176,7 @@ public class Player : MonoBehaviour
                     else ResetPreview();
                     break;
                 case GameManager.EPlayerControlStatus.Ability:
-                    if (ablilityCount > 0) UseAbility();
+                    if (abilityCount > 0) UseAbility();
                     break;
                 default:
                     break;
@@ -165,6 +191,7 @@ public class Player : MonoBehaviour
     protected virtual void Reset()
     {
         playerUI.SetActive(false); // [디버그용]
+        abilityUI.SetActive(false); // [임시 능력 UI]
         gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
         canAction = true;
         canAttack = true;
@@ -287,9 +314,43 @@ public class Player : MonoBehaviour
         }
         return isDead;
     }
-    protected virtual void UseAbility()
+    void UseAbility()
     {
+        IActiveAbility activeAbility = playerAbility.abilities[playerAbility.abilitiesID.IndexOf(usingAbilityID)] as IActiveAbility;
+        RaycastHit2D previewHit = Physics2D.Raycast(touchPosition, transform.forward, 15f, LayerMask.GetMask("Preview"));
+        if (activeAbility.attackRange.Count == 0)
+        {
+            List<Vector2Int> attackRange = allPositions.Select(position => position - GameManager.ChangeCoord(transform.position)).ToList();
 
+            SetPreviewAbility(attackRange, activeAbility.attackScale, activeAbility.canPenetrate[0]);
+            SetAbilityHighlight(activeAbility.attackScale, activeAbility.canPenetrate[1]);
+        }
+        else
+        {
+            SetPreviewAbility(activeAbility.attackRange, activeAbility.attackScale, activeAbility.canPenetrate[0]);
+            SetAbilityHighlight(activeAbility.attackScale, activeAbility.canPenetrate[1]);
+        }
+        if (touchState == ETouchState.Ended) //화면 클릭시
+        {
+            if (previewHit)
+            {
+                if (previewHit.transform.CompareTag("PlayerAttackPreview")) // 클릭좌표에 플레이어공격미리보기가 있다면
+                {
+                    activeAbility.targetPos = new Vector2Int(Mathf.RoundToInt(previewHit.transform.position.x / GameManager.gridSize), Mathf.RoundToInt(previewHit.transform.position.y / GameManager.gridSize));
+                    (activeAbility as IAbility).Event();
+                    usingAbilityID = 0;
+                    gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
+                    playerActionUI.ActiveUI();
+                    ResetPreview();
+                }
+            }
+            else //다른데 클릭하면 다시 선택화면으로
+            {
+                gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
+                playerActionUI.ActiveUI();
+                ResetPreview();
+            }
+        }
     }
     // 미리보기 벽 설치
     void SetPreviewWall()
@@ -526,10 +587,10 @@ public class Player : MonoBehaviour
                 playerAttackHighlights[i].SetActive(false);
                 continue;
             }
-            newPosition = atkDirection + direction;
-            playerAttackHighlights[i].transform.position = transform.position + GameManager.gridSize * new Vector3(Mathf.Round(newPosition.x), Mathf.Round(newPosition.y), 0);
+            newPosition = direction;
+            playerAttackHighlights[i].transform.position = previewHit.transform.position + GameManager.gridSize * new Vector3(Mathf.Round(newPosition.x), Mathf.Round(newPosition.y), 0);
             playerAttackHighlights[i].SetActive(true);
-            Debug.DrawRay(transform.position, (atkDirection + direction).normalized * GameManager.gridSize * (atkDirection + direction).magnitude, playerAttackHighlights[i].GetComponent<SpriteRenderer>().color, 0.1f);
+            Debug.DrawRay(transform.position, (atkDirection + direction).normalized * (previewHit.transform.position - transform.position).magnitude, playerAttackHighlights[i].GetComponent<SpriteRenderer>().color, 0.1f);
             if (result[1])
             {
                 playerAttackHighlights[i].GetComponent<SpriteRenderer>().color = Color.cyan;
@@ -538,6 +599,84 @@ public class Player : MonoBehaviour
             else
             {
                 playerAttackHighlights[i].GetComponent<SpriteRenderer>().color = Color.grey;
+            }
+
+        }
+    }
+    void SetPreviewAbility(List<Vector2Int> abilityRange, List<Vector2Int> abilityScale, bool isPenetration)
+    {
+        for (int i = 0; i < abilityRange.Count; i++)
+        {
+            bool canSetPreview = false;
+            bool isOuterWall = true;
+            for (int h = 0; h < abilityScale.Count; h++)
+            {
+                Vector2 direction = (Vector2)abilityScale[h];
+                RaycastHit2D outerWallHit = Physics2D.Raycast(transform.position, ((Vector2)abilityRange[i] + direction).normalized, GameManager.gridSize * ((Vector2)abilityRange[i] + direction).magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
+                RaycastHit2D wallHit = Physics2D.Raycast(transform.position, ((Vector2)abilityRange[i] + direction).normalized, GameManager.gridSize * ((Vector2)abilityRange[i] + direction).magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
+                RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, ((Vector2)abilityRange[i] + direction).normalized, GameManager.gridSize * ((Vector2)abilityRange[i] + direction).magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
+                RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, ((Vector2)abilityRange[i] + direction).normalized, GameManager.gridSize * ((Vector2)abilityRange[i] + direction).magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
+
+                bool[] result = CheckRay(outerWallHit, wallHit, semiWallHit);
+                if (!result[0]) isOuterWall = false;
+                if (result[1] || isPenetration)
+                {
+                    canSetPreview = true;
+                    playerAbilityPreviews[i].transform.position = transform.position + GameManager.gridSize * (Vector3)(Vector2)abilityRange[i];
+                    playerAbilityPreviews[i].GetComponent<SpriteRenderer>().color = Color.red;
+                    playerAbilityPreviews[i].GetComponent<BoxCollider2D>().enabled = true;
+                    playerAbilityPreviews[i].SetActive(true);
+                    break;
+                }
+            }
+            if (isOuterWall)
+            {
+                playerAbilityPreviews[i].SetActive(false);
+                continue;
+            }
+            if (canSetPreview) continue;
+            playerAbilityPreviews[i].transform.position = transform.position + GameManager.gridSize * (Vector3)(Vector2)abilityRange[i];
+            playerAbilityPreviews[i].GetComponent<SpriteRenderer>().color = Color.grey;
+            playerAbilityPreviews[i].GetComponent<BoxCollider2D>().enabled = false;
+            playerAbilityPreviews[i].SetActive(true);
+        }
+    }
+    void SetAbilityHighlight(List<Vector2Int> abilityScale, bool isPenetration)
+    {
+        RaycastHit2D previewHit = Physics2D.Raycast(touchPosition, transform.forward, 15f, LayerMask.GetMask("Preview"));
+        if (!previewHit)
+        {
+            foreach (var highlight in playerAbilityHighlights) highlight.SetActive(false);
+            return;
+        }
+        for (int i = 0; i < abilityScale.Count; i++)
+        {
+            Vector2 direction = (Vector2)abilityScale[i];
+            RaycastHit2D outerWallHit = Physics2D.Raycast(previewHit.transform.position, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
+            RaycastHit2D wallHit = Physics2D.Raycast(previewHit.transform.position, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
+            RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(previewHit.transform.position, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
+            RaycastHit2D tokenHit = Physics2D.RaycastAll(previewHit.transform.position, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
+            // Debug.Log((atkDirection + direction).normalized);
+            Vector3 newPosition = Vector3.zero;
+
+            bool[] result = CheckRay(outerWallHit, wallHit, semiWallHit);
+            if (result[0])
+            {
+                playerAbilityHighlights[i].SetActive(false);
+                continue;
+            }
+            newPosition = direction;
+            playerAbilityHighlights[i].transform.position = previewHit.transform.position + GameManager.gridSize * new Vector3(Mathf.Round(newPosition.x), Mathf.Round(newPosition.y), 0);
+            playerAbilityHighlights[i].SetActive(true);
+            Debug.DrawRay(previewHit.transform.position, direction, playerAbilityHighlights[i].GetComponent<SpriteRenderer>().color, 0.1f);
+            if (result[1] || isPenetration)
+            {
+                playerAbilityHighlights[i].GetComponent<SpriteRenderer>().color = Color.cyan;
+                continue;
+            }
+            else
+            {
+                playerAbilityHighlights[i].GetComponent<SpriteRenderer>().color = Color.grey;
             }
 
         }
@@ -588,6 +727,14 @@ public class Player : MonoBehaviour
         for (int i = 0; i < playerAttackHighlights.Count; i++)
         {
             playerAttackHighlights[i].SetActive(false);
+        }
+        foreach (GameObject preview in playerAbilityPreviews)
+        {
+            preview.SetActive(false);
+        }
+        foreach (GameObject highlight in playerAbilityHighlights)
+        {
+            highlight.SetActive(false);
         }
     }
     public virtual void Die()
