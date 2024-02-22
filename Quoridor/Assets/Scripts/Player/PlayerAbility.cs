@@ -222,8 +222,14 @@ public class PlayerAbility : MonoBehaviour
             case 13:
                 abilities.Add(new SmokeGrenade(this));
                 break;
+            case 32:
+                abilities.Add(new PrecisionBomb(this));
+                break;
             case 33:
                 abilities.Add(new EvasiveManeuver(this));
+                break;
+            case 34:
+                abilities.Add(new ConstructionManeuver(this));
                 break;
             case 36:
                 abilities.Add(new KnockBack(this));
@@ -498,6 +504,7 @@ public class PlayerAbility : MonoBehaviour
         private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.Attack;
         private List<Vector2Int> mAttackRange = new List<Vector2Int>();
         private List<Vector2Int> mAttackScale = new List<Vector2Int>();
+        private bool[] bCanPenetrate = new bool[2] { true, true };
         private Vector2Int mTargetPos;
 
         PlayerAbility thisScript;
@@ -509,6 +516,7 @@ public class PlayerAbility : MonoBehaviour
         public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
         public List<Vector2Int> attackRange { get { return mAttackRange; } }
         public List<Vector2Int> attackScale { get { return mAttackScale; } }
+        public bool[] canPenetrate { get { return bCanPenetrate; } }
         public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
         public EAbilityType abilityType { get { return mAbilityType; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
@@ -532,15 +540,16 @@ public class PlayerAbility : MonoBehaviour
     {
         private EAbilityType mAbilityType = EAbilityType.TargetActive;
         private bool mbEvent = true;
-        private int mCount = 1;
+        private int mCount = 2;
         private int mValue = 1;
-        private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.Attack;
+        private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
         private List<Vector2Int> mAttackRange = new List<Vector2Int>(){
             new Vector2Int(1, 0), new Vector2Int(2, 0), new Vector2Int(-1, 0), new Vector2Int(-2, 0), new Vector2Int(0, 1), new Vector2Int(0, 2), new Vector2Int(0, -1), new Vector2Int(0, -2), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
         };
         private List<Vector2Int> mAttackScale = new List<Vector2Int>(){
             new Vector2Int(0, 0), new Vector2Int(1, 0), new Vector2Int(-1, 0),  new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
         };
+        private bool[] bCanPenetrate = new bool[2] { true, true };
         private Vector2Int mTargetPos;
         private List<GameObject> mTargetList = new List<GameObject>();
 
@@ -553,6 +562,7 @@ public class PlayerAbility : MonoBehaviour
         public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
         public List<Vector2Int> attackRange { get { return mAttackRange; } }
         public List<Vector2Int> attackScale { get { return mAttackScale; } }
+        public bool[] canPenetrate { get { return bCanPenetrate; } }
         public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
         public EAbilityType abilityType { get { return mAbilityType; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
@@ -565,11 +575,89 @@ public class PlayerAbility : MonoBehaviour
         }
         public void Reset()
         {
-            canEvent = true;
-            foreach (var pos in mAttackScale)
+            mCount--;
+            RaycastHit2D previewHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos), Vector3.forward, 15f, LayerMask.GetMask("Preview"));
+            if (previewHit)
             {
-                mTargetList.Add(GameObject.FindGameObjectsWithTag("Enemy").Where(enemyObject => enemyObject.transform.position == GameManager.ChangeCoord(targetPos + pos)).FirstOrDefault());
+                if (previewHit.transform.CompareTag("PlayerAttackPreview")) // 클릭좌표에 플레이어공격미리보기가 있다면
+                {
+                    foreach (var attackPosition in attackScale)
+                    {
+                        RaycastHit2D enemyHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos) + GameManager.ChangeCoord(attackPosition), Vector3.forward, 15f, LayerMask.GetMask("Token"));
+                        if (enemyHit)
+                        {
+                            if (enemyHit.transform.CompareTag("Enemy"))
+                            {
+                                Enemy enemy = enemyHit.transform.GetComponent<Enemy>();
+
+                                // 적 공격 무효화 처리? HOW?
+                            }
+                        }
+                    }
+                }
             }
+        }
+    }
+    class PrecisionBomb : IAbility, IActiveAbility // 32.정밀 폭격
+    {
+        private EAbilityType mAbilityType = EAbilityType.TargetActive;
+        private bool mbEvent = true;
+        private int mCount = 1;
+        private int mValue = 1;
+        private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
+        private List<Vector2Int> mAttackRange = new List<Vector2Int>();
+        private List<Vector2Int> mAttackScale = new List<Vector2Int>(){
+            new Vector2Int(0, 0), new Vector2Int(1, 0), new Vector2Int(-1, 0),  new Vector2Int(0, 1), new Vector2Int(0, -1)
+        };
+        private bool[] bCanPenetrate = new bool[2] { true, true };
+        private Vector2Int mTargetPos;
+        private List<GameObject> mTargetList = new List<GameObject>();
+
+        PlayerAbility thisScript;
+        public PrecisionBomb(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            playerAbility.shouldSetUpAbilityUI = true;
+        }
+        public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
+        public List<Vector2Int> attackRange { get { return mAttackRange; } }
+        public List<Vector2Int> attackScale { get { return mAttackScale; } }
+        public bool[] canPenetrate { get { return bCanPenetrate; } }
+        public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            Debug.Log($"{targetPos}");
+            canEvent = false;
+
+            RaycastHit2D previewHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos), Vector3.forward, 15f, LayerMask.GetMask("Preview"));
+            if (previewHit)
+            {
+                if (previewHit.transform.CompareTag("PlayerAttackPreview")) // 클릭좌표에 플레이어공격미리보기가 있다면
+                {
+                    foreach (var attackPosition in attackScale)
+                    {
+                        RaycastHit2D enemyHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos) + GameManager.ChangeCoord(attackPosition), Vector3.forward, 15f, LayerMask.GetMask("Token"));
+                        if (enemyHit)
+                        {
+                            if (enemyHit.transform.CompareTag("Enemy"))
+                            {
+                                Enemy enemy = enemyHit.transform.GetComponent<Enemy>();
+
+                                enemy.AttackedEnemy(2);
+                                Debug.Log($"{enemyHit.transform.name}의 현재 체력 {enemy.hp}");
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+        public void Reset()
+        {
+            if (GameManager.Turn == 1) canEvent = true;
         }
     }
     class EvasiveManeuver : IAbility // 33.회피 기동
@@ -606,6 +694,30 @@ public class PlayerAbility : MonoBehaviour
             thisScript.player.shouldMove = false;
         }
     }
+    class ConstructionManeuver : IAbility // 34.건설 기동
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private bool mbEvent = false;
+        private int mCount = 1;
+
+
+        PlayerAbility thisScript;
+        public ConstructionManeuver(PlayerAbility playerAbility) { thisScript = playerAbility; }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.player.shouldBuild = false;
+            thisScript.player.shouldMove = false;
+            return false;
+        }
+        public void Reset()
+        {
+            thisScript.player.shouldBuild = true;
+            thisScript.player.shouldMove = true;
+        }
+    }
     class KnockBack : IAbility // 36.넉백
     {
         private EAbilityType mAbilityType = EAbilityType.AttackPassive;
@@ -632,6 +744,34 @@ public class PlayerAbility : MonoBehaviour
         public void Reset()
         {
             canEvent = true;
+        }
+    }
+    class Pressure : IAbility // 37.위압감
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private bool mbEvent = false;
+        private int mCount = 1;
+
+
+        PlayerAbility thisScript;
+        public Pressure(PlayerAbility playerAbility) { thisScript = playerAbility; }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            return false;
+        }
+        public void Reset()
+        {
+            if (GameManager.Turn == 1)
+            {
+                foreach (GameObject enemyObject in GameObject.FindGameObjectsWithTag("Enemy"))
+                {
+                    Enemy enemy = enemyObject.GetComponent<Enemy>();
+                    enemy.moveCtrl[1] = Mathf.Max(enemy.moveCtrl[1] - 3, 0);
+                }
+            }
         }
     }
 }

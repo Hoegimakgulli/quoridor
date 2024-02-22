@@ -22,6 +22,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     List<Vector2Int> attackPositions = new List<Vector2Int>() { Vector2Int.zero }; // 플레이어의 가능한 공격 좌표들
 
+    List<Vector2Int> allPositions = new List<Vector2Int>(); // 모든 좌표
+
     [SerializeField]
     PlayerPrefabs playerPrefabs; // 플레이어 관련 프리팹 모음
     List<GameObject> playerPreviews = new List<GameObject>();
@@ -50,6 +52,7 @@ public class Player : MonoBehaviour
 
     public bool canAction = true;
     public bool shouldMove = false;
+    public bool shouldBuild = false;
     public bool canAttack = true;
     public int abilityCount = 0;
     protected bool canSignAbility = true;
@@ -94,12 +97,12 @@ public class Player : MonoBehaviour
             playerAttackHighlights.Add(Instantiate(playerPrefabs.attackHighlight, transform.position, Quaternion.identity));
             playerAttackHighlights[i].SetActive(false);
         }
-        for (int i = 0; i < 80; i++) // 플레이어 능력 미리보기 -> 미리소환하여 비활성화 해놓기
+        for (int i = 0; i < 81; i++) // 플레이어 능력 미리보기 -> 미리소환하여 비활성화 해놓기
         {
             playerAbilityPreviews.Add(Instantiate(playerPrefabs.attackPreview, new Vector3(i % 9 - 4, i / 9 - 4, 0) * GameManager.gridSize, Quaternion.identity));
             playerAbilityPreviews[i].SetActive(false);
         }
-        for (int i = 0; i < 80; i++) // 플레이어 능력 하이라이트 -> 미리소환하여 비활성화 해놓기
+        for (int i = 0; i < 81; i++) // 플레이어 능력 하이라이트 -> 미리소환하여 비활성화 해놓기
         {
             playerAbilityHighlights.Add(Instantiate(playerPrefabs.attackHighlight, new Vector3(i % 9 - 4, i / 9 - 4, 0) * GameManager.gridSize, Quaternion.identity));
             playerAbilityHighlights[i].SetActive(false);
@@ -107,6 +110,10 @@ public class Player : MonoBehaviour
         for (int i = 0; i < maxWallCount; i++)
         {
             Instantiate(playerPrefabs.wall, wallStorage.transform).SetActive(false);
+        }
+        for (int i = 0; i < 81; i++)
+        {
+            allPositions.Add(new Vector2Int(i % 9 - 4, i / 9 - 4));
         }
         playerWallPreview = Instantiate(playerPrefabs.wallPreview, transform.position, Quaternion.identity); // 플레이어 벽 미리보기 -> 미리소환하여 비활성화 해놓기
         playerWallPreview.SetActive(false);
@@ -144,8 +151,8 @@ public class Player : MonoBehaviour
                 // [디버그용] //
                 canvas.GetChild(1).GetComponent<Button>().interactable = canAction;                 // 건설 버튼
                 canvas.GetChild(2).GetComponent<Button>().interactable = canAction || shouldMove;   // 이동 버튼
-                canvas.GetChild(0).GetComponent<Button>().interactable = canAttack;                 // 공격 버튼
-                canvas.GetChild(3).GetComponent<Button>().interactable = abilityCount == 0;        // 능력 버튼
+                canvas.GetChild(0).GetComponent<Button>().interactable = canAttack || shouldBuild;  // 공격 버튼
+                canvas.GetChild(3).GetComponent<Button>().interactable = abilityCount == 0;         // 능력 버튼
             }
             if (abilityCount > 0)
             {   //[임시 능력 UI]
@@ -161,7 +168,7 @@ public class Player : MonoBehaviour
                     else ResetPreview();
                     break;
                 case GameManager.EPlayerControlStatus.Build:
-                    if (canAction) BuildWall();
+                    if (canAction || shouldBuild) BuildWall();
                     else ResetPreview();
                     break;
                 case GameManager.EPlayerControlStatus.Attack:
@@ -313,17 +320,15 @@ public class Player : MonoBehaviour
         RaycastHit2D previewHit = Physics2D.Raycast(touchPosition, transform.forward, 15f, LayerMask.GetMask("Preview"));
         if (activeAbility.attackRange.Count == 0)
         {
-            foreach (GameObject preview in playerAbilityPreviews)
-            {
-                if (previewHit.transform.gameObject == preview) preview.GetComponent<SpriteRenderer>().color = Color.cyan;
-                else preview.GetComponent<SpriteRenderer>().color = Color.red;
-                preview.SetActive(true);
-            }
+            List<Vector2Int> attackRange = allPositions.Select(position => position - GameManager.ChangeCoord(transform.position)).ToList();
+
+            SetPreviewAbility(attackRange, activeAbility.attackScale, activeAbility.canPenetrate[0]);
+            SetAbilityHighlight(activeAbility.attackScale, activeAbility.canPenetrate[1]);
         }
         else
         {
-            SetPreviewAbility(activeAbility.attackRange, activeAbility.attackScale, true);
-            SetAbilityHighlight(activeAbility.attackScale, true);
+            SetPreviewAbility(activeAbility.attackRange, activeAbility.attackScale, activeAbility.canPenetrate[0]);
+            SetAbilityHighlight(activeAbility.attackScale, activeAbility.canPenetrate[1]);
         }
         if (touchState == ETouchState.Ended) //화면 클릭시
         {
