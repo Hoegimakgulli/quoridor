@@ -7,6 +7,7 @@ public interface IAbility   // 능력 인터페이스
     PlayerAbility.EAbilityType abilityType { get; }  // 능력 타입
     bool canEvent { get; set; }  // 이벤트 가능 여부 (쿨다운 관련)
     bool Event(); // 이벤트 (능력 함수 적는 부분)
+    PlayerAbility.EResetTime resetTime { get; }  // 리셋 주기
     void Reset(); // 리셋 (리셋, 쿨다운 관련, 턴이 넘어갈때마다 실행)
 }
 public interface IActiveAbility  // 액티브 능력 인터페이스

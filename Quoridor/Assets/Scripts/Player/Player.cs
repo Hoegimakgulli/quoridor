@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
+#if UNITY_EDITOR
 using UnityEditor.Experimental.GraphView;
+#endif
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -144,14 +146,15 @@ public class Player : MonoBehaviour
         TouchSetUp();
         if (GameManager.Turn % 2 == playerOrder) // 플레이어 차례인지 확인
         {
+            playerAbility.ResetEvent(PlayerAbility.EResetTime.OnPlayerTurnStart);
             playerUI.SetActive(true); // [디버그용]
             {
                 Transform canvas = playerUI.transform.GetChild(0);
                 canvas.GetChild(5).GetComponent<Text>().text = $"{maxWallCount - wallCount}/{maxWallCount}";
                 // [디버그용] //
-                canvas.GetChild(1).GetComponent<Button>().interactable = canAction;                 // 건설 버튼
+                canvas.GetChild(1).GetComponent<Button>().interactable = canAction || shouldBuild;  // 건설 버튼
                 canvas.GetChild(2).GetComponent<Button>().interactable = canAction || shouldMove;   // 이동 버튼
-                canvas.GetChild(0).GetComponent<Button>().interactable = canAttack || shouldBuild;  // 공격 버튼
+                canvas.GetChild(0).GetComponent<Button>().interactable = canAttack;                 // 공격 버튼
                 canvas.GetChild(3).GetComponent<Button>().interactable = abilityCount == 0;         // 능력 버튼
             }
             if (abilityCount > 0)
@@ -196,7 +199,7 @@ public class Player : MonoBehaviour
         canAction = true;
         canAttack = true;
         ResetPreview();
-        playerAbility.Reset();
+        playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEnemyTurnStart);
         shouldReset = false;
     }
     // 모바일 or 에디터 마우스 터치좌표 처리

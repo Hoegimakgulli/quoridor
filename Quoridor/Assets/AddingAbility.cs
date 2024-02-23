@@ -1,4 +1,4 @@
-﻿    using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,5 +19,7 @@ public class AddingAbility : MonoBehaviour
     {
         inputText = transform.GetChild(2).GetComponent<Text>();
         playerAbility.AddAbility(int.Parse(inputText.text));
+        inputText.text = "";
+        transform.GetComponent<InputField>().text = "";
     }
 }

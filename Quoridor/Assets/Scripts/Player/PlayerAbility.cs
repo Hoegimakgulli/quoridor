@@ -5,7 +5,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Unity.VisualScripting;
+#if UNITY_EDITOR
 using UnityEditor.PackageManager;
+#endif
 using UnityEngine;
 using UnityEngine.UI;
 #if UNITY_EDITOR
@@ -42,7 +44,7 @@ public class ReadOnlyAttribute : PropertyAttribute
 public class PlayerAbility : MonoBehaviour
 {
     public enum EAbilityType { ValuePassive, DiePassive, MovePassive, AttackPassive, HitPassive, KillPassive, InstantActive, TargetActive }
-
+    public enum EResetTime { OnEnemyTurnStart, OnPlayerTurnStart }
     Player player;
     GameManager gameManager;
 
@@ -119,11 +121,15 @@ public class PlayerAbility : MonoBehaviour
         player.usingAbilityID = abilityID;
         gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Ability;
     }
-    public void Reset()
+    public void ResetEvent(EResetTime resetTime)
     {
-        foreach (var ability in abilities)
+        List<IAbility> abilitiesCopy = new List<IAbility>(abilities);
+        foreach (var ability in abilitiesCopy)
         {
-            ability.Reset();
+            if (ability.resetTime == resetTime)
+            {
+                ability.Reset();
+            }
         }
         for (int i = 0; i < player.abilityCount; i++) // 버튼마다 버튼 이름과 쿨타임에 따른 활성화여부 설정
         {
@@ -225,14 +231,14 @@ public class PlayerAbility : MonoBehaviour
             case 11:
                 abilities.Add(new PenetrateAttack(this));
                 break;
-            case 22:
-                abilities.Add(new AutoTrapSetting(this));
-                break;
             case 12:
                 abilities.Add(new PrecisionAttack(this));
                 break;
             case 13:
                 abilities.Add(new SmokeGrenade(this));
+                break;
+            case 22:
+                abilities.Add(new AutoTrapSetting(this));
                 break;
             case 32:
                 abilities.Add(new PrecisionBomb(this));
@@ -300,6 +306,7 @@ public class PlayerAbility : MonoBehaviour
     class AtkUp1 : IAbility // 1.공격력 증가 +1
     {
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
         private int mValue = 1;
@@ -312,6 +319,7 @@ public class PlayerAbility : MonoBehaviour
         }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -327,6 +335,7 @@ public class PlayerAbility : MonoBehaviour
     class AtkUp2 : IAbility // 2.공격력 증가 +2
     {
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
         private int mValue = 2;
@@ -339,6 +348,7 @@ public class PlayerAbility : MonoBehaviour
         }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -354,6 +364,7 @@ public class PlayerAbility : MonoBehaviour
     class WallUp1 : IAbility // 3.벽 소지 +1
     {
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
         private int mValue = 1;
@@ -366,6 +377,7 @@ public class PlayerAbility : MonoBehaviour
         }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -381,6 +393,7 @@ public class PlayerAbility : MonoBehaviour
     class WallUp2 : IAbility // 4.벽 소지 +2
     {
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
         private int mValue = 2;
@@ -393,6 +406,7 @@ public class PlayerAbility : MonoBehaviour
         }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -408,6 +422,7 @@ public class PlayerAbility : MonoBehaviour
     class WallUp3 : IAbility // 5.벽 소지 +3
     {
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
         private int mValue = 3;
@@ -420,6 +435,7 @@ public class PlayerAbility : MonoBehaviour
         }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -435,6 +451,7 @@ public class PlayerAbility : MonoBehaviour
     class Shield : IAbility // 6.보호막
     {
         private EAbilityType mAbilityType = EAbilityType.DiePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -442,6 +459,7 @@ public class PlayerAbility : MonoBehaviour
         public Shield(PlayerAbility playerAbility) { thisScript = playerAbility; }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -475,6 +493,7 @@ public class PlayerAbility : MonoBehaviour
     class ToughSurvival : IAbility // 7.질긴 생존
     {
         private EAbilityType mAbilityType = EAbilityType.DiePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 3;
         private bool mbDidEvent = false;
@@ -483,6 +502,7 @@ public class PlayerAbility : MonoBehaviour
         public ToughSurvival(PlayerAbility playerAbility) { thisScript = playerAbility; }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -518,6 +538,7 @@ public class PlayerAbility : MonoBehaviour
     class Reload : IAbility // 8.재장전
     {
         private EAbilityType mAbilityType = EAbilityType.KillPassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -525,6 +546,7 @@ public class PlayerAbility : MonoBehaviour
         public Reload(PlayerAbility playerAbility) { thisScript = playerAbility; }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -540,6 +562,7 @@ public class PlayerAbility : MonoBehaviour
     class ChainLightning : IAbility // 9.체인라이트닝
     {
         private EAbilityType mAbilityType = EAbilityType.KillPassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -547,6 +570,7 @@ public class PlayerAbility : MonoBehaviour
         public ChainLightning(PlayerAbility playerAbility) { thisScript = playerAbility; }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -575,6 +599,7 @@ public class PlayerAbility : MonoBehaviour
     class ChaineExplosion : IAbility // 10.연쇄폭발
     {
         private EAbilityType mAbilityType = EAbilityType.KillPassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -584,6 +609,7 @@ public class PlayerAbility : MonoBehaviour
         public ChaineExplosion(PlayerAbility playerAbility) { thisScript = playerAbility; }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -675,6 +701,7 @@ public class PlayerAbility : MonoBehaviour
     class PenetrateAttack : IAbility // 11.관통 공격
     {
         private EAbilityType mAbilityType = EAbilityType.KillPassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -682,6 +709,7 @@ public class PlayerAbility : MonoBehaviour
         public PenetrateAttack(PlayerAbility playerAbility) { thisScript = playerAbility; }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -719,6 +747,7 @@ public class PlayerAbility : MonoBehaviour
     class PrecisionAttack : IAbility, IActiveAbility // 12.정밀 공격
     {
         private EAbilityType mAbilityType = EAbilityType.InstantActive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = true;
         private int mCount = 2;
         private int mValue = 1;
@@ -740,6 +769,7 @@ public class PlayerAbility : MonoBehaviour
         public bool[] canPenetrate { get { return bCanPenetrate; } }
         public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -760,6 +790,7 @@ public class PlayerAbility : MonoBehaviour
     class SmokeGrenade : IAbility, IActiveAbility // 13.연막탄
     {
         private EAbilityType mAbilityType = EAbilityType.TargetActive;
+        private EResetTime mResetTime = EResetTime.OnPlayerTurnStart;
         private bool mbEvent = true;
         private int mCount = 2;
         private int mValue = 1;
@@ -786,6 +817,7 @@ public class PlayerAbility : MonoBehaviour
         public bool[] canPenetrate { get { return bCanPenetrate; } }
         public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -822,6 +854,7 @@ public class PlayerAbility : MonoBehaviour
     class AutoTrapSetting : IAbility // 22.자동 덫 설치
     {
         private EAbilityType mAbilityType = EAbilityType.MovePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -832,6 +865,7 @@ public class PlayerAbility : MonoBehaviour
         public AutoTrapSetting(PlayerAbility playerAbility) { thisScript = playerAbility; }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -856,6 +890,7 @@ public class PlayerAbility : MonoBehaviour
     class PrecisionBomb : IAbility, IActiveAbility // 32.정밀 폭격
     {
         private EAbilityType mAbilityType = EAbilityType.TargetActive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = true;
         private int mCount = 1;
         private int mValue = 1;
@@ -880,6 +915,7 @@ public class PlayerAbility : MonoBehaviour
         public bool[] canPenetrate { get { return bCanPenetrate; } }
         public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -918,6 +954,7 @@ public class PlayerAbility : MonoBehaviour
     class EvasiveManeuver : IAbility // 33.회피 기동
     {
         private EAbilityType mAbilityType = EAbilityType.AttackPassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -932,6 +969,7 @@ public class PlayerAbility : MonoBehaviour
         }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -952,6 +990,7 @@ public class PlayerAbility : MonoBehaviour
     class ConstructionManeuver : IAbility // 34.건설 기동
     {
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -960,6 +999,7 @@ public class PlayerAbility : MonoBehaviour
         public ConstructionManeuver(PlayerAbility playerAbility) { thisScript = playerAbility; }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -976,6 +1016,7 @@ public class PlayerAbility : MonoBehaviour
     class KnockBack : IAbility // 36.넉백
     {
         private EAbilityType mAbilityType = EAbilityType.HitPassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -983,6 +1024,7 @@ public class PlayerAbility : MonoBehaviour
         public KnockBack(PlayerAbility playerAbility) { thisScript = playerAbility; }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -1004,6 +1046,7 @@ public class PlayerAbility : MonoBehaviour
     class Pressure : IAbility // 37.위압감
     {
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -1012,6 +1055,7 @@ public class PlayerAbility : MonoBehaviour
         public Pressure(PlayerAbility playerAbility) { thisScript = playerAbility; }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
@@ -1032,6 +1076,7 @@ public class PlayerAbility : MonoBehaviour
     class AnkleAttack : IAbility // 38.발목 공격
     {
         private EAbilityType mAbilityType = EAbilityType.HitPassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
 
@@ -1039,6 +1084,7 @@ public class PlayerAbility : MonoBehaviour
         public AnkleAttack(PlayerAbility playerAbility) { thisScript = playerAbility; }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
