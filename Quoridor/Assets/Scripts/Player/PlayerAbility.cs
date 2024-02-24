@@ -195,6 +195,11 @@ public class PlayerAbility : MonoBehaviour
     }
     public void AddAbility(int id)
     {
+        if (abilitiesID.Contains(id))
+        {
+            Debug.LogError("이미 보유중인 능력");
+            return;
+        }
         bool isSuccess = true;
         switch (id)
         {

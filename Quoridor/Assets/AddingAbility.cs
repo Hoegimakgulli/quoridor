@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class AddingAbility : MonoBehaviour
 {
-    private Text inputText;
+    private InputField inputField;
     //private GameObject player;
     private PlayerAbility playerAbility;
     // Start is called before the first frame update
@@ -13,13 +13,12 @@ public class AddingAbility : MonoBehaviour
     {
         //inputText = transform.GetChild(2).GetComponent<Text>();
         playerAbility = GameObject.FindWithTag("Player").GetComponent<PlayerAbility>();
+        inputField = GetComponent<InputField>();
     }
 
     public void AddAbility()
     {
-        inputText = transform.GetChild(2).GetComponent<Text>();
-        playerAbility.AddAbility(int.Parse(inputText.text));
-        inputText.text = "";
-        transform.GetComponent<InputField>().text = "";
+        playerAbility.AddAbility(int.Parse(inputField.text));
+        inputField.text = "";
     }
 }
