@@ -102,7 +102,7 @@ public class PlayerAbility : MonoBehaviour
             {
                 Button abilityButton = ContentBox.GetChild(index).GetComponent<Button>();
                 abilityButton.gameObject.SetActive(true);
-                abilityButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(index * 190f + 95f, 0);
+                abilityButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(index * 120f + 70f, 0);
                 int abilityIndex = abilities.IndexOf(ability);
                 abilityButton.transform.GetChild(0).GetComponent<Text>().text = abilitiesID[abilityIndex].ToString();
                 abilityButton.interactable = ability.canEvent;
