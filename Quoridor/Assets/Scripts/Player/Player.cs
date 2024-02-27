@@ -37,7 +37,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     GameObject historyIndexPrefab; // history 형식으로 저장되는 글 양식
 
-    public int playerOrder = 1; // 플레이어 차례
+    public const int playerOrder = 1; // 플레이어 차례
 
     // player Status //
     public int atk;
@@ -144,6 +144,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         TouchSetUp();
+        playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEveryTick);
         if (GameManager.Turn % 2 == playerOrder) // 플레이어 차례인지 확인
         {
             playerAbility.ResetEvent(PlayerAbility.EResetTime.OnPlayerTurnStart);
@@ -684,7 +685,7 @@ public class Player : MonoBehaviour
 
         }
     }
-    bool[] CheckRay(RaycastHit2D outerWallHit, RaycastHit2D wallHit, RaycastHit2D[] semiWallHit) // return [isOuterWall, canSetPreview]
+    public bool[] CheckRay(RaycastHit2D outerWallHit, RaycastHit2D wallHit, RaycastHit2D[] semiWallHit) // return [isOuterWall, canSetPreview]
     {
         bool fullBlock = false;
         // Debug.Log($"{(bool)tokenHit} - {(tokenHit ? tokenHit.collider.gameObject.name : i)}");

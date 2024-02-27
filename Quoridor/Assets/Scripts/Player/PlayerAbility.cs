@@ -44,7 +44,7 @@ public class ReadOnlyAttribute : PropertyAttribute
 public class PlayerAbility : MonoBehaviour
 {
     public enum EAbilityType { ValuePassive, DiePassive, MovePassive, AttackPassive, HitPassive, KillPassive, InstantActive, TargetActive }
-    public enum EResetTime { OnEnemyTurnStart, OnPlayerTurnStart }
+    public enum EResetTime { OnEnemyTurnStart, OnPlayerTurnStart, OnEveryTick }
     Player player;
     GameManager gameManager;
 
@@ -286,7 +286,7 @@ public class PlayerAbility : MonoBehaviour
         GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         foreach (Transform child in enemyBox.transform)
         {
-            Debug.Log(child.position);
+            // Debug.Log(child.position);
             if (child.position == position)
             {
                 return child.gameObject;
@@ -795,7 +795,7 @@ public class PlayerAbility : MonoBehaviour
     class SmokeGrenade : IAbility, IActiveAbility // 13.연막탄
     {
         private EAbilityType mAbilityType = EAbilityType.TargetActive;
-        private EResetTime mResetTime = EResetTime.OnPlayerTurnStart;
+        private EResetTime mResetTime = EResetTime.OnEveryTick;
         private bool mbEvent = true;
         private int mCount = 2;
         private int mValue = 1;
@@ -806,9 +806,10 @@ public class PlayerAbility : MonoBehaviour
         private List<Vector2Int> mAttackScale = new List<Vector2Int>(){
             new Vector2Int(0, 0), new Vector2Int(1, 0), new Vector2Int(-1, 0),  new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
         };
-        private bool[] bCanPenetrate = new bool[2] { true, true };
+        private bool[] bCanPenetrate = new bool[2] { true, false };
         private Vector2Int mTargetPos;
         private List<GameObject> mTargetList = new List<GameObject>();
+        private int tempTurn;
 
         PlayerAbility thisScript;
         public SmokeGrenade(PlayerAbility playerAbility)
@@ -828,30 +829,40 @@ public class PlayerAbility : MonoBehaviour
         {
             Debug.Log($"{targetPos}");
             canEvent = false;
-
+            tempTurn = GameManager.Turn;
             return false;
         }
         public void Reset()
         {
-            mCount--;
-            RaycastHit2D previewHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos), Vector3.forward, 15f, LayerMask.GetMask("Preview"));
-            if (previewHit)
+            if (canEvent) return;
+            if (GameManager.Turn == 1)
             {
-                if (previewHit.transform.CompareTag("PlayerAttackPreview")) // 클릭좌표에 플레이어공격미리보기가 있다면
-                {
-                    foreach (var attackPosition in attackScale)
-                    {
-                        RaycastHit2D enemyHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos) + GameManager.ChangeCoord(attackPosition), Vector3.forward, 15f, LayerMask.GetMask("Token"));
-                        if (enemyHit)
-                        {
-                            if (enemyHit.transform.CompareTag("Enemy"))
-                            {
-                                Enemy enemy = enemyHit.transform.GetComponent<Enemy>();
+                canEvent = true;
+                mCount = 2;
+            }
+            if (GameManager.Turn % 2 == Player.playerOrder && tempTurn != GameManager.Turn)
+            {
+                mCount--;
+                tempTurn = GameManager.Turn;
+            }
+            if (mCount <= 0)
+            {
+                return;
+            }
 
-                                // 적 공격 무효화 처리? HOW?
-                            }
-                        }
-                    }
+            foreach (var attackPosition in attackScale)
+            {
+                RaycastHit2D outerWallHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
+                RaycastHit2D wallHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
+                RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
+                bool[] result = thisScript.player.CheckRay(outerWallHit, wallHit, semiWallHit);
+                if (result[0]) continue;
+                if (result[1] || canPenetrate[1])
+                {
+                    GameObject targetEnemyObject = thisScript.FindValuesObj(GameManager.ChangeCoord(targetPos + attackPosition));
+                    if (targetEnemyObject == null) continue;
+                    Enemy targetEnemy = targetEnemyObject.GetComponent<Enemy>();
+                    Debug.Log($"{targetEnemyObject.name} 에게 이벤트 발생중!");
                 }
             }
         }
