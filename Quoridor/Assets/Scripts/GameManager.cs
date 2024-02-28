@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+#if UNITY_EDITOR
 using UnityEditor.Experimental.GraphView;
+#endif
 using UnityEngine;
 
 public class enemyValues
@@ -44,6 +46,8 @@ public class GameManager : MonoBehaviour
     public UiManager uiManager;
 
     public PlayerCharacters playerCharacters;
+
+    public GameObject autoTrap;
 
     void Awake()
     {
@@ -179,4 +183,6 @@ public class GameManager : MonoBehaviour
         playerActionUI.ActiveUI();
         uiManager.turnEndButton.SetActive(true);
     }
+    public static Vector3 ChangeCoord(Vector2Int originVector) { return ((Vector3)(Vector2)originVector * gridSize); }
+    public static Vector2Int ChangeCoord(Vector3 originVector) { return new Vector2Int(Mathf.RoundToInt((originVector / gridSize).x), Mathf.RoundToInt((originVector / gridSize).y)); }
 }

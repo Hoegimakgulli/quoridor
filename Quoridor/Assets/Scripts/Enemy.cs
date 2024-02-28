@@ -99,7 +99,6 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 }
             }
 
-            gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
 
             if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
             {
@@ -168,7 +167,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     {
         if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
         {
-            int currentShieldPos = (int)((transform.position.x / GameManager.gridSize + 4) + ((transform.position.y / GameManager.gridSize) * 9)); // mapgraph 형식으로 다듬기
+            int currentShieldPos = (int)((transform.position.x / GameManager.gridSize + 4) + ((transform.position.y / GameManager.gridSize + 4) * 9)); // mapgraph 형식으로 다듬기
+            Debug.Log(currentShieldPos);
             if (currentShieldPos + 9 < 81) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
             {
                 gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 1; // 초기화 1
@@ -250,9 +250,10 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     public void Start()
     {
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         uiManager = GameObject.Find("GameManager").GetComponent<UiManager>();
         Material tmpObj = Instantiate(fadeObj, transform.position, Quaternion.identity, transform).GetComponent<SpriteRenderer>().material;
-        highlightSPR = Instantiate(highlightObj, transform.position + new Vector3(0,0,0.1f), Quaternion.identity, transform).GetComponent<SpriteRenderer>(); //이규빈 작성
+        highlightSPR = Instantiate(highlightObj, transform.position + new Vector3(0, 0, 0.1f), Quaternion.identity, transform).GetComponent<SpriteRenderer>(); //이규빈 작성
         highlightSPR.DOFade(0, 0);
         shakeSequence = DOTween.Sequence()
             .SetAutoKill(false)

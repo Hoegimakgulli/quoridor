@@ -134,10 +134,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameManager
       objectReference: {fileID: 0}
-    - target: {fileID: 6551029922462568089, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
-      propertyPath: playerPrefab
-      value: 
-      objectReference: {fileID: 5098181600813880054, guid: 307f11c9afeb8164494a991dfa96429c, type: 3}
     - target: {fileID: 6551029922462568090, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
       propertyPath: m_RootOrder
       value: 7
@@ -182,14 +178,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6551029922462568091, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
-      propertyPath: uiCanvas
-      value: 
-      objectReference: {fileID: 7471301692746399857, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
-    - target: {fileID: 8153990614069101066, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
-      propertyPath: enemyBox
-      value: 
-      objectReference: {fileID: 2903932607343671340, guid: 427ba129aedc7bf45846f3347eb26b36, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
 --- !u!1 &143488365

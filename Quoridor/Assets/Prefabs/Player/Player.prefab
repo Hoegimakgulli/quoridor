@@ -124,10 +124,15 @@ MonoBehaviour:
   atk: 1
   wallCount: 0
   maxWallCount: 10
+  shouldReset: 1
   canAction: 1
   shouldMove: 1
   canAttack: 1
+  abilityCount: 0
+  usingAbilityID: 0
   playerUI: {fileID: 9073970126025145945, guid: 19eaef6fa2704a74fa9a65f72b4eb639, type: 3}
+  abilityUI: {fileID: 5219136279133507520, guid: a0e41180f6ec6e2489ce90161cb5c564, type: 3}
+  abilityUIButton: {fileID: 7816926944470679157, guid: 2c9e545168244c44ab214758548e196d, type: 3}
 --- !u!58 &-7823754267734906027
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -158,4 +163,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetEnemy: {fileID: 0}
   abilitiesID: 
+  abilityPrefabs: {fileID: 9053108252556958202, guid: 208346a78acef5040a141423799f0a16, type: 3}
   startAbilities: 
+  debugAbility: 0000000000000000
+  shouldSetUpAbilityUI: 1

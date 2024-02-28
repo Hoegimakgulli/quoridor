@@ -169,51 +169,20 @@ public class EnemyStage : MonoBehaviour
                 // enemyValues 클래스에 값 넣어주기
                 Enemy tmpCurrentObjEnemy = tmpCurrentObj.GetComponent<Enemy>();
                 tmpCurrentObjEnemy.moveCtrl[1] = Random.Range(0, tmpCurrentObjEnemy.moveCtrl[2] + 1);
-                enemyValues enemyItem = new enemyValues(tmpCurrentObjEnemy.maxHp, tmpCurrentObjEnemy.moveCtrl[1], StageEnemySelectNum(tmpCurrentObj.name), spawnCount, enemyPosition * GameManager.gridSize); // 기본 적 구조체 생성
+                enemyValues enemyItem = new enemyValues(tmpCurrentObjEnemy.maxHp, tmpCurrentObjEnemy.moveCtrl[1], StageEnemySelectNum(tmpCurrentObj.name), count, enemyPosition * GameManager.gridSize); // 기본 적 구조체 생성
                 GameManager.enemyValueList.Add(enemyItem); // 구조체 리스트에 넣어주기
 
                 GameManager.enemyPositions.Add(enemyPosition);
-
-                // 적들 소환하는 부분 수정 예정
-                Debug.Log(GameObject.FindWithTag("EnemyBox"));
-                GameObject currentEnemyObj = Instantiate(tmpCurrentObj, GameManager.gridSize * GameManager.enemyPositions[GameManager.enemyPositions.Count - 1], Quaternion.identity, GameObject.FindWithTag("EnemyBox").transform);
-                GameManager.enemyObjects.Add(currentEnemyObj);
-
-                if (tmpCurrentObj.name.Contains("EnemyShieldSoldier")) // 소환되는 오브젝트가 방패병일 경우 맵그래프 변경
-                {
-                    int currentShieldPos = (int)(enemyPosition.x + 4 + ((enemyPosition.y + 4) * 9)); // mapgraph 좌표로 변환
-                    if (currentShieldPos + 9 < 81 && gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] == 1) // 만약 쉴드가 보드만 외벽에 붙어있는지 확인 조건식에 부합하면 벽취급으로 변환
-                    {
-                        currentEnemyObj.GetComponent<Enemy>().ShieldTrue = true;
-                        gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 0;
-                        gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 0;
-                    }
-                }
-
-                // 적 정보 UI 판넬에 표시하는 부분
-                GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("Canvas(Clone)").transform.GetChild(3).GetChild(1).GetChild(0));
-                /*
-                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = currentEnemyObj.GetComponent<SpriteRenderer>().sprite;
-                currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().color = currentEnemyObj.GetComponent<SpriteRenderer>().color;
-                currentEnemyState.transform.GetChild(1).GetComponent<Text>().text = "행동력 " + currentEnemey.moveCtrl[1] + " / 10";
-                currentEnemey.maxHp = currentEnemey.hp;
-                currentEnemyState.transform.GetChild(2).GetComponent<Text>().text = "체력 " + currentEnemey.hp + " / " + currentEnemey.maxHp;
-                */
-
-                uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, tmpCurrentObj.GetComponent<Enemy>(), count); //적 각각의 상태창을 만들어내는 함수
             }
         }
 
-        uiManager.CreateSortingList(GameManager.enemyValueList.Count);
-        uiManager.SortEnemyStates(); //상태창 순서 정렬 (행동력 기준으로)
-        uiManager.DeploymentEnemyStates(); //상태창 각각 배치
-        gameManager.PlayerTurnSet(); //플레이어 턴 시작 시 실행되어야 할것잉 모여있는 함수 (규빈 작성)
+        StageEnemySpawn();
     }
 
     public int StageEnemySelectNum(string name)
     {
         int selectNum = 0;
-        foreach(GameObject child in EM.enemyPrefabs)
+        foreach (GameObject child in EM.enemyPrefabs)
         {
             if (child.name.Contains(name))
             {
@@ -226,6 +195,28 @@ public class EnemyStage : MonoBehaviour
 
     public void StageEnemySpawn()
     {
+        foreach (enemyValues child in GameManager.enemyValueList)
+        {
+            GameObject currentEnemyObj = Instantiate(EM.enemyPrefabs[child.uniqueNum], child.position, Quaternion.identity, GameObject.FindWithTag("EnemyBox").transform);
+            if (EM.enemyPrefabs[child.uniqueNum].name.Contains("EnemyShieldSoldier")) // 소환되는 오브젝트가 방패병일 경우 맵그래프 변경
+            {
+                Vector3 enemyPosition = child.position / GameManager.gridSize;
+                int currentShieldPos = (int)(enemyPosition.x + 4 + ((enemyPosition.y + 4) * 9)); // mapgraph 좌표로 변환
+                if (currentShieldPos + 9 < 81 && gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] == 1) // 만약 쉴드가 보드만 외벽에 붙어있는지 확인 조건식에 부합하면 벽취급으로 변환
+                {
+                    currentEnemyObj.GetComponent<Enemy>().ShieldTrue = true;
+                    gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 0;
+                    gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 0;
+                }
+            }
 
+            GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("Canvas(Clone)").transform.GetChild(3).GetChild(1).GetChild(0));
+            uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, currentEnemyObj.GetComponent<Enemy>(), child.spawnNum); //적 각각의 상태창을 만들어내는 함수
+        }
+
+        uiManager.CreateSortingList(GameManager.enemyValueList.Count);
+        uiManager.SortEnemyStates(); //상태창 순서 정렬 (행동력 기준으로)
+        uiManager.DeploymentEnemyStates(); //상태창 각각 배치
+        gameManager.PlayerTurnSet(); //플레이어 턴 시작 시 실행되어야 할것잉 모여있는 함수 (규빈 작성)
     }
 }
