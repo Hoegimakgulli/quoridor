@@ -899,10 +899,7 @@ public class PlayerAbility : MonoBehaviour
             {
                 foreach (var attackPosition in attackScale)
                 {
-                    RaycastHit2D outerWallHit = Physics2D.Raycast(GameManager.ChangeCoord(areaAbility.targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
-                    RaycastHit2D wallHit = Physics2D.Raycast(GameManager.ChangeCoord(areaAbility.targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
-                    RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(GameManager.ChangeCoord(areaAbility.targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
-                    bool[] result = thisScript.player.CheckRay(outerWallHit, wallHit, semiWallHit);
+                    bool[] result = thisScript.player.CheckRay(GameManager.ChangeCoord(areaAbility.targetPos), GameManager.ChangeCoord(attackPosition));
                     if (result[0]) continue;
                     if (result[1] || canPenetrate[1])
                     {
@@ -994,10 +991,7 @@ public class PlayerAbility : MonoBehaviour
                 areaAbility.targetList.Clear();
                 foreach (var attackPosition in attackScale)
                 {
-                    RaycastHit2D outerWallHit = Physics2D.Raycast(GameManager.ChangeCoord(areaAbility.targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
-                    RaycastHit2D wallHit = Physics2D.Raycast(GameManager.ChangeCoord(areaAbility.targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
-                    RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(GameManager.ChangeCoord(areaAbility.targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
-                    bool[] result = thisScript.player.CheckRay(outerWallHit, wallHit, semiWallHit);
+                    bool[] result = thisScript.player.CheckRay(GameManager.ChangeCoord(areaAbility.targetPos), GameManager.ChangeCoord(attackPosition));
                     if (result[0]) continue;
                     if (result[1] || canPenetrate[1])
                     {
@@ -1065,10 +1059,7 @@ public class PlayerAbility : MonoBehaviour
             mValue = 2 + thisScript.additionalAbilityStat.throwingDamage;
             foreach (var attackPosition in attackScale)
             {
-                RaycastHit2D outerWallHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
-                RaycastHit2D wallHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
-                RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
-                bool[] result = thisScript.player.CheckRay(outerWallHit, wallHit, semiWallHit);
+                bool[] result = thisScript.player.CheckRay(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition));
                 if (result[0]) continue;
                 if (result[1] || canPenetrate[1])
                 {

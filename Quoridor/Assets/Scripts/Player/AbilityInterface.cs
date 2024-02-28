@@ -18,10 +18,10 @@ public interface IActiveAbility  // 액티브 능력 인터페이스
     bool[] canPenetrate { get; }           // 공격 관통 여부  [0]:플레이어to타깃 관통 [1]:투사체 중심 부터 다른 범위
     Vector2Int targetPos { get; set; } // 투척 좌표
 }
-public class AreaAbility
+public class AreaAbility // 지속형 능력 class
 {
-    public int life;
-    public Vector2Int targetPos;
-    public List<GameObject> targetList = new List<GameObject>();
-    public AreaAbility(int life, Vector2Int targetPos) { this.life = life; this.targetPos = targetPos; }
+    public int life;  // 지속 기간
+    public Vector2Int targetPos;  // 타깃 좌표
+    public List<GameObject> targetList = new List<GameObject>(); // 타깃 오브젝트
+    public AreaAbility(int life, Vector2Int targetPos) { this.life = life; this.targetPos = targetPos; } // 생성자
 }
