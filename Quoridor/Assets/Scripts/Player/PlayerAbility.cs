@@ -792,12 +792,14 @@ public class PlayerAbility : MonoBehaviour
         private List<Vector2Int> mAttackScale = new List<Vector2Int>();
         private bool[] bCanPenetrate = new bool[2] { true, true };
         private Vector2Int mTargetPos;
+        private bool bUsed;
 
         PlayerAbility thisScript;
         public PrecisionAttack(PlayerAbility playerAbility)
         {
             thisScript = playerAbility;
             playerAbility.shouldSetUpAbilityUI = true;
+            bUsed = false;
         }
         public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
         public List<Vector2Int> attackRange { get { return mAttackRange; } }
@@ -810,14 +812,14 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             thisScript.player.atk += mValue;
-
+            bUsed = true;
             mCount--;
             canEvent = false;
             return false;
         }
         public void Reset()
         {
-            thisScript.player.atk -= mValue;
+            if (bUsed) { thisScript.player.atk -= mValue; bUsed = false; }
             if (GameManager.Turn == 1) mCount = 2;
             if (mCount > 0) canEvent = true;
             Debug.Log(canEvent);
