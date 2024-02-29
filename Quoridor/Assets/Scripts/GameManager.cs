@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
+
 #if UNITY_EDITOR
 using UnityEditor.Experimental.GraphView;
 #endif
@@ -115,52 +117,57 @@ public class GameManager : MonoBehaviour
     }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Z)) //디버그용. 적 1명 데미지1
-        {
-            EnemyManager em = GetComponent<EnemyManager>();
-            for (int i = 0; i < 1; i++)
-            {
-                Debug.Log("이름" + em.GetEnemyObject(i).name);
-                em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.X)) //디버그용. 적 2명 데미지1
-        {
-            EnemyManager em = GetComponent<EnemyManager>();
-            for (int i = 0; i < 2; i++)
-            {
-                Debug.Log("이름" + em.GetEnemyObject(i).name);
-                em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.C)) //디버그용. 적 3명 데미지1
-        {
-            EnemyManager em = GetComponent<EnemyManager>();
-            for (int i = 0; i < 3; i++)
-            {
-                Debug.Log("이름" + em.GetEnemyObject(i).name);
-                em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.V)) //디버그용. 적 4명 데미지1
-        {
-            EnemyManager em = GetComponent<EnemyManager>();
-            for (int i = 0; i < 4; i++)
-            {
-                Debug.Log("이름" + em.GetEnemyObject(i).name);
-                em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
-            }
-        }
+        // if (Input.GetKeyDown(KeyCode.Z)) //디버그용. 적 1명 데미지1
+        // {
+        //     EnemyManager em = GetComponent<EnemyManager>();
+        //     for (int i = 0; i < 1; i++)
+        //     {
+        //         Debug.Log("이름" + em.GetEnemyObject(i).name);
+        //         em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
+        //     }
+        // }
+        // if (Input.GetKeyDown(KeyCode.X)) //디버그용. 적 2명 데미지1
+        // {
+        //     EnemyManager em = GetComponent<EnemyManager>();
+        //     for (int i = 0; i < 2; i++)
+        //     {
+        //         Debug.Log("이름" + em.GetEnemyObject(i).name);
+        //         em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
+        //     }
+        // }
+        // if (Input.GetKeyDown(KeyCode.C)) //디버그용. 적 3명 데미지1
+        // {
+        //     EnemyManager em = GetComponent<EnemyManager>();
+        //     for (int i = 0; i < 3; i++)
+        //     {
+        //         Debug.Log("이름" + em.GetEnemyObject(i).name);
+        //         em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
+        //     }
+        // }
+        // if (Input.GetKeyDown(KeyCode.V)) //디버그용. 적 4명 데미지1
+        // {
+        //     EnemyManager em = GetComponent<EnemyManager>();
+        //     for (int i = 0; i < 4; i++)
+        //     {
+        //         Debug.Log("이름" + em.GetEnemyObject(i).name);
+        //         em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
+        //     }
+        // }
+        // if (Input.GetKeyDown(KeyCode.B)) //디버그용. 적 5명 데미지1
+        // {
+        //     EnemyManager em = GetComponent<EnemyManager>();
+        //     for (int i = 0; i < 5; i++)
+        //     {
+        //         Debug.Log("이름" + em.GetEnemyObject(i).name);
+        //         em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
+        //     }
+        // }
         if (Input.GetKeyDown(KeyCode.B)) //디버그용. 적 5명 데미지1
         {
             EnemyManager em = GetComponent<EnemyManager>();
-            for (int i = 0; i < 5; i++)
-            {
-                Debug.Log("이름" + em.GetEnemyObject(i).name);
-                em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
-            }
+            em.GetEnemyObject(0).transform.position += new Vector3(0, -1, 0);
+            Debug.Log(enemyValueList[0].position);
         }
-
 
         if (Turn % 2 == 0 && Input.GetKey(KeyCode.Space)) //[디버그용] space 키를 통해 적턴 넘기기
         {

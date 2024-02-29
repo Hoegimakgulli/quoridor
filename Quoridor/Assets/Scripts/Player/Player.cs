@@ -270,6 +270,7 @@ public class Player : MonoBehaviour
             tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
             wallCount++; // 설치한 벽 개수 +1
             canAction = false; // 이동이나 벽 설치 불가
+            shouldBuild = false;
             return true;
         }
         else return false;
