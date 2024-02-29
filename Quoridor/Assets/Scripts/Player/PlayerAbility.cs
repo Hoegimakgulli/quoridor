@@ -40,11 +40,16 @@ public class ReadOnlyAttribute : PropertyAttribute
         this.runtimeOnly = runtimeOnly;
     }
 }
-
+public class AdditionalAbilityStat
+{
+    public int throwingDamage = 0;
+    public List<Vector2Int> throwingRange = new List<Vector2Int>();
+    public int throwingCount = 0;
+}
 public class PlayerAbility : MonoBehaviour
 {
     public enum EAbilityType { ValuePassive, DiePassive, MovePassive, AttackPassive, HitPassive, KillPassive, InstantActive, TargetActive }
-    public enum EResetTime { OnEnemyTurnStart, OnPlayerTurnStart }
+    public enum EResetTime { OnEnemyTurnStart, OnPlayerTurnStart, OnEveryTick }
     Player player;
     GameManager gameManager;
 
@@ -61,6 +66,8 @@ public class PlayerAbility : MonoBehaviour
 #if UNITY_EDITOR
     public List<int> debugAbility = new List<int>() { 0, 0 };
 #endif
+
+    public AdditionalAbilityStat additionalAbilityStat = new AdditionalAbilityStat();
 
     public bool shouldSetUpAbilityUI = true; // [임시 능력 UI]
 
@@ -242,6 +249,30 @@ public class PlayerAbility : MonoBehaviour
             case 13:
                 abilities.Add(new SmokeGrenade(this));
                 break;
+            case 14:
+                abilities.Add(new PoisonBomb(this));
+                break;
+            case 15:
+                abilities.Add(new Grenade(this));
+                break;
+            case 16:
+                abilities.Add(new ThrowingDamageUp1(this));
+                break;
+            case 17:
+                abilities.Add(new ThrowingDamageUp1(this));
+                break;
+            case 18:
+                abilities.Add(new ThrowingRangeUp1(this));
+                break;
+            case 19:
+                abilities.Add(new ThrowingRangeUp2(this));
+                break;
+            case 20:
+                abilities.Add(new ThrowingCountUp1(this));
+                break;
+            case 21:
+                abilities.Add(new ThrowingCountUp2(this));
+                break;
             case 22:
                 abilities.Add(new AutoTrapSetting(this));
                 break;
@@ -286,7 +317,7 @@ public class PlayerAbility : MonoBehaviour
         GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         foreach (Transform child in enemyBox.transform)
         {
-            Debug.Log(child.position);
+            // Debug.Log(child.position);
             if (child.position == position)
             {
                 return child.gameObject;
@@ -313,7 +344,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
-        private int mCount = 1;
+        // private int mCount = 1;
         private int mValue = 1;
 
         PlayerAbility thisScript;
@@ -342,7 +373,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
-        private int mCount = 1;
+        // private int mCount = 1;
         private int mValue = 2;
 
         PlayerAbility thisScript;
@@ -371,7 +402,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
-        private int mCount = 1;
+        // private int mCount = 1;
         private int mValue = 1;
 
         PlayerAbility thisScript;
@@ -400,7 +431,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
-        private int mCount = 1;
+        // private int mCount = 1;
         private int mValue = 2;
 
         PlayerAbility thisScript;
@@ -429,7 +460,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
-        private int mCount = 1;
+        // private int mCount = 1;
         private int mValue = 3;
 
         PlayerAbility thisScript;
@@ -545,7 +576,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.KillPassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
-        private int mCount = 1;
+        // private int mCount = 1;
 
         PlayerAbility thisScript;
         public Reload(PlayerAbility playerAbility) { thisScript = playerAbility; }
@@ -795,7 +826,7 @@ public class PlayerAbility : MonoBehaviour
     class SmokeGrenade : IAbility, IActiveAbility // 13.연막탄
     {
         private EAbilityType mAbilityType = EAbilityType.TargetActive;
-        private EResetTime mResetTime = EResetTime.OnPlayerTurnStart;
+        private EResetTime mResetTime = EResetTime.OnEveryTick;
         private bool mbEvent = true;
         private int mCount = 2;
         private int mValue = 1;
@@ -806,15 +837,18 @@ public class PlayerAbility : MonoBehaviour
         private List<Vector2Int> mAttackScale = new List<Vector2Int>(){
             new Vector2Int(0, 0), new Vector2Int(1, 0), new Vector2Int(-1, 0),  new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
         };
-        private bool[] bCanPenetrate = new bool[2] { true, true };
+        private bool[] bCanPenetrate = new bool[2] { true, false };
         private Vector2Int mTargetPos;
-        private List<GameObject> mTargetList = new List<GameObject>();
+        private List<AreaAbility> mAreaAbilityList = new List<AreaAbility>();
+        private int tempTurn;
+        private List<Vector2Int> originAttackRange = new List<Vector2Int>();
 
         PlayerAbility thisScript;
         public SmokeGrenade(PlayerAbility playerAbility)
         {
             thisScript = playerAbility;
             playerAbility.shouldSetUpAbilityUI = true;
+            originAttackRange = mAttackRange.ToList();
         }
         public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
         public List<Vector2Int> attackRange { get { return mAttackRange; } }
@@ -827,33 +861,459 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             Debug.Log($"{targetPos}");
+            mAreaAbilityList.Add(new AreaAbility(2, targetPos));
             canEvent = false;
+            mCount--;
+            tempTurn = GameManager.Turn;
+            return false;
+        }
+        public void Reset()
+        {
+            if (canEvent)
+            {
+                mAttackRange = originAttackRange.Concat(thisScript.additionalAbilityStat.throwingRange).ToList();
+                return;
+            }
+            if (GameManager.Turn == 1)
+            {
+                canEvent = true;
+                mCount = 1 + thisScript.additionalAbilityStat.throwingCount;
+            }
+            if (GameManager.Turn % 2 == Player.playerOrder && tempTurn != GameManager.Turn)
+            {
+                List<AreaAbility> tempAreaAbility = mAreaAbilityList.ToList();
+                foreach (var areaAbility in mAreaAbilityList)
+                {
+                    areaAbility.life--;
+                    if (areaAbility.life <= 0) tempAreaAbility.Remove(areaAbility);
+                }
+                mAreaAbilityList = tempAreaAbility.ToList();
+                tempTurn = GameManager.Turn;
+                if (mCount > 0)
+                {
+                    canEvent = true;
+                }
+            }
+
+            foreach (var areaAbility in mAreaAbilityList)
+            {
+                foreach (var attackPosition in attackScale)
+                {
+                    bool[] result = thisScript.player.CheckRay(GameManager.ChangeCoord(areaAbility.targetPos), GameManager.ChangeCoord(attackPosition));
+                    if (result[0]) continue;
+                    if (result[1] || canPenetrate[1])
+                    {
+                        GameObject targetEnemyObject = thisScript.FindValuesObj(GameManager.ChangeCoord(areaAbility.targetPos + attackPosition));
+                        if (targetEnemyObject == null) continue;
+                        Enemy targetEnemy = targetEnemyObject.GetComponent<Enemy>();
+                        Debug.Log($"{targetEnemyObject.name} 에게 이벤트 발생중!");
+                    }
+                }
+            }
+        }
+    }
+    class PoisonBomb : IAbility, IActiveAbility // 14.독성 폭탄
+    {
+        private EAbilityType mAbilityType = EAbilityType.TargetActive;
+        private EResetTime mResetTime = EResetTime.OnEveryTick;
+        private bool mbEvent = true;
+        private int mCount = 1;
+        private int mValue = 1;
+        private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
+        private List<Vector2Int> mAttackRange = new List<Vector2Int>(){
+            new Vector2Int(1, 0), new Vector2Int(2, 0), new Vector2Int(-1, 0), new Vector2Int(-2, 0), new Vector2Int(0, 1), new Vector2Int(0, 2), new Vector2Int(0, -1), new Vector2Int(0, -2), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
+        };
+        private List<Vector2Int> mAttackScale = new List<Vector2Int>(){
+            new Vector2Int(0, 0), new Vector2Int(1, 0), new Vector2Int(-1, 0),  new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
+        };
+        private bool[] bCanPenetrate = new bool[2] { true, false };
+        private Vector2Int mTargetPos;
+        private List<AreaAbility> mAreaAbilityList = new List<AreaAbility>();
+        private int tempTurn;
+        private List<Vector2Int> originAttackRange = new List<Vector2Int>();
+
+        PlayerAbility thisScript;
+        public PoisonBomb(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            playerAbility.shouldSetUpAbilityUI = true;
+            originAttackRange = mAttackRange.ToList();
+        }
+        public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
+        public List<Vector2Int> attackRange { get { return mAttackRange; } }
+        public List<Vector2Int> attackScale { get { return mAttackScale; } }
+        public bool[] canPenetrate { get { return bCanPenetrate; } }
+        public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            Debug.Log($"{targetPos}");
+            mValue = 1 + thisScript.additionalAbilityStat.throwingDamage;
+            mAreaAbilityList.Add(new AreaAbility(2, targetPos));
+            canEvent = false;
+            mCount--;
+            tempTurn = GameManager.Turn;
+            return false;
+        }
+        public void Reset()
+        {
+            if (canEvent)
+            {
+                mAttackRange = originAttackRange.Concat(thisScript.additionalAbilityStat.throwingRange).ToList();
+                return;
+            }
+            if (GameManager.Turn == 1)
+            {
+                canEvent = true;
+                mCount = 1 + thisScript.additionalAbilityStat.throwingCount;
+            }
+            if (GameManager.Turn % 2 == Player.playerOrder && tempTurn != GameManager.Turn)
+            {
+                List<AreaAbility> tempAreaAbility = mAreaAbilityList.ToList();
+                foreach (var areaAbility in mAreaAbilityList)
+                {
+                    areaAbility.life--;
+                    if (areaAbility.life <= 0) tempAreaAbility.Remove(areaAbility);
+                }
+                mAreaAbilityList = tempAreaAbility.ToList();
+                tempTurn = GameManager.Turn;
+                if (mCount > 0)
+                {
+                    canEvent = true;
+                }
+            }
+
+            foreach (var areaAbility in mAreaAbilityList)
+            {
+                List<GameObject> tempTargetList = areaAbility.targetList.ToList();
+                areaAbility.targetList.Clear();
+                foreach (var attackPosition in attackScale)
+                {
+                    bool[] result = thisScript.player.CheckRay(GameManager.ChangeCoord(areaAbility.targetPos), GameManager.ChangeCoord(attackPosition));
+                    if (result[0]) continue;
+                    if (result[1] || canPenetrate[1])
+                    {
+                        GameObject targetEnemyObject = thisScript.FindValuesObj(GameManager.ChangeCoord(areaAbility.targetPos + attackPosition));
+                        if (targetEnemyObject == null) continue;
+                        Enemy targetEnemy = targetEnemyObject.GetComponent<Enemy>();
+                        if (tempTargetList.Contains(targetEnemyObject))  // On Stay
+                        {
+                            targetEnemy.AttackedEnemy(mValue);
+                        }
+                        else  // On Enter
+                        {
+                            targetEnemy.moveCtrl[1] = Mathf.Max(targetEnemy.moveCtrl[1] - 2, 0);
+                        }
+                        areaAbility.targetList.Add(targetEnemyObject);
+                    }
+                }
+                // foreach (GameObject targetEnemyObject in tempTargetList.Except(areaAbility.targetList)) // On Exit
+                // { 
+                //     if (targetEnemyObject == null) // On Die
+                //     {
+                //         continue;
+                //     }
+                // }
+            }
+        }
+    }
+    class Grenade : IAbility, IActiveAbility // 15.수류탄
+    {
+        private EAbilityType mAbilityType = EAbilityType.TargetActive;
+        private EResetTime mResetTime = EResetTime.OnEveryTick;
+        private bool mbEvent = true;
+        private int mCount = 1;
+        private int mValue = 2;
+        private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
+        private List<Vector2Int> mAttackRange = new List<Vector2Int>(){
+            new Vector2Int(1, 0), new Vector2Int(2, 0), new Vector2Int(-1, 0), new Vector2Int(-2, 0), new Vector2Int(0, 1), new Vector2Int(0, 2), new Vector2Int(0, -1), new Vector2Int(0, -2), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
+        };
+        private List<Vector2Int> mAttackScale = new List<Vector2Int>(){
+            new Vector2Int(0, 0), new Vector2Int(1, 0), new Vector2Int(-1, 0),  new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
+        };
+        private bool[] bCanPenetrate = new bool[2] { true, false };
+        private Vector2Int mTargetPos;
+        private int tempTurn;
+        private List<Vector2Int> originAttackRange = new List<Vector2Int>();
+
+        PlayerAbility thisScript;
+        public Grenade(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            playerAbility.shouldSetUpAbilityUI = true;
+            originAttackRange = mAttackRange.ToList();
+        }
+        public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
+        public List<Vector2Int> attackRange { get { return mAttackRange; } }
+        public List<Vector2Int> attackScale { get { return mAttackScale; } }
+        public bool[] canPenetrate { get { return bCanPenetrate; } }
+        public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            Debug.Log($"{targetPos}");
+            mValue = 2 + thisScript.additionalAbilityStat.throwingDamage;
+            foreach (var attackPosition in attackScale)
+            {
+                bool[] result = thisScript.player.CheckRay(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition));
+                if (result[0]) continue;
+                if (result[1] || canPenetrate[1])
+                {
+                    GameObject targetEnemyObject = thisScript.FindValuesObj(GameManager.ChangeCoord(targetPos + attackPosition));
+                    if (targetEnemyObject == null) continue;
+                    Enemy targetEnemy = targetEnemyObject.GetComponent<Enemy>();
+                    targetEnemy.AttackedEnemy(mValue);
+                }
+            }
+            mCount--;
+            canEvent = false;
+            tempTurn = GameManager.Turn;
+            return false;
+        }
+        public void Reset()
+        {
+            if (canEvent)
+            {
+                mAttackRange = originAttackRange.Concat(thisScript.additionalAbilityStat.throwingRange).ToList();
+                return;
+            }
+            if (GameManager.Turn == 1)
+            {
+                canEvent = true;
+                mCount = 1 + thisScript.additionalAbilityStat.throwingCount;
+            }
+            if (GameManager.Turn % 2 == Player.playerOrder && tempTurn != GameManager.Turn)
+            {
+                tempTurn = GameManager.Turn;
+                if (mCount > 0)
+                {
+                    canEvent = true;
+                }
+            }
+            // if (GameManager.Turn % 2 == Player.playerOrder && tempTurn != GameManager.Turn)
+            // {
+            //     mCount--;
+            //     tempTurn = GameManager.Turn;
+            // }
+            // if (mCount <= 0)
+            // {
+            //     return;
+            // }
+
+            // List<GameObject> tempTargetList = mTargetList.ToList();
+            // mTargetList.Clear();
+            // foreach (var attackPosition in attackScale)
+            // {
+            //     RaycastHit2D outerWallHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
+            //     RaycastHit2D wallHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
+            //     RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
+            //     bool[] result = thisScript.player.CheckRay(outerWallHit, wallHit, semiWallHit);
+            //     if (result[0]) continue;
+            //     if (result[1] || canPenetrate[1])
+            //     {
+            //         GameObject targetEnemyObject = thisScript.FindValuesObj(GameManager.ChangeCoord(targetPos + attackPosition));
+            //         if (targetEnemyObject == null) continue;
+            //         Enemy targetEnemy = targetEnemyObject.GetComponent<Enemy>();
+            //         if (tempTargetList.Contains(targetEnemyObject))  // On Stay
+            //         {
+            //             targetEnemy.AttackedEnemy(mValue);
+            //         }
+            //         else  // On Enter
+            //         {
+            //             targetEnemy.moveCtrl[1] = Mathf.Max(targetEnemy.moveCtrl[1] - 2, 0);
+            //         }
+            //         mTargetList.Add(targetEnemyObject);
+            //     }
+            // }
+            // foreach (GameObject targetEnemyObject in tempTargetList.Except(mTargetList)) // On Exit
+            // { 
+            //     if (targetEnemyObject == null) // On Die
+            //     {
+            //         continue;
+            //     }
+            // }
+        }
+    }
+    class ThrowingDamageUp1 : IAbility // 16.투척 데미지 증가1
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
+        private bool mbEvent = false;
+        // private int mCount = 1;
+        private int mValue = 1;
+
+        PlayerAbility thisScript;
+        public ThrowingDamageUp1(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            thisScript.additionalAbilityStat.throwingDamage += mValue;
+        }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.additionalAbilityStat.throwingDamage -= mValue;
 
             return false;
         }
         public void Reset()
         {
-            mCount--;
-            RaycastHit2D previewHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos), Vector3.forward, 15f, LayerMask.GetMask("Preview"));
-            if (previewHit)
-            {
-                if (previewHit.transform.CompareTag("PlayerAttackPreview")) // 클릭좌표에 플레이어공격미리보기가 있다면
-                {
-                    foreach (var attackPosition in attackScale)
-                    {
-                        RaycastHit2D enemyHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos) + GameManager.ChangeCoord(attackPosition), Vector3.forward, 15f, LayerMask.GetMask("Token"));
-                        if (enemyHit)
-                        {
-                            if (enemyHit.transform.CompareTag("Enemy"))
-                            {
-                                Enemy enemy = enemyHit.transform.GetComponent<Enemy>();
+            return;
+        }
+    }
+    class ThrowingDamageUp2 : IAbility // 17.투척 데미지 증가2
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
+        private bool mbEvent = false;
+        // private int mCount = 1;
+        private int mValue = 1;
 
-                                // 적 공격 무효화 처리? HOW?
-                            }
-                        }
-                    }
-                }
-            }
+        PlayerAbility thisScript;
+        public ThrowingDamageUp2(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            thisScript.additionalAbilityStat.throwingDamage += mValue;
+        }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.additionalAbilityStat.throwingDamage -= mValue;
+
+            return false;
+        }
+        public void Reset()
+        {
+            return;
+        }
+    }
+    class ThrowingRangeUp1 : IAbility // 18.투척 사거리 확장1
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
+        private bool mbEvent = false;
+        // private int mCount = 1;
+        // private int mValue = 1;
+        private List<Vector2Int> mRange = new List<Vector2Int>() {
+            new Vector2Int(2, 1), new Vector2Int(2, -1), new Vector2Int(-2, 1), new Vector2Int(-2, -1), new Vector2Int(1, 2), new Vector2Int(1, -2), new Vector2Int(-1, 2), new Vector2Int(-1, -2) };
+
+        PlayerAbility thisScript;
+        public ThrowingRangeUp1(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            thisScript.additionalAbilityStat.throwingRange = thisScript.additionalAbilityStat.throwingRange.Concat(mRange).ToList();
+        }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.additionalAbilityStat.throwingRange = thisScript.additionalAbilityStat.throwingRange.Except(mRange).ToList();
+
+            return false;
+        }
+        public void Reset()
+        {
+            return;
+        }
+    }
+    class ThrowingRangeUp2 : IAbility // 19.투척 사거리 확장2
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
+        private bool mbEvent = false;
+        // private int mCount = 1;
+        // private int mValue = 1;
+        private List<Vector2Int> mRange = new List<Vector2Int>() {
+            new Vector2Int(2, 2), new Vector2Int(2, -2), new Vector2Int(-2, 2), new Vector2Int(-2, -2) };
+
+        PlayerAbility thisScript;
+        public ThrowingRangeUp2(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            thisScript.additionalAbilityStat.throwingRange = thisScript.additionalAbilityStat.throwingRange.Concat(mRange).ToList();
+        }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.additionalAbilityStat.throwingRange = thisScript.additionalAbilityStat.throwingRange.Except(mRange).ToList();
+
+            return false;
+        }
+        public void Reset()
+        {
+            return;
+        }
+    }
+    class ThrowingCountUp1 : IAbility // 20.투척 개수 증가1
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
+        private bool mbEvent = false;
+        // private int mCount = 1;
+        private int mValue = 1;
+
+        PlayerAbility thisScript;
+        public ThrowingCountUp1(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            thisScript.additionalAbilityStat.throwingCount += mValue;
+        }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.additionalAbilityStat.throwingCount -= mValue;
+
+            return false;
+        }
+        public void Reset()
+        {
+            return;
+        }
+    }
+    class ThrowingCountUp2 : IAbility // 21.투척 개수 증가2
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
+        private bool mbEvent = false;
+        // private int mCount = 1;
+        private int mValue = 1;
+
+        PlayerAbility thisScript;
+        public ThrowingCountUp2(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            thisScript.additionalAbilityStat.throwingCount += mValue;
+        }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.additionalAbilityStat.throwingCount -= mValue;
+
+            return false;
+        }
+        public void Reset()
+        {
+            return;
         }
     }
     class AutoTrapSetting : IAbility // 22.자동 덫 설치
@@ -897,8 +1357,8 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.TargetActive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = true;
-        private int mCount = 1;
-        private int mValue = 1;
+        // private int mCount = 1;
+        private int mValue = 2;
         private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
         private List<Vector2Int> mAttackRange = new List<Vector2Int>();
         private List<Vector2Int> mAttackScale = new List<Vector2Int>(){
@@ -941,7 +1401,7 @@ public class PlayerAbility : MonoBehaviour
                             {
                                 Enemy enemy = enemyHit.transform.GetComponent<Enemy>();
 
-                                enemy.AttackedEnemy(2);
+                                enemy.AttackedEnemy(mValue);
                                 Debug.Log($"{enemyHit.transform.name}의 현재 체력 {enemy.hp}");
                             }
                         }
@@ -961,7 +1421,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.AttackPassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
-        private int mCount = 1;
+        // private int mCount = 1;
 
         private List<Vector2Int> originMovablePositions;
         private List<Vector2Int> newMovablePositions = new List<Vector2Int>() { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
@@ -997,7 +1457,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
-        private int mCount = 1;
+        // private int mCount = 1;
 
 
         PlayerAbility thisScript;
@@ -1023,7 +1483,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.HitPassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
-        private int mCount = 1;
+        // private int mCount = 1;
 
         PlayerAbility thisScript;
         public KnockBack(PlayerAbility playerAbility) { thisScript = playerAbility; }
@@ -1053,7 +1513,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
-        private int mCount = 1;
+        // private int mCount = 1;
 
 
         PlayerAbility thisScript;
