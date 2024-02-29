@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using DG.Tweening;
 using static UnityEngine.UI.Image;
 using Unity.VisualScripting;
+using JetBrains.Annotations;
 
 public class UiManager : MonoBehaviour
 {
@@ -21,10 +22,32 @@ public class UiManager : MonoBehaviour
     public float uiMoveTime = 0.2f; //적 상태창 움직이는 시간 
     public bool popLock = false; //임시 변수. 플레이어 및 적턴 알려주는 팝업 통제용.
     public List<int> sortingList = new List<int>(); //행동력 순서로 EnemyState를 정렬할 리스트. 각 배열의 숫자는 몇 번째 적인지를 나타냄.
-    private GameObject explosionEffect;
-    private List<RectTransform> particlesRT = new List<RectTransform>();
+    //private GameObject explosionEffect;
+    //private List<RectTransform> particlesRT = new List<RectTransform>();
     public GameObject turnEndButton;
     public Text WallCountText;
+    public bool freezeButton = false; //true면 행동 및 턴 종료 버튼 작동 안함. (적 상태창 애니메이션 중 행동 제약)
+
+    public class attackedEnemyValues
+    {
+        public int enemyNum;
+        public int originalHP;
+        public int goalHP;
+        public int maxHP;
+
+        public attackedEnemyValues(int enemyNum, int originalHP, int goalHP, int maxHP)
+        {
+            this.enemyNum = enemyNum;
+            this.originalHP = originalHP;
+            this.goalHP = goalHP;
+            this.maxHP = maxHP;
+        }
+    }
+
+    public List<attackedEnemyValues> attackedEnemyList = new List<attackedEnemyValues>();
+
+    private List<int> attackedEnemiesNum = new List<int>();  //피격당한 적의 번호들
+    private List<int> attackedEnemiesMaxHP = new List<int>();  //피격당한 적의 최대 HP들 (적 상태창에 쓰일 정보로 필요)
 
 
     private void Awake()
@@ -43,12 +66,13 @@ public class UiManager : MonoBehaviour
         panelBox[1] = GameObject.Find("HistoryPanel");
         historyBox[0] = panelBox[1].transform.GetChild(0).transform.GetChild(0).gameObject; // History -> playerBox 접근
         historyBox[1] = panelBox[1].transform.GetChild(0).transform.GetChild(1).gameObject; // History -> enemyBox 접근
-        explosionEffect = panelBox[0].transform.parent.GetChild(3).GetChild(2).gameObject;
+        /*explosionEffect = panelBox[0].transform.parent.GetChild(3).GetChild(2).gameObject;
         for (int i = 0; i < explosionEffect.transform.childCount; i++)
         {
             particlesRT.Add(explosionEffect.transform.GetChild(i).GetComponent<RectTransform>());
         }
         explosionEffect.SetActive(false);
+    */
     }
 
     private void Update()
@@ -135,9 +159,9 @@ public class UiManager : MonoBehaviour
     //적 상태창이 전부 사라질 때 꼭 호출
     public void ResetEnemyStates()
     {
-        for (int i = 0; i < enemyStates.Count; i++)
+        for (int i = enemyStates.Count - 1; i >= 0; i--)
         {
-            Destroy(enemyStates[0]);
+            Destroy(enemyStates[i].gameObject);
         }
         enemyStates.Clear();
         sortingList.Clear();
@@ -149,6 +173,7 @@ public class UiManager : MonoBehaviour
     public void CreateEnemyState(GameObject currentEnemyState, GameObject currentEnemyObj, Enemy currentEnemey, int enemyNum)
     {
         //상태창 이미지, 수치들을 바꿈
+        currentEnemyState.transform.GetChild(5).gameObject.SetActive(false); //터지는 이펙트 비활성화
         currentEnemyState.transform.GetChild(3).GetComponent<Image>().DOFade(0, 0); //맞았을 때 빨간색으로 깜빡이는 Panel을 투명하게
         currentEnemyState.transform.GetChild(4).GetComponent<Image>().DOFade(0, 0); //상태창 하이라이팅 Panel을 투명하게
         currentEnemyState.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = currentEnemyObj.GetComponent<SpriteRenderer>().sprite;
@@ -225,73 +250,121 @@ public class UiManager : MonoBehaviour
 
     public void StartCountEnemyHpAnim(int i, int originHP, int hp) //코루틴을 실행한 스크립트가 사라지면 코루틴이 멈춰버리므로 uiManager에서 코루틴을 호출
     {
-        StartCoroutine(CountEnemyHpAnim(i, originHP, hp));
+        freezeButton = true;
+        if (hp < 0) hp = 0; //피격 후 hp가 0 아래로 내려가면 0으로 고정.
+        attackedEnemyList.Add(new attackedEnemyValues(i, originHP, hp, enemyManager.GetEnemyObject(i).GetComponent<Enemy>().maxHp)); //적 번호, 원래 HP, 바뀐 HP, max HP를 리스트에 저장
+        if (attackedEnemyList.Count == 1) //한 번의 공격에 한번씩만 실행되도록.
+        {
+            StartCoroutine(CountEnemyHpAnim());
+        }
     }
     //적 체력 내려가는 애니메이션 (몇번째 enemy인지, 처음 체력, 맞은 후 체력)
-    public IEnumerator CountEnemyHpAnim(int enemyNum, int start, int goal)
+    public IEnumerator CountEnemyHpAnim()
     {
-        Enemy enemy = enemyManager.GetEnemyObject(enemyNum).GetComponent<Enemy>();  ////////////////GameManager.enemy
-        if (goal < 0) goal = 0;
-        enemyStates[enemyNum].GetChild(3).GetComponent<Image>().DOFade(1, 0);
-        enemyStates[enemyNum].GetChild(3).GetComponent<Image>().DOFade(0, uiMoveTime * 5);
-        DOVirtual.Int(start, goal, uiMoveTime * 5, ((x) => { enemyStates[enemyNum].GetChild(2).GetComponent<Text>().text = "체력 : " + x + " / " + enemy.maxHp; })).SetEase(Ease.OutCubic);
-        yield return new WaitForSeconds(uiMoveTime * 5);
-        if (goal == 0) //적 사망
+        yield return new WaitForSeconds(0.05f);
+
+        foreach (attackedEnemyValues value in attackedEnemyList)
         {
-            StartCoroutine(DyingEnemyAnim(enemyNum));
+            enemyStates[value.enemyNum].GetChild(3).GetComponent<Image>().DOFade(1, 0); //피격시 ui 빨개지는 애니메이션 준비
+            enemyStates[value.enemyNum].GetChild(3).GetComponent<Image>().DOFade(0, uiMoveTime * 3); //피격시 ui 빨개지는 애니메이션
+            //enemyStates[enemyNum].GetChild(2).GetComponent<Text>().text = "체력 : " + value.goalHP + " / " + value.maxHP;
+            DOVirtual.Int(value.originalHP, value.goalHP, uiMoveTime * 3, ((x) => { enemyStates[value.enemyNum].GetChild(2).GetComponent<Text>().text = "체력 : " + x + " / " + value.maxHP; })).SetEase(Ease.OutCubic); //체력 줄어드는 애니메이션
+        }
+        yield return new WaitForSeconds(uiMoveTime * 3);
+        for(int i = attackedEnemyList.Count - 1; i >= 0; i--)
+        {
+            if (attackedEnemyList[i].goalHP > 0) //피격된 것 중 죽지 않은 것들은 리스트에서 제거 
+            {
+                attackedEnemyList.Remove(attackedEnemyList[i]);
+            }
+        }
+        if (attackedEnemyList.Count > 0) //사망한 적이 하나 이상 있다면
+        {
+            StartCoroutine(DyingEnemyAnim());
+        }
+        else
+        {
+            freezeButton = false; //사망한 적이 없으면 바로 버튼 클릭 가능한 상태가 됨
         }
         yield return null;
     }
 
     //적 사망 시 상태창 애니메이션
-    private IEnumerator DyingEnemyAnim(int enemyNum)
+    private IEnumerator DyingEnemyAnim()
     {
-        enemyStates[enemyNum].GetChild(3).GetComponent<Image>().DOFade(1, uiMoveTime * 4);
-        yield return StartCoroutine(QuakeAnim(enemyStates[enemyNum], uiMoveTime * 4));
-        GameObject destroyState = enemyStates[enemyNum].gameObject;
-
-        //UI 터지는 부분
-        explosionEffect.SetActive(true);
-        RectTransform statesPanelRT = enemyStates[0].parent.parent.GetComponent<RectTransform>();
-        explosionEffect.GetComponent<RectTransform>().anchoredPosition = statesPanelRT.anchoredPosition + new Vector2(0, statesPanelRT.rect.height / 2 + enemyStates[enemyNum].anchoredPosition.y);
-        foreach (RectTransform particle in particlesRT)
+        List<GameObject> destroyObjects = new List<GameObject>(); //처리 후 삭제될 오브젝트를 담아두는 리스트
+        List<int> destroyEnemyNum = new List<int>(); //처리 후 삭제될 적의 번호를 담아두는 리스트
+        foreach(attackedEnemyValues value in attackedEnemyList) //죽기 전 예열 foreach문
         {
-            particle.anchoredPosition = Vector2.zero;
-            particle.GetComponent<Image>().DOFade(1, 0);
-            float angle = Random.Range(0, Mathf.PI * 2);
-            particle.DOAnchorPos(new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * 300, uiMoveTime * 2);
-            particle.GetComponent<Image>().DOFade(0, uiMoveTime * 2);
+            enemyStates[value.enemyNum].GetChild(3).GetComponent<Image>().DOFade(1, uiMoveTime * 3); //죽은애들 상태창 빨개짐
+            StartCoroutine(QuakeAnim(enemyStates[value.enemyNum], uiMoveTime * 3)); //죽은애들 상태창 흔들림
         }
-
-        enemyStates.RemoveAt(enemyNum);
-        Destroy(destroyState);
-
-        //적 상태창 버튼에 적 기물 하이라이팅 함수를 연결
-        for (int i = 0; i < enemyStates.Count; i++)
+        yield return new WaitForSeconds (uiMoveTime * 3);
+        foreach (attackedEnemyValues value in attackedEnemyList) //터질때 실행되는 foreach문
+        {
+            enemyStates[value.enemyNum].GetComponent<RectTransform>().sizeDelta = Vector2.zero; //상태창 본체 크기 0으로
+            for(int i = 0; i < 5; i++)
+            {
+                enemyStates[value.enemyNum].GetChild(i).gameObject.SetActive(false); //터지는 이펙트를 제외한 모든 자식을 비활성화
+            }
+            enemyStates[value.enemyNum].GetChild(5).gameObject.SetActive(true); //터지는 이펙트 활성화
+            List<RectTransform> explosionParticleRT = new List<RectTransform>(); //이펙트 입자들 리스트
+            for(int i = 0; i < enemyStates[value.enemyNum].GetChild(5).childCount; i++)
+            {
+                explosionParticleRT.Add(enemyStates[value.enemyNum].GetChild(5).GetChild(i).GetComponent<RectTransform>());
+            }
+            foreach (RectTransform particle in explosionParticleRT) //터지는 이펙트 애니메이션
+            {
+                particle.anchoredPosition = Vector2.zero;
+                particle.GetComponent<Image>().DOFade(1, 0);
+                float angle = Random.Range(0, Mathf.PI * 2);
+                particle.DOAnchorPos(new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * 300, uiMoveTime * 1.5f);
+                particle.GetComponent<Image>().DOFade(0, uiMoveTime * 1.5f);
+            }
+            destroyObjects.Add(enemyStates[value.enemyNum].gameObject);
+            destroyEnemyNum.Add(value.enemyNum);
+            //enemyStates.RemoveAt(value.enemyNum); //상태창 리스트에서 죽은애 상태창을 제거
+        }
+        for(int i = attackedEnemyList.Count - 1; i >= 0; i--)
+        {   
+            for (int j = sortingList.Count - 1; j >= 0; j--) // SortingList에서 죽은애는 제거하고 죽은애보다 뒤에있는애는 앞으로 당겨줌.
+            {
+                if (sortingList[j] > attackedEnemyList[i].enemyNum)
+                {
+                    sortingList[j]--;
+                }
+                else if (sortingList[j] == attackedEnemyList[i].enemyNum)
+                {
+                    sortingList.RemoveAt(j);
+                }
+            }
+            enemyStates.RemoveAt(attackedEnemyList[i].enemyNum); //상태창 리스트에서 죽은애 상태창을 제거
+            foreach (attackedEnemyValues value in attackedEnemyList)
+            {
+                if (value.enemyNum > attackedEnemyList[i].enemyNum)
+                {
+                    value.enemyNum--;
+                }
+            }
+            attackedEnemyList.Remove(attackedEnemyList[i]);
+        }
+        for (int i = 0; i < enemyStates.Count; i++) //적 상태창 버튼들에 적 기물 하이라이팅 함수를 연결
         {
             enemyStates[i].GetComponent<Button>().onClick.RemoveAllListeners();
             int iii = i;
             enemyStates[i].GetComponent<Button>().onClick.AddListener(() => HighlightEnemy(iii));
         }
 
-
-        for (int i = sortingList.Count - 1; i >= 0; i--)
+        if (GameManager.enemyValueList.Count != 0) //안 죽은 적이 남아있다면
         {
-            if (sortingList[i] > enemyNum)
-            {
-                sortingList[i]--;
-            }
-            else if (sortingList[i] == enemyNum)
-            {
-                sortingList.RemoveAt(i);
-            }
+            StartCoroutine(SwapStatesAnim(0, false)); //순서대로 상태창 위치 바꾸는 애니메이션 실행
         }
-        if (GameManager.enemyValueList.Count != 0)
+        yield return new WaitForSeconds(uiMoveTime * 1.5f); //터지는 이펙트 입자가 사라지는 시간동안 대기
+        for(int i = destroyObjects.Count - 1; i >= 0; i--) //죽은애들 상태창 오브젝트 전부 삭제
         {
-            StartCoroutine(SwapStatesAnim(0, false));
+            Destroy(destroyObjects[i]);
         }
-        yield return new WaitForSeconds(uiMoveTime * 2);
-        explosionEffect.SetActive(false);
+        freezeButton = false; //버튼 잠금 해제
     }
 
     //UI 흔들리는 애니메이션 (흔들 UI의 RectTransform, 흔들 시간)
@@ -359,9 +432,12 @@ public class UiManager : MonoBehaviour
     //턴 종료 시 호출
     public void PlayerTurnEnd()
     {
-        EnemyManager.turnCheck = false;
-        GameManager.Turn++;
-        gameManager.playerActionUI.PassiveUI();
-        turnEndButton.SetActive(false);
+        if (!freezeButton)
+        {
+            EnemyManager.turnCheck = false;
+            GameManager.Turn++;
+            gameManager.playerActionUI.PassiveUI();
+            turnEndButton.SetActive(false);
+        }
     }
 }
