@@ -37,7 +37,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     GameObject historyIndexPrefab; // history 형식으로 저장되는 글 양식
 
-    public int playerOrder = 1; // 플레이어 차례
+    public const int playerOrder = 1; // 플레이어 차례
 
     // player Status //
     public int atk;
@@ -144,6 +144,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         TouchSetUp();
+        playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEveryTick);
         if (GameManager.Turn % 2 == playerOrder) // 플레이어 차례인지 확인
         {
             playerAbility.ResetEvent(PlayerAbility.EResetTime.OnPlayerTurnStart);
@@ -500,7 +501,7 @@ public class Player : MonoBehaviour
             RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, ((Vector2)movablePositions[i]).normalized, GameManager.gridSize * movablePositions[i].magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
             RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, ((Vector2)movablePositions[i]).normalized, GameManager.gridSize * movablePositions[i].magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
 
-            bool[] result = CheckRay(outerWallHit, wallHit, semiWallHit);
+            bool[] result = CheckRay(transform.position, (Vector2)movablePositions[i]);
             if (result[0])
             {
                 playerPreviews[i].SetActive(false);
@@ -536,12 +537,9 @@ public class Player : MonoBehaviour
             for (int h = 0; h < attackPositions.Count; h++)
             {
                 Vector2 direction = Quaternion.AngleAxis(Mathf.Atan2(attackablePositions[i].y, attackablePositions[i].x) * Mathf.Rad2Deg, Vector3.forward) * (Vector2)attackPositions[h];
-                RaycastHit2D outerWallHit = Physics2D.Raycast(transform.position, ((Vector2)attackablePositions[i] + direction).normalized, GameManager.gridSize * ((Vector2)attackablePositions[i] + direction).magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
-                RaycastHit2D wallHit = Physics2D.Raycast(transform.position, ((Vector2)attackablePositions[i] + direction).normalized, GameManager.gridSize * ((Vector2)attackablePositions[i] + direction).magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
-                RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, ((Vector2)attackablePositions[i] + direction).normalized, GameManager.gridSize * ((Vector2)attackablePositions[i] + direction).magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
                 RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, ((Vector2)attackablePositions[i] + direction).normalized, GameManager.gridSize * ((Vector2)attackablePositions[i] + direction).magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
 
-                bool[] result = CheckRay(outerWallHit, wallHit, semiWallHit);
+                bool[] result = CheckRay(transform.position, (Vector2)attackablePositions[i] + direction);
                 if (!result[0]) isOuterWall = false;
                 if (result[1])
                 {
@@ -577,14 +575,11 @@ public class Player : MonoBehaviour
         {
             Vector2 atkDirection = ((Vector2)(previewHit.transform.position - transform.position) / GameManager.gridSize).normalized;
             Vector2 direction = Quaternion.AngleAxis(Mathf.Atan2(atkDirection.y, atkDirection.x) * Mathf.Rad2Deg, Vector3.forward) * (Vector2)attackPositions[i];
-            RaycastHit2D outerWallHit = Physics2D.Raycast(transform.position, (atkDirection + direction).normalized, GameManager.gridSize * (atkDirection + direction).magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
-            RaycastHit2D wallHit = Physics2D.Raycast(transform.position, (atkDirection + direction).normalized, GameManager.gridSize * (atkDirection + direction).magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
-            RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, (atkDirection + direction).normalized, GameManager.gridSize * (atkDirection + direction).magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
             RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, (atkDirection + direction).normalized, GameManager.gridSize * (atkDirection + direction).magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
             // Debug.Log((atkDirection + direction).normalized);
             Vector3 newPosition = Vector3.zero;
 
-            bool[] result = CheckRay(outerWallHit, wallHit, semiWallHit);
+            bool[] result = CheckRay(transform.position, atkDirection + direction);
             if (result[0])
             {
                 playerAttackHighlights[i].SetActive(false);
@@ -615,12 +610,9 @@ public class Player : MonoBehaviour
             for (int h = 0; h < abilityScale.Count; h++)
             {
                 Vector2 direction = (Vector2)abilityScale[h];
-                RaycastHit2D outerWallHit = Physics2D.Raycast(transform.position, ((Vector2)abilityRange[i] + direction).normalized, GameManager.gridSize * ((Vector2)abilityRange[i] + direction).magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
-                RaycastHit2D wallHit = Physics2D.Raycast(transform.position, ((Vector2)abilityRange[i] + direction).normalized, GameManager.gridSize * ((Vector2)abilityRange[i] + direction).magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
-                RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, ((Vector2)abilityRange[i] + direction).normalized, GameManager.gridSize * ((Vector2)abilityRange[i] + direction).magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
                 RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, ((Vector2)abilityRange[i] + direction).normalized, GameManager.gridSize * ((Vector2)abilityRange[i] + direction).magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
 
-                bool[] result = CheckRay(outerWallHit, wallHit, semiWallHit);
+                bool[] result = CheckRay(transform.position, (Vector2)abilityRange[i] + direction);
                 if (!result[0]) isOuterWall = false;
                 if (result[1] || isPenetration)
                 {
@@ -655,14 +647,11 @@ public class Player : MonoBehaviour
         for (int i = 0; i < abilityScale.Count; i++)
         {
             Vector2 direction = (Vector2)abilityScale[i];
-            RaycastHit2D outerWallHit = Physics2D.Raycast(previewHit.transform.position, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
-            RaycastHit2D wallHit = Physics2D.Raycast(previewHit.transform.position, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
-            RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(previewHit.transform.position, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
             RaycastHit2D tokenHit = Physics2D.RaycastAll(previewHit.transform.position, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
             // Debug.Log((atkDirection + direction).normalized);
             Vector3 newPosition = Vector3.zero;
 
-            bool[] result = CheckRay(outerWallHit, wallHit, semiWallHit);
+            bool[] result = CheckRay(previewHit.transform.position, direction);
             if (result[0])
             {
                 playerAbilityHighlights[i].SetActive(false);
@@ -684,8 +673,11 @@ public class Player : MonoBehaviour
 
         }
     }
-    bool[] CheckRay(RaycastHit2D outerWallHit, RaycastHit2D wallHit, RaycastHit2D[] semiWallHit) // return [isOuterWall, canSetPreview]
+    public bool[] CheckRay(Vector3 start, Vector3 direction) // return [isOuterWall, canSetPreview]
     {
+        RaycastHit2D outerWallHit = Physics2D.Raycast(start, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
+        RaycastHit2D wallHit = Physics2D.Raycast(start, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
+        RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(start, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
         bool fullBlock = false;
         // Debug.Log($"{(bool)tokenHit} - {(tokenHit ? tokenHit.collider.gameObject.name : i)}");
         if (outerWallHit)
