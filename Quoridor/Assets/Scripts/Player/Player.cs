@@ -238,8 +238,8 @@ public class Player : MonoBehaviour
                     GameManager.playerPosition = transform.position / GameManager.gridSize; //플레이어 위치정보 저장
                     canAction = false; // 이동이나 벽 설치 불가
                     playerAbility.MoveEvent();
-                    playerActionUI.ActiveUI(); //플레이어 행동 UI 등장 애니메이션
                     if (shouldMove) shouldMove = false;
+                    playerActionUI.ActiveUI(); //플레이어 행동 UI 등장 애니메이션
                     return;
                 }
             }
