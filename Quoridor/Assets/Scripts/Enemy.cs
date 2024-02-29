@@ -157,14 +157,38 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         }
         if (hp <= 0)
         {
-            DieEnemy();
+            StartCoroutine(DieEnemy(1)); //한번에 없애면 순서가 꼬이면서 실행되지 않는 경우가 자주 일어나므로 코루틴으로 약간의 텀을 줌.
             return true;
         }
         return false;
     }
-
     public void DieEnemy()
     {
+        if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
+        {
+            int currentShieldPos = (int)((transform.position.x / GameManager.gridSize + 4) + ((transform.position.y / GameManager.gridSize + 4) * 9)); // mapgraph 형식으로 다듬기
+            Debug.Log(currentShieldPos);
+            if (currentShieldPos + 9 < 81) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
+            {
+                gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 1; // 초기화 1
+                gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
+            }
+        }
+        foreach (enemyValues child in GameManager.enemyValueList)
+        {
+            if (child.position == gameObject.transform.position)
+            {
+                GameManager.enemyValueList.Remove(child);
+                break;
+            }
+        }
+        Debug.Log("Enemy Dead : " + transform.name);
+        Destroy(transform.gameObject);
+        EnemyStage.totalEnemyCount--;
+    }
+    public IEnumerator DieEnemy(int ia)
+    {
+        yield return new WaitForSeconds(0.02f);
         if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
         {
             int currentShieldPos = (int)((transform.position.x / GameManager.gridSize + 4) + ((transform.position.y / GameManager.gridSize + 4) * 9)); // mapgraph 형식으로 다듬기

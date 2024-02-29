@@ -82,6 +82,27 @@ public class PlayerActionUI : MonoBehaviour
                 uiImages2[i].DOFade(0.5f, 0);
             }
         }
+        else if((player != null && player.shouldBuild) || (player != null && player.shouldMove)) //플레이어가 건설 가능한 상태라면
+        {
+            if (player.shouldBuild)
+            {
+                uiImages[1].raycastTarget = true; //버튼이 클릭 가능한 상태로
+                uiImages2[1].raycastTarget = true; //버튼이 클릭 가능한 상태로
+                playerUIs[1].localScale = Vector2.one;
+                playerUIs[1].anchoredPosition = Vector2.zero;
+                uiImages[1].DOFade(0.5f, 0);
+                uiImages2[1].DOFade(0.5f, 0);
+            }
+            if(player.shouldMove)
+            {
+                uiImages[0].raycastTarget = true; //버튼이 클릭 가능한 상태로
+                uiImages2[0].raycastTarget = true; //버튼이 클릭 가능한 상태로
+                playerUIs[0].localScale = Vector2.one;
+                playerUIs[0].anchoredPosition = Vector2.zero;
+                uiImages[0].DOFade(0.5f, 0);
+                uiImages2[0].DOFade(0.5f, 0);
+            }
+        }
         else //플레이어가 이동 및 건설이 불가능한 상태라면
         {
             for (int i = 0; i < 2; i++)
