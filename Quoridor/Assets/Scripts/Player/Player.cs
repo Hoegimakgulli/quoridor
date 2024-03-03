@@ -440,10 +440,10 @@ public class Player : MonoBehaviour
                             wallInfo[1] = Mathf.FloorToInt(wallStartPos.y - 1);
                             wallInfo[2] = 0;
                         }
-                        playerWallPreview.transform.position = new Vector3(wallInfo[0] + 0.5f, wallInfo[1] + 0.5f, 0) * GameManager.gridSize;
-                        playerWallPreview.transform.rotation = Quaternion.Euler(0, 0, wallInfo[2] * 90);
-                        playerWallPreview.SetActive(true);
                     }
+                    playerWallPreview.transform.position = new Vector3(wallInfo[0] + 0.5f, wallInfo[1] + 0.5f, 0) * GameManager.gridSize;
+                    playerWallPreview.transform.rotation = Quaternion.Euler(0, 0, wallInfo[2] * 90);
+                    playerWallPreview.SetActive(true);
                     if (wallInfo[0] < -4 || wallInfo[0] > 3 || wallInfo[1] < -4 || wallInfo[1] > 3) // 벽 좌표가 땅 밖이라면
                     {
                         playerWallPreview.SetActive(false); // 비활성화
