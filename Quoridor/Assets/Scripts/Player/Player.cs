@@ -145,6 +145,7 @@ public class Player : MonoBehaviour
     {
         TouchSetUp();
         playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEveryTick);
+        GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position);
         if (GameManager.Turn % 2 == playerOrder) // 플레이어 차례인지 확인
         {
             playerAbility.ResetEvent(PlayerAbility.EResetTime.OnPlayerTurnStart);
@@ -236,7 +237,7 @@ public class Player : MonoBehaviour
                 if (previewHit.transform.CompareTag("PlayerPreview")) // 클릭좌표에 플레이어미리보기가 있다면
                 {
                     transform.position = previewHit.transform.position; //플레이어 위치 이동
-                    GameManager.playerPosition = transform.position / GameManager.gridSize; //플레이어 위치정보 저장
+                    GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position); //플레이어 위치정보 저장
                     canAction = false; // 이동이나 벽 설치 불가
                     playerAbility.MoveEvent();
                     if (shouldMove) shouldMove = false;
@@ -266,7 +267,7 @@ public class Player : MonoBehaviour
             playerWall.SetActive(true);
             playerWall.transform.position = playerWallPreview.transform.position;
             playerWall.transform.rotation = playerWallPreview.transform.rotation;
-            GameManager.playerPosition = transform.position / GameManager.gridSize;
+            GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position);
             tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
             wallCount++; // 설치한 벽 개수 +1
             canAction = false; // 이동이나 벽 설치 불가
@@ -341,7 +342,7 @@ public class Player : MonoBehaviour
             {
                 if (previewHit.transform.CompareTag("PlayerAttackPreview")) // 클릭좌표에 플레이어공격미리보기가 있다면
                 {
-                    activeAbility.targetPos = new Vector2Int(Mathf.RoundToInt(previewHit.transform.position.x / GameManager.gridSize), Mathf.RoundToInt(previewHit.transform.position.y / GameManager.gridSize));
+                    activeAbility.targetPos = GameManager.ChangeCoord(previewHit.transform.position);
                     (activeAbility as IAbility).Event();
                     usingAbilityID = 0;
                     gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
@@ -497,7 +498,7 @@ public class Player : MonoBehaviour
                 if (!tokenHit)
                 {
                     Debug.DrawRay(transform.position, (Vector2)movablePositions[i] * GameManager.gridSize, Color.green, 0.1f);
-                    playerPreviews[i].transform.position = transform.position + GameManager.gridSize * (Vector3)(Vector2)movablePositions[i];
+                    playerPreviews[i].transform.position = transform.position + GameManager.ChangeCoord(movablePositions[i]);
                     playerPreviews[i].SetActive(true);
                 }
                 else
@@ -528,7 +529,7 @@ public class Player : MonoBehaviour
                 if (result[1])
                 {
                     canSetPreview = true;
-                    playerAttackPreviews[i].transform.position = transform.position + GameManager.gridSize * (Vector3)(Vector2)attackablePositions[i];
+                    playerAttackPreviews[i].transform.position = transform.position + GameManager.ChangeCoord(attackablePositions[i]);
                     playerAttackPreviews[i].GetComponent<SpriteRenderer>().color = Color.red;
                     playerAttackPreviews[i].GetComponent<BoxCollider2D>().enabled = true;
                     playerAttackPreviews[i].SetActive(true);
@@ -541,7 +542,7 @@ public class Player : MonoBehaviour
                 continue;
             }
             if (canSetPreview) continue;
-            playerAttackPreviews[i].transform.position = transform.position + GameManager.gridSize * (Vector3)(Vector2)attackablePositions[i];
+            playerAttackPreviews[i].transform.position = transform.position + GameManager.ChangeCoord(attackablePositions[i]);
             playerAttackPreviews[i].GetComponent<SpriteRenderer>().color = Color.grey;
             playerAttackPreviews[i].GetComponent<BoxCollider2D>().enabled = false;
             playerAttackPreviews[i].SetActive(true);
@@ -597,7 +598,7 @@ public class Player : MonoBehaviour
                 if (result[1] || isPenetration)
                 {
                     canSetPreview = true;
-                    playerAbilityPreviews[i].transform.position = transform.position + GameManager.gridSize * (Vector3)(Vector2)abilityRange[i];
+                    playerAbilityPreviews[i].transform.position = transform.position + GameManager.ChangeCoord(abilityRange[i]);
                     playerAbilityPreviews[i].GetComponent<SpriteRenderer>().color = Color.red;
                     playerAbilityPreviews[i].GetComponent<BoxCollider2D>().enabled = true;
                     playerAbilityPreviews[i].SetActive(true);
@@ -610,7 +611,7 @@ public class Player : MonoBehaviour
                 continue;
             }
             if (canSetPreview) continue;
-            playerAbilityPreviews[i].transform.position = transform.position + GameManager.gridSize * (Vector3)(Vector2)abilityRange[i];
+            playerAbilityPreviews[i].transform.position = transform.position + GameManager.ChangeCoord(abilityRange[i]);
             playerAbilityPreviews[i].GetComponent<SpriteRenderer>().color = Color.grey;
             playerAbilityPreviews[i].GetComponent<BoxCollider2D>().enabled = false;
             playerAbilityPreviews[i].SetActive(true);

@@ -10,7 +10,7 @@ public class Soldier : Player
         if (GameManager.enemyPositions.Contains(newPosition)) { } // 어떻게 해야하는가
         if (newPosition.y / GameManager.gridSize < -4) newPosition.y = GameManager.gridSize * -4;
         transform.position = newPosition;
-        GameManager.playerPosition = newPosition / GameManager.gridSize;
+        GameManager.playerGridPosition = newPosition / GameManager.gridSize;
 
         canSignAbility = false;
     }

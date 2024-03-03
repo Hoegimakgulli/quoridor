@@ -474,15 +474,15 @@ public class PlayerAbility : MonoBehaviour
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
-            Vector3 newPosition = GameManager.playerPosition + new Vector3(0, -2, 0);
-            if (GameManager.enemyValueList.Any(enemyValue => enemyValue.position == newPosition))
+            Vector2Int newGridPosition = GameManager.playerGridPosition + new Vector2Int(0, -2);
+            if (thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(newGridPosition)) != null)
             {
-                newPosition = GameManager.playerPosition + new Vector3(0, -1, 0);
-                if (GameManager.enemyValueList.Any(enemyValue => enemyValue.position == newPosition)) newPosition = GameManager.playerPosition;
+                newGridPosition = GameManager.playerGridPosition + new Vector2Int(0, -1);
+                if (thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(newGridPosition)) != null) newGridPosition = GameManager.playerGridPosition;
             }
-            if (newPosition.y < -4) newPosition.y = -4;
-            thisScript.transform.position = newPosition * GameManager.gridSize;
-            GameManager.playerPosition = newPosition;
+            if (newGridPosition.y < -4) newGridPosition.y = -4;
+            thisScript.transform.position = GameManager.ChangeCoord(newGridPosition);
+            GameManager.playerGridPosition = newGridPosition;
 
             canEvent = false;
             mCount--;
@@ -636,44 +636,8 @@ public class PlayerAbility : MonoBehaviour
 
             for (int i = 0; i < exploablePosition.Count; i++)
             {
-                RaycastHit2D outerWallHit = Physics2D.Raycast(thisScript.targetEnemy.transform.position, ((Vector2)exploablePosition[i]).normalized, GameManager.gridSize * exploablePosition[i].magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
-                RaycastHit2D wallHit = Physics2D.Raycast(thisScript.targetEnemy.transform.position, ((Vector2)exploablePosition[i]).normalized, GameManager.gridSize * exploablePosition[i].magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
-                RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(thisScript.targetEnemy.transform.position, ((Vector2)exploablePosition[i]).normalized, GameManager.gridSize * exploablePosition[i].magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
+                result = thisScript.player.CheckRay(thisScript.targetEnemy.transform.position, exploablePosition[i]);
 
-                bool fullBlock = false;
-                // Debug.Log($"{(bool)tokenHit} - {(tokenHit ? tokenHit.collider.gameObject.name : i)}");
-                while (true) // 타겟과 폭발범위 사이에 벽이 존재할경우 폭발 범위에서 제외 확인
-                {
-                    if (outerWallHit)
-                    {
-                        result = new bool[] { true, false };
-                        break;
-                    }
-                    if (!wallHit)
-                    { // 벽에 의해 완전히 막히지 않았고
-                        for (int j = 0; j < semiWallHit.Length; j++)
-                        { // 반벽이 2개가 겹쳐있을 경우에
-                            for (int k = j + 1; k < semiWallHit.Length; k++)
-                            {
-                                float wallDistance = Mathf.Abs(semiWallHit[j].distance - semiWallHit[k].distance);
-                                if (wallDistance > 0.1f) continue;
-                                if (semiWallHit[j].transform.rotation == semiWallHit[k].transform.rotation || Mathf.Abs(semiWallHit[j].distance - semiWallHit[k].distance) < 0.000001f)
-                                {
-                                    fullBlock = true; // 완전 막힘으로 처리
-                                    break;
-                                }
-                            }
-                            if (fullBlock) break;
-                        }
-                        if (!fullBlock)
-                        { // 완전 막히지 않았고 적이 공격 범주에 있다면 공격한다.
-                            result = new bool[] { false, true };
-                            break;
-                        }
-                    }
-                    result = new bool[] { false, false };
-                    break;
-                }
                 if (result[0]) // 외부벽에 막혀있는 판정일 경우 리스트에서 제외
                 {
                     exploablePosition.RemoveAt(i);
@@ -691,13 +655,7 @@ public class PlayerAbility : MonoBehaviour
                 GameObject enemyObj = thisScript.enemyManager.GetEnemyObject(explosionPos);
                 if (enemyObj) // 만약 폭발 지점에 적이 존재했을 경우
                 {
-                    foreach (EnemyValues child in GameManager.enemyValueList) // 리스트에서 찾아서 hp 다운
-                    {
-                        if (child.position == enemyObj.transform.position)
-                        {
-                            enemyObj.transform.GetComponent<Enemy>().AttackedEnemy(1);
-                        }
-                    }
+                    enemyObj.transform.GetComponent<Enemy>().AttackedEnemy(1);
                 }
             }
 
@@ -724,8 +682,8 @@ public class PlayerAbility : MonoBehaviour
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
-            Vector2 enemyTrimPos = (thisScript.targetEnemy.transform.position + new Vector3(4, 4, 0)) / GameManager.gridSize;
-            int enemyMapNumber = (int)(enemyTrimPos.x + (enemyTrimPos.y * 9));
+            Vector2Int enemyTrimPos = GameManager.ChangeCoord(thisScript.targetEnemy.transform.position) + new Vector2Int(4, 4);
+            int enemyMapNumber = enemyTrimPos.x + (enemyTrimPos.y * 9);
 
             // 예외 처리
             if (enemyMapNumber > 72) // 현재 처치된 적이 위쪽 외벽에 붙어있을 경우
@@ -738,7 +696,7 @@ public class PlayerAbility : MonoBehaviour
             }
 
             // 실행 코드
-            GameObject enemyBackTarget = thisScript.enemyManager.GetEnemyObject(((Vector3)(enemyTrimPos) + new Vector3(-4, -4, 0)) * GameManager.gridSize);
+            GameObject enemyBackTarget = thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(enemyTrimPos + new Vector2Int(-4, -4)));
             if (enemyBackTarget) // 처치된 적 뒤에 아무런 유닛도 없을 경우
             {
                 return false;
@@ -1071,48 +1029,6 @@ public class PlayerAbility : MonoBehaviour
                     canEvent = true;
                 }
             }
-            // if (GameManager.Turn % 2 == Player.playerOrder && tempTurn != GameManager.Turn)
-            // {
-            //     mCount--;
-            //     tempTurn = GameManager.Turn;
-            // }
-            // if (mCount <= 0)
-            // {
-            //     return;
-            // }
-
-            // List<GameObject> tempTargetList = mTargetList.ToList();
-            // mTargetList.Clear();
-            // foreach (var attackPosition in attackScale)
-            // {
-            //     RaycastHit2D outerWallHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
-            //     RaycastHit2D wallHit = Physics2D.Raycast(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
-            //     RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(GameManager.ChangeCoord(targetPos), GameManager.ChangeCoord(attackPosition).normalized, GameManager.gridSize * GameManager.ChangeCoord(attackPosition).magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
-            //     bool[] result = thisScript.player.CheckRay(outerWallHit, wallHit, semiWallHit);
-            //     if (result[0]) continue;
-            //     if (result[1] || canPenetrate[1])
-            //     {
-            //         GameObject targetEnemyObject = thisScript.FindValuesObj(GameManager.ChangeCoord(targetPos + attackPosition));
-            //         if (targetEnemyObject == null) continue;
-            //         Enemy targetEnemy = targetEnemyObject.GetComponent<Enemy>();
-            //         if (tempTargetList.Contains(targetEnemyObject))  // On Stay
-            //         {
-            //             targetEnemy.AttackedEnemy(mValue);
-            //         }
-            //         else  // On Enter
-            //         {
-            //             targetEnemy.moveCtrl[1] = Mathf.Max(targetEnemy.moveCtrl[1] - 2, 0);
-            //         }
-            //         mTargetList.Add(targetEnemyObject);
-            //     }
-            // }
-            // foreach (GameObject targetEnemyObject in tempTargetList.Except(mTargetList)) // On Exit
-            // { 
-            //     if (targetEnemyObject == null) // On Die
-            //     {
-            //         continue;
-            //     }
-            // }
         }
     }
     class ThrowingDamageUp1 : IAbility // 16.투척 데미지 증가1
@@ -1470,13 +1386,12 @@ public class PlayerAbility : MonoBehaviour
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
-            Vector3 newPosition = thisScript.targetEnemy.transform.position / GameManager.gridSize + new Vector3(0, 1, 0);
+            Vector2Int newGridPosition = GameManager.ChangeCoord(thisScript.targetEnemy.transform.position) + new Vector2Int(0, 1);
             if (Physics2D.Raycast(thisScript.targetEnemy.transform.position, Vector2.up, GameManager.gridSize, LayerMask.GetMask("Wall"))) return false;
             if (Physics2D.Raycast(thisScript.targetEnemy.transform.position, Vector2.up, GameManager.gridSize, LayerMask.GetMask("OuterWall"))) return false;
             if (Physics2D.Raycast(thisScript.targetEnemy.transform.position, Vector2.up, GameManager.gridSize, LayerMask.GetMask("Token"))) return false;
 
-            GameManager.enemyValueList.Find(enemyValue => enemyValue.position == thisScript.targetEnemy.transform.position).position = newPosition;
-            thisScript.targetEnemy.transform.position = newPosition * GameManager.gridSize;
+            thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = GameManager.ChangeCoord(newGridPosition);
 
             return false;
         }

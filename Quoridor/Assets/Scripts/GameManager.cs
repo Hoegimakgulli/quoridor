@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
     public static int Turn = 1; // 현재 턴
     public const float gridSize = 1.3f; // 그리드의 크기
 
-    public static Vector3 playerPosition = new Vector3(0, -4, 0); // 플레이어의 위치
+    public static Vector2Int playerGridPosition = new Vector2Int(0, -4); // 플레이어의 타일 위치
 
     public static List<Vector3> enemyPositions = new List<Vector3>();    // 모든 적들 위치 정보 저장      폐기처분 예정
     public static List<GameObject> enemyObjects = new List<GameObject>(); // 모든 적 기물 오브젝트 저장   폐기처분 예정
@@ -54,7 +54,7 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         Turn = 1; // 턴 초기화
-        playerPosition = new Vector3(0, -4, 0); // 플레이어 위치 초기화
+        playerGridPosition = new Vector2Int(0, -4); // 플레이어 위치 초기화
         for (int i = 0; i < mapGraph.GetLength(0); i++) // 맵 그래프 초기화
         {
             int row = i / 9;
@@ -77,7 +77,7 @@ public class GameManager : MonoBehaviour
             }
         }
         // DebugMap();
-        player = Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], playerPosition * gridSize, Quaternion.identity);
+        player = Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], ChangeCoord(playerGridPosition), Quaternion.identity);
         playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
         uiManager = GetComponent<UiManager>();
     }
@@ -89,7 +89,7 @@ public class GameManager : MonoBehaviour
     {
         enemyPositions.Clear();
         enemyObjects.Clear();
-        playerPosition = new Vector3(0, -4, 0);
+        playerGridPosition = new Vector2Int(0, -4);
         playerControlStatus = EPlayerControlStatus.None;
         Turn = 1; // 턴 초기화
         mapGraph = new int[81, 81];
@@ -180,7 +180,7 @@ public class GameManager : MonoBehaviour
     public bool CheckStuck()
     {
         bool[] visited = new bool[81];
-        int playerGraphPosition = (int)((playerPosition.y + 4) * 9 + playerPosition.x + 4);
+        int playerGraphPosition = (int)((playerGridPosition.y + 4) * 9 + playerGridPosition.x + 4);
 
         void DFS(int now)
         {

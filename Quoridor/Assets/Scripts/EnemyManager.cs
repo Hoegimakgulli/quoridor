@@ -36,7 +36,6 @@ public class EnemyManager : MonoBehaviour
     // public static int gameManager.currentStage = 0;
     public GameObject enemyBox; // 경고 표기 담아두는 박스
     public GameObject enemyUiCanvas;
-    public const float gridSize = 1.3f; // 그리드의 크기
 
     private bool enemyTurnAnchor = true;
     //private bool enemyWarningSignAnchor = true;
