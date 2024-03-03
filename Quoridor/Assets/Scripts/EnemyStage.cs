@@ -169,7 +169,7 @@ public class EnemyStage : MonoBehaviour
                 // enemyValues 클래스에 값 넣어주기
                 Enemy tmpCurrentObjEnemy = tmpCurrentObj.GetComponent<Enemy>();
                 tmpCurrentObjEnemy.moveCtrl[1] = Random.Range(0, tmpCurrentObjEnemy.moveCtrl[2] + 1);
-                enemyValues enemyItem = new enemyValues(tmpCurrentObjEnemy.maxHp, tmpCurrentObjEnemy.moveCtrl[1], StageEnemySelectNum(tmpCurrentObj.name), count, enemyPosition * GameManager.gridSize); // 기본 적 구조체 생성
+                EnemyValues enemyItem = new EnemyValues(tmpCurrentObjEnemy.maxHp, tmpCurrentObjEnemy.moveCtrl[1], StageEnemySelectNum(tmpCurrentObj.name), count, enemyPosition * GameManager.gridSize); // 기본 적 구조체 생성
                 GameManager.enemyValueList.Add(enemyItem); // 구조체 리스트에 넣어주기
 
                 GameManager.enemyPositions.Add(enemyPosition);
@@ -195,7 +195,7 @@ public class EnemyStage : MonoBehaviour
 
     public void StageEnemySpawn()
     {
-        foreach (enemyValues child in GameManager.enemyValueList)
+        foreach (EnemyValues child in GameManager.enemyValueList)
         {
             GameObject currentEnemyObj = Instantiate(EM.enemyPrefabs[child.uniqueNum], child.position, Quaternion.identity, GameObject.FindWithTag("EnemyBox").transform);
             if (EM.enemyPrefabs[child.uniqueNum].name.Contains("EnemyShieldSoldier")) // 소환되는 오브젝트가 방패병일 경우 맵그래프 변경

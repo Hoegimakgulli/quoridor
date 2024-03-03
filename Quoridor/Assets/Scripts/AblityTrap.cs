@@ -6,7 +6,7 @@ public class AblityTrap : MonoBehaviour
 {
     public void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.transform.tag == "Enemy")
+        if (collision.transform.tag == "Enemy")
         {
             Enemy enemyPushTrap = collision.transform.GetComponent<Enemy>();
             // 밟은 적 행동력 감소
@@ -31,9 +31,9 @@ public class AblityTrap : MonoBehaviour
         return null; // 위치에 아무런 오브젝트도 못찾았을 경우
     }
 
-    public enemyValues FindValues(Vector3 position)
+    public EnemyValues FindValues(Vector3 position)
     {
-        foreach (enemyValues child in GameManager.enemyValueList)
+        foreach (EnemyValues child in GameManager.enemyValueList)
         {
             if (child.position == position)
             {

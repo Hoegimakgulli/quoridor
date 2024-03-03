@@ -140,7 +140,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         int originHP = hp;
         hp -= playerAtk;
 
-        foreach (enemyValues child in GameManager.enemyValueList)
+        foreach (EnemyValues child in GameManager.enemyValueList)
         {
             if (child.position == gameObject.transform.position)
             {
@@ -174,7 +174,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
             }
         }
-        foreach (enemyValues child in GameManager.enemyValueList)
+        foreach (EnemyValues child in GameManager.enemyValueList)
         {
             if (child.position == gameObject.transform.position)
             {
@@ -199,7 +199,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
             }
         }
-        foreach (enemyValues child in GameManager.enemyValueList)
+        foreach (EnemyValues child in GameManager.enemyValueList)
         {
             if (child.position == gameObject.transform.position)
             {

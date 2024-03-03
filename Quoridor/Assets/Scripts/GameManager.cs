@@ -7,7 +7,7 @@ using UnityEditor.Experimental.GraphView;
 #endif
 using UnityEngine;
 
-public class enemyValues
+public class EnemyValues
 {
     public int hp;
     public int moveCtrl;
@@ -15,7 +15,7 @@ public class enemyValues
     public int spawnNum;
     public Vector3 position;
 
-    public enemyValues(int hp, int moveCtrl, int uniqueNum, int spawnNum, Vector3 position)
+    public EnemyValues(int hp, int moveCtrl, int uniqueNum, int spawnNum, Vector3 position)
     {
         this.hp = hp;
         this.moveCtrl = moveCtrl;
@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviour
 
     public static List<Vector3> enemyPositions = new List<Vector3>();    // 모든 적들 위치 정보 저장      폐기처분 예정
     public static List<GameObject> enemyObjects = new List<GameObject>(); // 모든 적 기물 오브젝트 저장   폐기처분 예정
-    public static List<enemyValues> enemyValueList = new List<enemyValues>();
+    public static List<EnemyValues> enemyValueList = new List<EnemyValues>();
 
     public int[,] mapGraph = new int[81, 81]; //DFS용 맵 그래프
 

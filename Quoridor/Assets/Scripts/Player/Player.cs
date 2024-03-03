@@ -13,7 +13,7 @@ public class Player : MonoBehaviour
 {
     protected GameManager gameManager;
 
-    public enum ETouchState { None, Began, Moved, Ended, Waiting }; //모바일과 에디터 모두 가능하게 터치 & 마우스 처리
+    public enum ETouchState { None, Began, Moved, Ended }; //모바일과 에디터 모두 가능하게 터치 & 마우스 처리
     public ETouchState touchState = ETouchState.None;
     Vector2 touchPosition;
 

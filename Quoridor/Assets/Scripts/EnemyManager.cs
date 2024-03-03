@@ -426,7 +426,7 @@ public class EnemyManager : MonoBehaviour
         int originMoveCtrl;  //원래 행동력.
         for (count = 0; count < GameManager.enemyValueList.Count; count++)
         {
-            currentEnemyState = FindValuesObj(GameManager.enemyValueList[originSortingList[count]].position).GetComponent<Enemy>();
+            currentEnemyState = GetEnemyObject(GameManager.enemyValueList[originSortingList[count]].position).GetComponent<Enemy>();
             originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl;
 
             //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
@@ -447,7 +447,7 @@ public class EnemyManager : MonoBehaviour
             if (currentEnemyState.moveCtrl[0] <= GameManager.enemyValueList[originSortingList[count]].moveCtrl)
             {
                 //GameObject currenEnemy = FindValuesObj(GameManager.enemyValueList[count].position);
-                GameObject currenEnemy = FindValuesObj(GameManager.enemyValueList[originSortingList[count]].position);
+                GameObject currenEnemy = GetEnemyObject(GameManager.enemyValueList[originSortingList[count]].position);
                 ///////////////////요 윗부분 originalSortingList랑 그 안에 어쩌구 뭐 있었는데 테스트하느라 지웠다함!!! 문제생기면 여기일듯??ㅁㅁㅇㅁㄴㄻㄴㅇ훠ㅑㅁㅈ둬모ㅓ몬ㅇ 
 
                 GameObject player = GameObject.FindWithTag("Player");
@@ -479,7 +479,7 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    public GameObject FindValuesObj(Vector3 position)
+    public GameObject GetEnemyObject(Vector3 position)
     {
         GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         foreach (Transform child in enemyBox.transform)
@@ -490,15 +490,47 @@ public class EnemyManager : MonoBehaviour
                 return child.gameObject;
             }
         }
-        Debug.LogError("enemyManager error : 어떤 Enemy 스크립트를 찾지 못했습니다.");
+        Debug.LogError("EnemyManager error : 어떤 Enemy 오브젝트를 찾지 못했습니다.");
         return null;
     }
-
-
-
-    public GameObject GetEnemyObject(int num)
+    public EnemyValues GetEnemyValues(Vector3 position)
+    {
+        foreach (EnemyValues child in GameManager.enemyValueList)
+        {
+            if (child.position == position)
+            {
+                return child;
+            }
+        }
+        Debug.LogError("EnemyManager error : 어떤 EnemyValues도 찾지 못했습니다.");
+        return null; // 위치에 아무런 오브젝트도 못찾았을 경우
+    }
+    public Enemy GetEnemy(Vector3 position)
     {
         GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
-        return enemyBox.transform.GetChild(num).gameObject;
+        foreach (Transform child in enemyBox.transform)
+        {
+            Debug.Log(child.position);
+            if (child.position == position)
+            {
+                return child.GetComponent<Enemy>();
+            }
+        }
+        Debug.LogError("EnemyManager error : 어떤 Enemy 스크립트를 찾지 못했습니다.");
+        return null;
+    }
+    public GameObject GetEnemyObject(int index)
+    {
+        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
+        return enemyBox.transform.GetChild(index).gameObject;
+    }
+    public EnemyValues GetEnemyValues(int index)
+    {
+        return GameManager.enemyValueList[index];
+    }
+    public Enemy GetEnemy(int index)
+    {
+        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
+        return enemyBox.transform.GetChild(index).GetComponent<Enemy>();
     }
 }

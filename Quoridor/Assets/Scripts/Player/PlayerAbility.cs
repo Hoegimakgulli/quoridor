@@ -52,6 +52,7 @@ public class PlayerAbility : MonoBehaviour
     public enum EResetTime { OnEnemyTurnStart, OnPlayerTurnStart, OnEveryTick }
     Player player;
     GameManager gameManager;
+    EnemyManager enemyManager;
 
     [HideInInspector]
     public Enemy targetEnemy;
@@ -75,6 +76,7 @@ public class PlayerAbility : MonoBehaviour
     {
         player = GetComponent<Player>();
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        enemyManager = gameManager.gameObject.GetComponent<EnemyManager>();
 
         foreach (var startAbility in startAbilities) AddAbility(startAbility);
     }
@@ -311,33 +313,6 @@ public class PlayerAbility : MonoBehaviour
         abilities.RemoveAt(index);
         abilitiesID.RemoveAt(index);
         player.abilityCount = abilities.Count(ability => ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive);
-    }
-    public GameObject FindValuesObj(Vector3 position)
-    {
-        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
-        foreach (Transform child in enemyBox.transform)
-        {
-            // Debug.Log(child.position);
-            if (child.position == position)
-            {
-                return child.gameObject;
-            }
-        }
-        //Debug.LogError("enemyManager error : 어떤 Enemy 스크립트를 찾지 못했습니다.");
-        return null; // 위치에 아무런 오브젝트도 못찾았을 경우
-    }
-
-    public enemyValues FindValues(Vector3 position)
-    {
-        foreach (enemyValues child in GameManager.enemyValueList)
-        {
-            if (child.position == position)
-            {
-                return child;
-            }
-        }
-        //Debug.LogError("enemyManager error : 어떤 EnemyValues도 찾지 못했습니다.");
-        return null; // 위치에 아무런 오브젝트도 못찾았을 경우
     }
     class AtkUp1 : IAbility // 1.공격력 증가 +1
     {
@@ -612,13 +587,13 @@ public class PlayerAbility : MonoBehaviour
         {
             float dist = 10000000;
             GameObject enemyObj = null;
-            enemyValues enemyValue = null;
-            foreach (enemyValues enemysPos in GameManager.enemyValueList) // 죽은 적 기준으로 가장 가까운 적 확인
+            EnemyValues enemyValue = null;
+            foreach (EnemyValues enemysPos in GameManager.enemyValueList) // 죽은 적 기준으로 가장 가까운 적 확인
             {
                 if (dist > Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position))
                 {
                     dist = Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position);
-                    enemyObj = thisScript.FindValuesObj(enemysPos.position);
+                    enemyObj = thisScript.enemyManager.GetEnemyObject(enemysPos.position);
                     enemyValue = enemysPos;
                 }
             }
@@ -713,10 +688,10 @@ public class PlayerAbility : MonoBehaviour
             for (int i = 0; i < exploablePosition.Count; i++)
             {
                 Vector3 explosionPos = thisScript.targetEnemy.transform.position + ((Vector3)exploablePosition[i] * GameManager.gridSize);
-                GameObject enemyObj = thisScript.FindValuesObj(explosionPos);
+                GameObject enemyObj = thisScript.enemyManager.GetEnemyObject(explosionPos);
                 if (enemyObj) // 만약 폭발 지점에 적이 존재했을 경우
                 {
-                    foreach (enemyValues child in GameManager.enemyValueList) // 리스트에서 찾아서 hp 다운
+                    foreach (EnemyValues child in GameManager.enemyValueList) // 리스트에서 찾아서 hp 다운
                     {
                         if (child.position == enemyObj.transform.position)
                         {
@@ -763,7 +738,7 @@ public class PlayerAbility : MonoBehaviour
             }
 
             // 실행 코드
-            GameObject enemyBackTarget = thisScript.FindValuesObj(((Vector3)(enemyTrimPos) + new Vector3(-4, -4, 0)) * GameManager.gridSize);
+            GameObject enemyBackTarget = thisScript.enemyManager.GetEnemyObject(((Vector3)(enemyTrimPos) + new Vector3(-4, -4, 0)) * GameManager.gridSize);
             if (enemyBackTarget) // 처치된 적 뒤에 아무런 유닛도 없을 경우
             {
                 return false;
@@ -905,7 +880,7 @@ public class PlayerAbility : MonoBehaviour
                     if (result[0]) continue;
                     if (result[1] || canPenetrate[1])
                     {
-                        GameObject targetEnemyObject = thisScript.FindValuesObj(GameManager.ChangeCoord(areaAbility.targetPos + attackPosition));
+                        GameObject targetEnemyObject = thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(areaAbility.targetPos + attackPosition));
                         if (targetEnemyObject == null) continue;
                         Enemy targetEnemy = targetEnemyObject.GetComponent<Enemy>();
                         Debug.Log($"{targetEnemyObject.name} 에게 이벤트 발생중!");
@@ -997,7 +972,7 @@ public class PlayerAbility : MonoBehaviour
                     if (result[0]) continue;
                     if (result[1] || canPenetrate[1])
                     {
-                        GameObject targetEnemyObject = thisScript.FindValuesObj(GameManager.ChangeCoord(areaAbility.targetPos + attackPosition));
+                        GameObject targetEnemyObject = thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(areaAbility.targetPos + attackPosition));
                         if (targetEnemyObject == null) continue;
                         Enemy targetEnemy = targetEnemyObject.GetComponent<Enemy>();
                         if (tempTargetList.Contains(targetEnemyObject))  // On Stay
@@ -1065,7 +1040,7 @@ public class PlayerAbility : MonoBehaviour
                 if (result[0]) continue;
                 if (result[1] || canPenetrate[1])
                 {
-                    GameObject targetEnemyObject = thisScript.FindValuesObj(GameManager.ChangeCoord(targetPos + attackPosition));
+                    GameObject targetEnemyObject = thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(targetPos + attackPosition));
                     if (targetEnemyObject == null) continue;
                     Enemy targetEnemy = targetEnemyObject.GetComponent<Enemy>();
                     targetEnemy.AttackedEnemy(mValue);
@@ -1556,7 +1531,7 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             // 피격받은 적 오브젝트 행동력 3 감소
-            thisScript.FindValues(thisScript.targetEnemy.transform.position).moveCtrl -= 3;
+            thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).moveCtrl -= 3;
             thisScript.targetEnemy.GetComponent<Enemy>().moveCtrl[1] -= 3;
             return false;
         }
