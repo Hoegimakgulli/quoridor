@@ -417,20 +417,12 @@ public class Player : MonoBehaviour
                             wallInfo[0] = Mathf.FloorToInt(wallStartPos.x + 1);
                             wallInfo[1] = Mathf.FloorToInt(wallStartPos.y);
                             wallInfo[2] = 1;
-
-                            playerWallPreview.transform.position = new Vector3(wallInfo[0] + 0.5f, wallInfo[1] + 0.5f, 0) * GameManager.gridSize;
-                            playerWallPreview.transform.rotation = Quaternion.Euler(0, 0, 90);
-                            playerWallPreview.SetActive(true);
                         }
                         else // 좌향
                         {
                             wallInfo[0] = Mathf.FloorToInt(wallStartPos.x - 1);
                             wallInfo[1] = Mathf.FloorToInt(wallStartPos.y);
                             wallInfo[2] = 1;
-
-                            playerWallPreview.transform.position = new Vector3(wallInfo[0] + 0.5f, wallInfo[1] + 0.5f, 0) * GameManager.gridSize;
-                            playerWallPreview.transform.rotation = Quaternion.Euler(0, 0, 90);
-                            playerWallPreview.SetActive(true);
                         }
                     }
                     else
@@ -440,21 +432,16 @@ public class Player : MonoBehaviour
                             wallInfo[0] = Mathf.FloorToInt(wallStartPos.x);
                             wallInfo[1] = Mathf.FloorToInt(wallStartPos.y + 1);
                             wallInfo[2] = 0;
-
-                            playerWallPreview.transform.position = new Vector3(wallInfo[0] + 0.5f, wallInfo[1] + 0.5f, 0) * GameManager.gridSize;
-                            playerWallPreview.transform.rotation = Quaternion.Euler(0, 0, 0);
-                            playerWallPreview.SetActive(true);
                         }
                         else //하향
                         {
                             wallInfo[0] = Mathf.FloorToInt(wallStartPos.x);
                             wallInfo[1] = Mathf.FloorToInt(wallStartPos.y - 1);
                             wallInfo[2] = 0;
-
-                            playerWallPreview.transform.position = new Vector3(wallInfo[0] + 0.5f, wallInfo[1] + 0.5f, 0) * GameManager.gridSize;
-                            playerWallPreview.transform.rotation = Quaternion.Euler(0, 0, 0);
-                            playerWallPreview.SetActive(true);
                         }
+                        playerWallPreview.transform.position = new Vector3(wallInfo[0] + 0.5f, wallInfo[1] + 0.5f, 0) * GameManager.gridSize;
+                        playerWallPreview.transform.rotation = Quaternion.Euler(0, 0, wallInfo[2] * 90);
+                        playerWallPreview.SetActive(true);
                     }
                     if (wallInfo[0] < -4 || wallInfo[0] > 3 || wallInfo[1] < -4 || wallInfo[1] > 3) // 벽 좌표가 땅 밖이라면
                     {
