@@ -484,9 +484,6 @@ public class Player : MonoBehaviour
     {
         for (int i = 0; i < movablePositions.Count; i++)
         {
-            RaycastHit2D outerWallHit = Physics2D.Raycast(transform.position, ((Vector2)movablePositions[i]).normalized, GameManager.gridSize * movablePositions[i].magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
-            RaycastHit2D wallHit = Physics2D.Raycast(transform.position, ((Vector2)movablePositions[i]).normalized, GameManager.gridSize * movablePositions[i].magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
-            RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(transform.position, ((Vector2)movablePositions[i]).normalized, GameManager.gridSize * movablePositions[i].magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
             RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, ((Vector2)movablePositions[i]).normalized, GameManager.gridSize * movablePositions[i].magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
 
             bool[] result = CheckRay(transform.position, (Vector2)movablePositions[i]);
@@ -525,7 +522,6 @@ public class Player : MonoBehaviour
             for (int h = 0; h < attackPositions.Count; h++)
             {
                 Vector2 direction = Quaternion.AngleAxis(Mathf.Atan2(attackablePositions[i].y, attackablePositions[i].x) * Mathf.Rad2Deg, Vector3.forward) * (Vector2)attackPositions[h];
-                RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, ((Vector2)attackablePositions[i] + direction).normalized, GameManager.gridSize * ((Vector2)attackablePositions[i] + direction).magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
 
                 bool[] result = CheckRay(transform.position, (Vector2)attackablePositions[i] + direction);
                 if (!result[0]) isOuterWall = false;
@@ -563,9 +559,7 @@ public class Player : MonoBehaviour
         {
             Vector2 atkDirection = ((Vector2)(previewHit.transform.position - transform.position) / GameManager.gridSize).normalized;
             Vector2 direction = Quaternion.AngleAxis(Mathf.Atan2(atkDirection.y, atkDirection.x) * Mathf.Rad2Deg, Vector3.forward) * (Vector2)attackPositions[i];
-            RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, (atkDirection + direction).normalized, GameManager.gridSize * (atkDirection + direction).magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
             // Debug.Log((atkDirection + direction).normalized);
-            Vector3 newPosition = Vector3.zero;
 
             bool[] result = CheckRay(transform.position, atkDirection + direction);
             if (result[0])
@@ -573,8 +567,7 @@ public class Player : MonoBehaviour
                 playerAttackHighlights[i].SetActive(false);
                 continue;
             }
-            newPosition = direction;
-            playerAttackHighlights[i].transform.position = previewHit.transform.position + GameManager.gridSize * new Vector3(Mathf.Round(newPosition.x), Mathf.Round(newPosition.y), 0);
+            playerAttackHighlights[i].transform.position = previewHit.transform.position + GameManager.gridSize * new Vector3(Mathf.Round(direction.x), Mathf.Round(direction.y), 0);
             playerAttackHighlights[i].SetActive(true);
             Debug.DrawRay(transform.position, (atkDirection + direction).normalized * (previewHit.transform.position - transform.position).magnitude, playerAttackHighlights[i].GetComponent<SpriteRenderer>().color, 0.1f);
             if (result[1])
@@ -598,7 +591,6 @@ public class Player : MonoBehaviour
             for (int h = 0; h < abilityScale.Count; h++)
             {
                 Vector2 direction = (Vector2)abilityScale[h];
-                RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, ((Vector2)abilityRange[i] + direction).normalized, GameManager.gridSize * ((Vector2)abilityRange[i] + direction).magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
 
                 bool[] result = CheckRay(transform.position, (Vector2)abilityRange[i] + direction);
                 if (!result[0]) isOuterWall = false;
@@ -635,9 +627,6 @@ public class Player : MonoBehaviour
         for (int i = 0; i < abilityScale.Count; i++)
         {
             Vector2 direction = (Vector2)abilityScale[i];
-            RaycastHit2D tokenHit = Physics2D.RaycastAll(previewHit.transform.position, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
-            // Debug.Log((atkDirection + direction).normalized);
-            Vector3 newPosition = Vector3.zero;
 
             bool[] result = CheckRay(previewHit.transform.position, direction);
             if (result[0])
@@ -645,8 +634,7 @@ public class Player : MonoBehaviour
                 playerAbilityHighlights[i].SetActive(false);
                 continue;
             }
-            newPosition = direction;
-            playerAbilityHighlights[i].transform.position = previewHit.transform.position + GameManager.gridSize * new Vector3(Mathf.Round(newPosition.x), Mathf.Round(newPosition.y), 0);
+            playerAbilityHighlights[i].transform.position = previewHit.transform.position + GameManager.gridSize * new Vector3(Mathf.Round(direction.x), Mathf.Round(direction.y), 0);
             playerAbilityHighlights[i].SetActive(true);
             Debug.DrawRay(previewHit.transform.position, direction, playerAbilityHighlights[i].GetComponent<SpriteRenderer>().color, 0.1f);
             if (result[1] || isPenetration)
@@ -724,6 +712,4 @@ public class Player : MonoBehaviour
     {
         if (playerAbility.DieEvent()) Destroy(this.gameObject);
     }
-
-    protected virtual void SignatureAbility() { }
 }
