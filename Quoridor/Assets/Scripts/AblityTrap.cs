@@ -4,6 +4,34 @@ using UnityEngine;
 
 public class AblityTrap : MonoBehaviour
 {
+    private int currentGameStage = 0;
+    private int trapNum;
+
+    public void Start()
+    {
+        currentGameStage = GameManager.Turn; // 처음 소환됐을 때 지금 턴 저장
+    }
+
+    public void Update()
+    {
+        if(currentGameStage != GameManager.Turn) // 턴이 변했을 때 기존에 있던 트랩들 전부 제거
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    public void ShareTrap() // 지금 트랩의 오브젝트 이름에 따라 변경
+    {
+        if (transform.name.Contains("AutoTrap"))
+        {
+            trapNum = 1;
+        }
+        else
+        {
+            Debug.LogError("AblityTrap 스크립트에서 trapNum을 분류하지 못했습니다");
+        }
+    }
+
     public void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.transform.tag == "Enemy")
@@ -27,7 +55,6 @@ public class AblityTrap : MonoBehaviour
                 return child.gameObject;
             }
         }
-        //Debug.LogError("enemyManager error : 어떤 Enemy 스크립트를 찾지 못했습니다.");
         return null; // 위치에 아무런 오브젝트도 못찾았을 경우
     }
 
@@ -40,7 +67,6 @@ public class AblityTrap : MonoBehaviour
                 return child;
             }
         }
-        //Debug.LogError("enemyManager error : 어떤 EnemyValues도 찾지 못했습니다.");
         return null; // 위치에 아무런 오브젝트도 못찾았을 경우
     }
 }

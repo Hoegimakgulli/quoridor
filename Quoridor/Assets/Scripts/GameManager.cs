@@ -23,6 +23,19 @@ public class EnemyValues
         this.spawnNum = spawnNum;
         this.position = position;
     }
+
+    public void EnemyChange(Vector3 changePos) // position 함수 변경하는 함수 임시 방편,, position 바꾸면 자동으로 바뀌게 만들도록 생각해 보겠습니다!
+    {
+        GameObject enemyBox = GameObject.Find("EnemyBox");
+        foreach(Transform child in enemyBox.transform)
+        {
+            if(child.position == position)
+            {
+                position = changePos;
+                child.position = changePos;
+            }
+        }
+    }
 }
 
 public class GameManager : MonoBehaviour
