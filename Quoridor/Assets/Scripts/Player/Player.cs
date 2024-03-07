@@ -711,6 +711,6 @@ public class Player : MonoBehaviour
     }
     public virtual void Die()
     {
-        if (playerAbility.DieEvent()) Destroy(this.gameObject);
+        if (playerAbility.DieEvent()) this.gameObject.SetActive(false);
     }
 }
