@@ -490,7 +490,7 @@ public class EnemyManager : MonoBehaviour
                 return child.gameObject;
             }
         }
-        Debug.LogError("EnemyManager error : 어떤 Enemy 오브젝트를 찾지 못했습니다.");
+        //Debug.LogError("EnemyManager error : 어떤 Enemy 오브젝트를 찾지 못했습니다.");
         return null;
     }
     public EnemyValues GetEnemyValues(Vector3 position)

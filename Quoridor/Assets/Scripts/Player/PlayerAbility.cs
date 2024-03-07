@@ -685,7 +685,7 @@ public class PlayerAbility : MonoBehaviour
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
-            Vector2Int enemyTrimPos = GameManager.ChangeCoord(thisScript.targetEnemy.transform.position) + new Vector2Int(4, 4);
+            Vector2Int enemyTrimPos = new Vector2Int((int)(thisScript.transform.position.x / GameManager.gridSize), (int)(thisScript.transform.position.y / GameManager.gridSize)) + new Vector2Int(4, 4);
             int enemyMapNumber = enemyTrimPos.x + (enemyTrimPos.y * 9);
 
             // 예외 처리
@@ -698,9 +698,10 @@ public class PlayerAbility : MonoBehaviour
                 return false;
             }
 
+            
             // 실행 코드
-            GameObject enemyBackTarget = thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(enemyTrimPos + new Vector2Int(-4, -4)));
-            if (enemyBackTarget) // 처치된 적 뒤에 아무런 유닛도 없을 경우
+            GameObject enemyBackTarget = thisScript.enemyManager.GetEnemyObject(thisScript.targetEnemy.transform.position + new Vector3(0, 1.3f, 0));
+            if (!enemyBackTarget) // 처치된 적 뒤에 아무런 유닛도 없을 경우
             {
                 return false;
             }
