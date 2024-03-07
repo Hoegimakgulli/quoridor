@@ -92,8 +92,9 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                     if (GameManager.enemyValueList[posCount].position == transform.position)
                     {
                         Debug.Log("Enemy Move Check");
-                        transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
-                        GameManager.enemyValueList[posCount].position = transform.position;
+                        //transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+                        // 클래스 position 변경 시 자동으로 위치 이동 변경
+                        GameManager.enemyValueList[posCount].position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
                         break;
                     }
                 }
