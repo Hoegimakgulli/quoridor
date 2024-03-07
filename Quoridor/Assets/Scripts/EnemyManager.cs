@@ -425,6 +425,7 @@ public class EnemyManager : MonoBehaviour
         int originMoveCtrl;  //원래 행동력.
         for (count = 0; count < GameManager.enemyValueList.Count; count++)
         {
+            Debug.Log("문제의 그녀석 부분" + GameManager.enemyValueList[originSortingList[count]].position);
             currentEnemyState = GetEnemyObject(GameManager.enemyValueList[originSortingList[count]].position).GetComponent<Enemy>();
             originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl;
 

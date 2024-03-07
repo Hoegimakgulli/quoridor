@@ -13,7 +13,30 @@ public class EnemyValues
     public int moveCtrl;
     public int uniqueNum;
     public int spawnNum;
-    public Vector3 position;
+    public Vector3 tmpPosition; // position이 바뀌기 전 위치값
+    public Vector3 position // position이 변경될때 일어나는 것
+    {
+        get
+        {
+            return tmpPosition;
+        }
+
+        set
+        {
+            Debug.Log("position이 변경되었습니다.");
+            Debug.Log(value);
+            Debug.Log(tmpPosition);
+            GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
+            foreach(Transform enemyPos in enemyBox.transform)
+            {
+                if (enemyPos.position == tmpPosition) // 만약 
+                {
+                    enemyPos.position = value;
+                    tmpPosition = value;
+                }
+            }
+        }
+    }
 
     public EnemyValues(int hp, int moveCtrl, int uniqueNum, int spawnNum, Vector3 position)
     {
@@ -21,12 +44,12 @@ public class EnemyValues
         this.moveCtrl = moveCtrl;
         this.uniqueNum = uniqueNum;
         this.spawnNum = spawnNum;
-        this.position = position;
+        tmpPosition = position;
     }
 
     public void EnemyChange(Vector3 changePos) // position 함수 변경하는 함수 임시 방편,, position 바꾸면 자동으로 바뀌게 만들도록 생각해 보겠습니다!
     {
-        GameObject enemyBox = GameObject.Find("EnemyBox");
+        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         foreach(Transform child in enemyBox.transform)
         {
             if(child.position == position)

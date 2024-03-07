@@ -590,7 +590,7 @@ public class PlayerAbility : MonoBehaviour
             EnemyValues enemyValue = null;
             foreach (EnemyValues enemysPos in GameManager.enemyValueList) // 죽은 적 기준으로 가장 가까운 적 확인
             {
-                if (dist > Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position))
+                if (dist > Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position) && thisScript.targetEnemy.transform.position != enemysPos.position)
                 {
                     dist = Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position);
                     enemyObj = thisScript.enemyManager.GetEnemyObject(enemysPos.position);
@@ -598,7 +598,10 @@ public class PlayerAbility : MonoBehaviour
                 }
             }
             // hp 깍아내는 코드 나중에 최적화 필요할듯
-            enemyObj.transform.GetComponent<Enemy>().AttackedEnemy(1);
+            if (enemyObj)
+            {
+                enemyObj.transform.GetComponent<Enemy>().AttackedEnemy(1);
+            }
 
             return false;
         }
