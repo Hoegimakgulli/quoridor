@@ -24,7 +24,7 @@ public class EnemyValues
         set
         {
             GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
-            foreach(Transform enemyPos in enemyBox.transform)
+            foreach (Transform enemyPos in enemyBox.transform)
             {
                 if (enemyPos.position == tmpPosition) // 만약 
                 {

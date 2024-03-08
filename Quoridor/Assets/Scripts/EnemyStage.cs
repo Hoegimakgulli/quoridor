@@ -161,8 +161,8 @@ public class EnemyStage : MonoBehaviour
                     }
                     else
                     {
-                        enemyPosition = new Vector3(0, Random.Range(3, 5), 0);
-                        //enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0);
+                        // enemyPosition = new Vector3(0, Random.Range(3, 5), 0);
+                        enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0);
                     }
                 }
                 while (GameManager.enemyPositions.Contains(enemyPosition) && GameManager.enemyPositions.Count != 0); // 이미 소환된 적의 위치랑 안 겹칠때
