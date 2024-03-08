@@ -1394,14 +1394,17 @@ public class PlayerAbility : MonoBehaviour
             bool[] result = thisScript.player.CheckRay(thisScript.targetEnemy.transform.position, Vector2.up);
             if (!result[0] && !result[2])
             {
-                Debug.Log("기본 조건 달성");
-                if (result[1]) thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
+                if (result[1])
+                {
+                    thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
+                    return false;
+                }
                 if (thisScript.targetEnemy.name.Contains("EnemyShieldSoldier"))
                 {
-                    Debug.Log("적 이름 조건");
-                    if (Physics2D.RaycastAll(thisScript.targetEnemy.transform.position, Vector2.up, GameManager.gridSize, LayerMask.GetMask("Wall")).Any(h => h.transform.name.Contains("PlayerWall")))
+                    if (!Physics2D.RaycastAll(thisScript.targetEnemy.transform.position, Vector2.up, GameManager.gridSize, LayerMask.GetMask("Wall")).Any(h => h.transform.name.Contains("PlayerWall")))
                     {
                         thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
+                        return false;
                     }
                 }
             }
