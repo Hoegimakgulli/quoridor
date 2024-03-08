@@ -650,16 +650,18 @@ public class Player : MonoBehaviour
 
         }
     }
-    public bool[] CheckRay(Vector3 start, Vector3 direction) // return [isOuterWall, canSetPreview]
+    public bool[] CheckRay(Vector3 start, Vector2 direction) // return [isOuterWall, canSetPreview, 적과의 충돌이 있는지]
     {
         RaycastHit2D outerWallHit = Physics2D.Raycast(start, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("OuterWall")); // 외벽에 의해 완전히 막힘
         RaycastHit2D wallHit = Physics2D.Raycast(start, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("Wall")); // 벽에 의해 완전히 막힘
         RaycastHit2D[] semiWallHit = Physics2D.RaycastAll(start, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("SemiWall")); // 벽에 의해 "반" 막힘
+        RaycastHit2D[] tokenHit = Physics2D.RaycastAll(start, direction.normalized, GameManager.gridSize * direction.magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).ToArray(); // 적에 의해 완전히 막힘
+
         bool fullBlock = false;
         // Debug.Log($"{(bool)tokenHit} - {(tokenHit ? tokenHit.collider.gameObject.name : i)}");
         if (outerWallHit)
         {
-            return new bool[] { true, false };
+            return new bool[] { true, false, tokenHit.Length > 1 };
         }
         if (!wallHit)
         { // 벽에 의해 완전히 막히지 않았고
@@ -679,10 +681,10 @@ public class Player : MonoBehaviour
             }
             if (!fullBlock)
             { // 완전 막히지 않았고 적이 공격 범주에 있다면 공격한다.
-                return new bool[] { false, true };
+                return new bool[] { false, true, tokenHit.Length > 1 };
             }
         }
-        return new bool[] { false, false };
+        return new bool[] { false, false, tokenHit.Length > 1 };
     }
     public void ResetPreview()
     {

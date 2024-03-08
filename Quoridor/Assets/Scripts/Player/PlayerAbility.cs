@@ -698,7 +698,7 @@ public class PlayerAbility : MonoBehaviour
                 return false;
             }
 
-            
+
             // 실행 코드
             GameObject enemyBackTarget = thisScript.enemyManager.GetEnemyObject(thisScript.targetEnemy.transform.position + new Vector3(0, 1.3f, 0));
             if (!enemyBackTarget) // 처치된 적 뒤에 아무런 유닛도 없을 경우
@@ -1390,12 +1390,22 @@ public class PlayerAbility : MonoBehaviour
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
-            Vector2Int newGridPosition = GameManager.ChangeCoord(thisScript.targetEnemy.transform.position) + new Vector2Int(0, 1);
-            if (Physics2D.Raycast(thisScript.targetEnemy.transform.position, Vector2.up, GameManager.gridSize, LayerMask.GetMask("Wall"))) return false;
-            if (Physics2D.Raycast(thisScript.targetEnemy.transform.position, Vector2.up, GameManager.gridSize, LayerMask.GetMask("OuterWall"))) return false;
-            if (Physics2D.Raycast(thisScript.targetEnemy.transform.position, Vector2.up, GameManager.gridSize, LayerMask.GetMask("Token"))) return false;
-
-            thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = GameManager.ChangeCoord(newGridPosition);
+            Vector3 newPosition = thisScript.targetEnemy.transform.position + GameManager.ChangeCoord(new Vector2Int(0, 1));
+            bool[] result = thisScript.player.CheckRay(thisScript.targetEnemy.transform.position, Vector2.up);
+            if (!result[0] && !result[2])
+            {
+                Debug.Log("기본 조건 달성");
+                if (result[1]) thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
+                if (thisScript.targetEnemy.name.Contains("EnemyShieldSoldier"))
+                {
+                    Debug.Log("적 이름 조건");
+                    if (Physics2D.RaycastAll(thisScript.targetEnemy.transform.position, Vector2.up, GameManager.gridSize, LayerMask.GetMask("Wall")).Any(h => h.transform.name.Contains("PlayerWall")))
+                    {
+                        thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
+                    }
+                }
+            }
+            // Debug.Log(newPosition);
 
             return false;
         }

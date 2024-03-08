@@ -426,7 +426,7 @@ public class EnemyManager : MonoBehaviour
         for (count = 0; count < GameManager.enemyValueList.Count; count++)
         {
             Debug.Log("문제의 그녀석 부분" + GameManager.enemyValueList[originSortingList[count]].position);
-            currentEnemyState = GetEnemyObject(GameManager.enemyValueList[originSortingList[count]].position).GetComponent<Enemy>();
+            currentEnemyState = GetEnemy(GameManager.enemyValueList[originSortingList[count]].position);
             originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl;
 
             //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
@@ -484,13 +484,13 @@ public class EnemyManager : MonoBehaviour
         GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         foreach (Transform child in enemyBox.transform)
         {
-            Debug.Log(child.position);
+            // Debug.Log(child.position);
             if (child.position == position)
             {
                 return child.gameObject;
             }
         }
-        //Debug.LogError("EnemyManager error : 어떤 Enemy 오브젝트를 찾지 못했습니다.");
+        Debug.LogError("EnemyManager error : 어떤 Enemy 오브젝트를 찾지 못했습니다.");
         return null;
     }
     public EnemyValues GetEnemyValues(Vector3 position)
