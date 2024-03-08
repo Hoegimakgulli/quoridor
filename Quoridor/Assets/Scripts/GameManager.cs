@@ -25,17 +25,17 @@ public class EnemyValues
         set
         {
             GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
-            enemyBox.transform.GetChild(spawnNum).position = value;
-            mPosition = value;
-            // foreach (Transform enemyPos in enemyBox.transform)
-            // {
-            //     Debug.Log($"EV: {value}");
-            //     if (enemyPos.position == mPosition) // 만약 
-            //     {
-            //         enemyPos.position = value;
-            //         mPosition = value;
-            //     }
-            // }
+            // enemyBox.transform.GetChild(spawnNum).position = value;
+            // mPosition = value;
+            foreach (Transform enemyPos in enemyBox.transform)
+            {
+                Debug.Log($"EV: {value}");
+                if (enemyPos.position == mPosition) // 만약 
+                {
+                    enemyPos.position = value;
+                    mPosition = value;
+                }
+            }
         }
     }
 
