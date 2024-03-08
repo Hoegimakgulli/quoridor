@@ -14,7 +14,7 @@ public class EnemyValues
     public int hp; // 유닛 hp
     public int moveCtrl; // 실시간 행동력 체크
     public int uniqueNum; // 어떤 유닛을 생성할지 정하는 번호
-    public int spawnNum; // 생성할 때 넣는 번호
+    public int index; // 생성 순서, EnemyBox 내 Index
     public Vector3 position // position이 변경될때 일어나는 것
     {
         get
@@ -39,12 +39,12 @@ public class EnemyValues
         }
     }
 
-    public EnemyValues(int hp, int moveCtrl, int uniqueNum, int spawnNum, Vector3 position)
+    public EnemyValues(int hp, int moveCtrl, int uniqueNum, int index, Vector3 position)
     {
         this.hp = hp;
         this.moveCtrl = moveCtrl;
         this.uniqueNum = uniqueNum;
-        this.spawnNum = spawnNum;
+        this.index = index;
         mPosition = position;
     }
 }

@@ -69,8 +69,10 @@ public class EnemyStage : MonoBehaviour
         }
     }
 
-    public void EnemyInitialied()
+    public void EnemyInitialize()
     {
+        // EM.SetEnemyBox();
+        // GameManager.enemyValueList.Clear();
         totalEnemyCount = stageEnemySettig[gameManager.currentStage].TotalReturn();
         StageEnemySelect();
     }
@@ -212,7 +214,7 @@ public class EnemyStage : MonoBehaviour
             }
 
             GameObject currentEnemyState = Instantiate(enemyStatePrefab, GameObject.Find("Canvas(Clone)").transform.GetChild(3).GetChild(1).GetChild(0));
-            uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, currentEnemyObj.GetComponent<Enemy>(), child.spawnNum); //적 각각의 상태창을 만들어내는 함수
+            uiManager.CreateEnemyState(currentEnemyState, currentEnemyObj, currentEnemyObj.GetComponent<Enemy>(), child.index); //적 각각의 상태창을 만들어내는 함수
         }
 
         uiManager.CreateSortingList(GameManager.enemyValueList.Count);

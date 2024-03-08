@@ -34,7 +34,8 @@ public class EnemyManager : MonoBehaviour
     public List<GameObject> enemyPrefabs; // 모든 유닛들 통합으로 관리
 
     // public static int gameManager.currentStage = 0;
-    public GameObject enemyBox; // 경고 표기 담아두는 박스
+    public GameObject enemyBoxPrefab; // 경고 표기 담아두는 박스
+    GameObject enemyBox;
     public GameObject enemyUiCanvas;
 
     private bool enemyTurnAnchor = true;
@@ -44,7 +45,7 @@ public class EnemyManager : MonoBehaviour
 
     private void Awake()
     {
-        Instantiate(enemyBox);
+        SetEnemyBox();
         //GameObject enemyUi = Instantiate(enemyUiCanvas);
         //Instantiate(EnemyStatePanel, enemyUi.transform);
         Debug.Log("ui Spawned");
@@ -250,7 +251,6 @@ public class EnemyManager : MonoBehaviour
     private GameObject blockEmemyObj;
     private bool CheckEnemyPos(Vector2 currentPos)
     {
-        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         foreach (Transform enemy in enemyBox.transform)
         {
             Vector2 enemyPos = enemy.position;
@@ -478,10 +478,13 @@ public class EnemyManager : MonoBehaviour
             }*/
         }
     }
-
+    public void SetEnemyBox()
+    {
+        if (enemyBox != null) Destroy(enemyBox);
+        enemyBox = Instantiate(enemyBoxPrefab);
+    }
     public GameObject GetEnemyObject(Vector3 position)
     {
-        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         foreach (Transform child in enemyBox.transform)
         {
             // Debug.Log(child.position);
@@ -507,7 +510,6 @@ public class EnemyManager : MonoBehaviour
     }
     public Enemy GetEnemy(Vector3 position)
     {
-        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         foreach (Transform child in enemyBox.transform)
         {
             Debug.Log(child.position);
@@ -521,7 +523,6 @@ public class EnemyManager : MonoBehaviour
     }
     public GameObject GetEnemyObject(int index)
     {
-        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         return enemyBox.transform.GetChild(index).gameObject;
     }
     public EnemyValues GetEnemyValues(int index)
@@ -530,7 +531,6 @@ public class EnemyManager : MonoBehaviour
     }
     public Enemy GetEnemy(int index)
     {
-        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         return enemyBox.transform.GetChild(index).GetComponent<Enemy>();
     }
 }

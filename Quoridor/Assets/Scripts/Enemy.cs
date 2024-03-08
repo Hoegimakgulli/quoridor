@@ -183,8 +183,9 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 break;
             }
         }
-        Debug.Log("Enemy Dead : " + transform.name);
         Destroy(transform.gameObject);
+        Debug.Log("Enemy Dead : " + transform.name);
+
         EnemyStage.totalEnemyCount--;
     }
     public IEnumerator DieEnemy(int ia)
