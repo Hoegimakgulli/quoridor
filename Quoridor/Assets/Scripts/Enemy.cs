@@ -4,16 +4,15 @@ using System.Linq;
 using UnityEngine;
 using DG.Tweening;
 using System;
+using DG.Tweening.Core.Easing;
 
 public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 {
     public UiManager uiManager;
-
+    // enemyValues
     //-------------- Enemy Values --------------//
     public int hp;                                    // 받아야하는 총 체력
     public int maxHp;
-    [HideInInspector] public int type;
-    public int index; // 리스트 인덱스
     public int[] moveCtrl = new int[3];               // 0 = 요구 행동력, 1 = 현재 채워져 있는 행동력, 2 = 랜덤 행동력 충전 최대치
     public Vector2Int[] moveablePoints;
     public Vector2Int[] attackablePoints;
@@ -27,6 +26,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public EState state = EState.Idle;
     public ECharacteristic characteristic = ECharacteristic.Forward;
     public EValue value = EValue.Normal;
+    public bool ShieldTrue = false; // 방패병 한정 변수
 
 
     //--------------- Move 시작 ---------------//
@@ -50,6 +50,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             }
         }
     }
+
+    public GameManager gameManager;
 
     // A* 알고리즘
     public void GetShortRoad(List<Path> path)
@@ -83,9 +85,33 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
             if (count != 1)
             {
-                transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
-                GameManager.enemyPositions[index] = new Vector3(transform.position.x / GameManager.gridSize, transform.position.y / GameManager.gridSize, 0f);
+                Debug.Log("Enemy Values Count : " + GameManager.enemyValueList.Count);
+                for (int posCount = 0; posCount < GameManager.enemyValueList.Count; posCount++)
+                {
+                    Debug.Log("Enemy Move Start");
+                    if (GameManager.enemyValueList[posCount].position == transform.position)
+                    {
+                        Debug.Log("Enemy Move Check");
+                        //transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+                        // 클래스 position 변경 시 자동으로 위치 이동 변경
+                        GameManager.enemyValueList[posCount].position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+                        break;
+                    }
+                }
             }
+
+
+            if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
+            {
+                int currentShieldPos = (int)(fixPos.x + (fixPos.y * 9)); // mapgraph 형식으로 다듬기
+                if (currentShieldPos + 9 < 81 && gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] == 1) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
+                {
+                    gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 0; // 초기화 1
+                    gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 0; // 초기화 2
+                    ShieldTrue = true;
+                }
+            }
+
             state = EState.Attack;
             AttackPlayer();
         }
@@ -110,31 +136,75 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     //--------------- Die 시작 ---------------//
     // Attack 받았을 때 실행하는 함수
-    public void AttackedEnemy(int playerAtk)
+    public bool AttackedEnemy(int playerAtk)
     {
         int originHP = hp;
         hp -= playerAtk;
-        for (int i = 0; i < GameManager.enemyObjects.Count; i++)
+
+        foreach (EnemyValues child in GameManager.enemyValueList)
         {
-            if (GameManager.enemyObjects[i] == gameObject)
+            if (child.position == gameObject.transform.position)
+            {
+                child.hp = hp;
+            }
+        }
+
+        for (int i = 0; i < GameManager.enemyValueList.Count; i++)
+        {
+            if (GameObject.FindWithTag("EnemyBox").transform.GetChild(i).gameObject == gameObject)
             {
                 uiManager.StartCountEnemyHpAnim(i, originHP, hp);
             }
         }
         if (hp <= 0)
         {
-            DieEnemy();
+            StartCoroutine(DieEnemy(1)); //한번에 없애면 순서가 꼬이면서 실행되지 않는 경우가 자주 일어나므로 코루틴으로 약간의 텀을 줌.
+            return true;
         }
+        return false;
     }
-
     public void DieEnemy()
     {
-        foreach (GameObject child in GameManager.enemyObjects)
+        if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
         {
-            if (child == gameObject)
+            int currentShieldPos = (int)((transform.position.x / GameManager.gridSize + 4) + ((transform.position.y / GameManager.gridSize + 4) * 9)); // mapgraph 형식으로 다듬기
+            Debug.Log(currentShieldPos);
+            if (currentShieldPos + 9 < 81) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
             {
-                GameManager.enemyPositions.Remove(child.transform.position);
-                GameManager.enemyObjects.Remove(child);
+                gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 1; // 초기화 1
+                gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
+            }
+        }
+        foreach (EnemyValues child in GameManager.enemyValueList)
+        {
+            if (child.position == gameObject.transform.position)
+            {
+                GameManager.enemyValueList.Remove(child);
+                break;
+            }
+        }
+        Debug.Log("Enemy Dead : " + transform.name);
+        Destroy(transform.gameObject);
+        EnemyStage.totalEnemyCount--;
+    }
+    public IEnumerator DieEnemy(int ia)
+    {
+        yield return new WaitForSeconds(0.02f);
+        if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
+        {
+            int currentShieldPos = (int)((transform.position.x / GameManager.gridSize + 4) + ((transform.position.y / GameManager.gridSize + 4) * 9)); // mapgraph 형식으로 다듬기
+            Debug.Log(currentShieldPos);
+            if (currentShieldPos + 9 < 81) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
+            {
+                gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 1; // 초기화 1
+                gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
+            }
+        }
+        foreach (EnemyValues child in GameManager.enemyValueList)
+        {
+            if (child.position == gameObject.transform.position)
+            {
+                GameManager.enemyValueList.Remove(child);
                 break;
             }
         }
@@ -158,8 +228,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             {
                 if (hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
                 {
-                    Debug.Log("Player Dead");
-                    Destroy(hit.transform.gameObject);
+                    hit.transform.GetComponent<Player>().Die();
                 }
             }
         }
@@ -200,12 +269,17 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     Sequence shakeSequence;
     public GameObject fadeObj;
+    public GameObject highlightObj; //이규빈 작성함. 적 기물 하이라이트를 위한 오브젝트
+    private SpriteRenderer highlightSPR;
     public bool useShake = true;
 
     public void Start()
     {
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         uiManager = GameObject.Find("GameManager").GetComponent<UiManager>();
         Material tmpObj = Instantiate(fadeObj, transform.position, Quaternion.identity, transform).GetComponent<SpriteRenderer>().material;
+        highlightSPR = Instantiate(highlightObj, transform.position + new Vector3(0, 0, 0.1f), Quaternion.identity, transform).GetComponent<SpriteRenderer>(); //이규빈 작성
+        highlightSPR.DOFade(0, 0);
         shakeSequence = DOTween.Sequence()
             .SetAutoKill(false)
             .OnStart(() =>
@@ -232,5 +306,17 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         shakeSequence.Restart();
         yield return new WaitForSeconds(shakeSequence.Duration());
         useShake = true;
+    }
+
+    // 이규빈 작성 함수
+    public IEnumerator FadeInOutLoop(float fadeTime)
+    {
+        //for (int i = 0; i < 3; i++)
+        {
+            highlightSPR.DOFade(1, fadeTime);
+            yield return new WaitForSeconds(fadeTime);
+            highlightSPR.DOFade(0, fadeTime);
+            yield return new WaitForSeconds(fadeTime);
+        }
     }
 }

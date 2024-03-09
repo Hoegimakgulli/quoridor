@@ -9,8 +9,9 @@ TagManager:
   - CantBuild
   - Enemy
   - PlayerAttackPreview
-  - WarningBox
   - WallStorage
+  - EnemyBox
+  - Trap
   layers:
   - Default
   - TransparentFX
@@ -24,7 +25,7 @@ TagManager:
   - Preview
   - SemiWall
   - OuterWall
-  - 
+  - Trap
   - 
   - 
   - 

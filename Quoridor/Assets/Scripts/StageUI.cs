@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -18,12 +18,15 @@ public class StageUI : MonoBehaviour
 
     public void ClearStage()
     {
-        gameManager.currentStage++;
+        if (!gameManager.gameObject.GetComponent<UiManager>().freezeButton)
+        {
+            gameManager.currentStage++;
 
-        gameManager.Initialize();
-        player.Initialize();
-        enemyStage.EnemyInitialied();
+            gameManager.Initialize();
+            player.Initialize();
+            enemyStage.EnemyInitialied();
 
-        Destroy(this.gameObject);
+            Destroy(this.gameObject);
+        }
     }
 }
