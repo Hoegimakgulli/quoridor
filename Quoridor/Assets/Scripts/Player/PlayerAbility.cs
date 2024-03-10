@@ -590,7 +590,7 @@ public class PlayerAbility : MonoBehaviour
             EnemyValues enemyValue = null;
             foreach (EnemyValues enemysPos in GameManager.enemyValueList) // 죽은 적 기준으로 가장 가까운 적 확인
             {
-                if (dist > Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position))
+                if (dist > Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position) && thisScript.targetEnemy.transform.position != enemysPos.position)
                 {
                     dist = Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position);
                     enemyObj = thisScript.enemyManager.GetEnemyObject(enemysPos.position);
@@ -598,7 +598,10 @@ public class PlayerAbility : MonoBehaviour
                 }
             }
             // hp 깍아내는 코드 나중에 최적화 필요할듯
-            enemyObj.transform.GetComponent<Enemy>().AttackedEnemy(1);
+            if (enemyObj)
+            {
+                enemyObj.transform.GetComponent<Enemy>().AttackedEnemy(1);
+            }
 
             return false;
         }
@@ -682,7 +685,7 @@ public class PlayerAbility : MonoBehaviour
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
-            Vector2Int enemyTrimPos = GameManager.ChangeCoord(thisScript.targetEnemy.transform.position) + new Vector2Int(4, 4);
+            Vector2Int enemyTrimPos = new Vector2Int((int)(thisScript.transform.position.x / GameManager.gridSize), (int)(thisScript.transform.position.y / GameManager.gridSize)) + new Vector2Int(4, 4);
             int enemyMapNumber = enemyTrimPos.x + (enemyTrimPos.y * 9);
 
             // 예외 처리
@@ -695,9 +698,10 @@ public class PlayerAbility : MonoBehaviour
                 return false;
             }
 
+            
             // 실행 코드
-            GameObject enemyBackTarget = thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(enemyTrimPos + new Vector2Int(-4, -4)));
-            if (enemyBackTarget) // 처치된 적 뒤에 아무런 유닛도 없을 경우
+            GameObject enemyBackTarget = thisScript.enemyManager.GetEnemyObject(thisScript.targetEnemy.transform.position + new Vector3(0, 1.3f, 0));
+            if (!enemyBackTarget) // 처치된 적 뒤에 아무런 유닛도 없을 경우
             {
                 return false;
             }

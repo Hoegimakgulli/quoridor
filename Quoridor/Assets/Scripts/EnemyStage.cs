@@ -161,6 +161,7 @@ public class EnemyStage : MonoBehaviour
                     }
                     else
                     {
+                        // enemyPosition = new Vector3(0, Random.Range(3, 5), 0);
                         enemyPosition = new Vector3(Random.Range(-4, 5), Random.Range(3, 5), 0);
                     }
                 }

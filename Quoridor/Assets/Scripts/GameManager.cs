@@ -9,11 +9,31 @@ using UnityEngine;
 
 public class EnemyValues
 {
-    public int hp;
-    public int moveCtrl;
-    public int uniqueNum;
-    public int spawnNum;
-    public Vector3 position;
+    public int hp; // 유닛 hp
+    public int moveCtrl; // 실시간 행동력 체크
+    public int uniqueNum; // 어떤 유닛을 생성할지 정하는 번호
+    public int spawnNum; // 생성할 때 넣는 번호
+    public Vector3 tmpPosition; // position이 바뀌기 전 위치값
+    public Vector3 position // position이 변경될때 일어나는 것
+    {
+        get
+        {
+            return tmpPosition;
+        }
+
+        set
+        {
+            GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
+            foreach (Transform enemyPos in enemyBox.transform)
+            {
+                if (enemyPos.position == tmpPosition) // 만약 
+                {
+                    enemyPos.position = value;
+                    tmpPosition = value;
+                }
+            }
+        }
+    }
 
     public EnemyValues(int hp, int moveCtrl, int uniqueNum, int spawnNum, Vector3 position)
     {
@@ -21,7 +41,7 @@ public class EnemyValues
         this.moveCtrl = moveCtrl;
         this.uniqueNum = uniqueNum;
         this.spawnNum = spawnNum;
-        this.position = position;
+        tmpPosition = position;
     }
 }
 
