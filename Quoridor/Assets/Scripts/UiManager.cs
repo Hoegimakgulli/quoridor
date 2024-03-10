@@ -46,9 +46,6 @@ public class UiManager : MonoBehaviour
 
     public List<attackedEnemyValues> attackedEnemyList = new List<attackedEnemyValues>();
 
-    private List<int> attackedEnemiesNum = new List<int>();  //피격당한 적의 번호들
-    private List<int> attackedEnemiesMaxHP = new List<int>();  //피격당한 적의 최대 HP들 (적 상태창에 쓰일 정보로 필요)
-
 
     private void Awake()
     {
@@ -240,10 +237,9 @@ public class UiManager : MonoBehaviour
     //행동력 올라가는 애니메이션  (몇번째 enemy인지, 시작 행동력, 목표 행동력, 마지막 적의 움직임인지)
     public IEnumerator CountMovectrlAnim(int enemyNum, int start, int goal, bool finalMove)
     {
-        Enemy enemy = enemyManager.GetEnemyObject(enemyNum).GetComponent<Enemy>();
         if (goal > 10) goal = 10;
         enemyStates[enemyNum].GetComponent<Image>().DOFade(1, 0); //밝아지는 연출
-        DOVirtual.Int(start, goal, uiMoveTime, ((x) => { enemyStates[enemyNum].GetChild(1).GetComponent<Text>().text = "행동력 : " + x + " / " + enemy.moveCtrl[0]; })).SetEase(Ease.InCubic);
+        DOVirtual.Int(start, goal, uiMoveTime, ((x) => { enemyStates[enemyNum].GetChild(1).GetComponent<Text>().text = "행동력 : " + x + " / 10"; })).SetEase(Ease.InCubic);
         yield return new WaitForSeconds(uiMoveTime);
         yield return StartCoroutine(SwapStatesAnim(enemyNum, finalMove));
     }
@@ -263,6 +259,10 @@ public class UiManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.05f);
 
+        for (int i = 0; i < attackedEnemyList.Count; i++)
+        {
+            Debug.Log(i + " : " + attackedEnemyList[i].enemyNum);
+        }
         foreach (attackedEnemyValues value in attackedEnemyList)
         {
             enemyStates[value.enemyNum].GetChild(3).GetComponent<Image>().DOFade(1, 0); //피격시 ui 빨개지는 애니메이션 준비
@@ -292,6 +292,7 @@ public class UiManager : MonoBehaviour
     //적 사망 시 상태창 애니메이션
     private IEnumerator DyingEnemyAnim()
     {
+
         List<GameObject> destroyObjects = new List<GameObject>(); //처리 후 삭제될 오브젝트를 담아두는 리스트
         List<int> destroyEnemyNum = new List<int>(); //처리 후 삭제될 적의 번호를 담아두는 리스트
         foreach(attackedEnemyValues value in attackedEnemyList) //죽기 전 예열 foreach문
@@ -400,7 +401,7 @@ public class UiManager : MonoBehaviour
         //cg = enemyStates[enemyNum]
         yield return new WaitForSeconds(uiMoveTime);
         yield return StartCoroutine(SwapStatesAnim(enemyNum, false));
-        enemyStates[enemyNum].GetChild(1).GetComponent<Text>().text = "행동력 : " + 0 + " / " + enemyManager.GetEnemyObject(enemyNum).GetComponent<Enemy>().moveCtrl[0];  //GameManager.enemyObjects[enemyNum].GetComponent<Enemy>().moveCtrl[0];
+        enemyStates[enemyNum].GetChild(1).GetComponent<Text>().text = "행동력 : " + 0 + " / 10";  //GameManager.enemyObjects[enemyNum].GetComponent<Enemy>().moveCtrl[0];
         enemyStates[enemyNum].DOAnchorPosX(enemyStates[enemyNum].anchoredPosition.x - 400, uiMoveTime);
         yield return new WaitForSeconds(uiMoveTime);
 

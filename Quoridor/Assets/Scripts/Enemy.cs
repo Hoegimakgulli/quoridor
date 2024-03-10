@@ -137,6 +137,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     // Attack 받았을 때 실행하는 함수
     public bool AttackedEnemy(int playerAtk)
     {
+        Debug.Log(GetComponent<SpriteRenderer>().color);
         int originHP = hp;
         hp -= playerAtk;
 
