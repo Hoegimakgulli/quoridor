@@ -9,6 +9,8 @@ public delegate void ExitEvent(Enemy enemy);
 
 public class AreaAbility : MonoBehaviour
 {
+    public enum ELifeType { Turn, Count }
+    public ELifeType lifeType;
     public int life;  // 지속 기간
     public List<GameObject> targetList = new List<GameObject>(); // 타깃 오브젝트
     public List<Vector2Int> areaPositionList = new List<Vector2Int>();
@@ -17,6 +19,8 @@ public class AreaAbility : MonoBehaviour
     public EnterEvent enterEvent;
     public StayEvent stayEvent;
     public ExitEvent exitEvent;
+
+    public GameObject sprite;
 
     int tempTurn;
     EnemyManager enemyManager;
@@ -52,16 +56,11 @@ public class AreaAbility : MonoBehaviour
         if (GameManager.Turn % 2 == Player.playerOrder && tempTurn != GameManager.Turn)
         {
             tempTurn = GameManager.Turn;
-
-            if (--life <= 0)
+            if (lifeType == ELifeType.Turn)
             {
-                for (int i = 0; i < areaPositionList.Count; i++)
+                if (--life == 0)
                 {
-                    if (boxColliderList[i].enabled)
-                    {
-                        Enemy enemy = enemyManager.GetEnemy(transform.position + GameManager.ChangeCoord(areaPositionList[i]), false);
-                        if (enemy != null) exitEvent(enemy);
-                    }
+                    OnAbilityDisable();
                 }
             }
         }
@@ -74,11 +73,33 @@ public class AreaAbility : MonoBehaviour
             boxCollider.isTrigger = true;
             boxCollider.offset = areaPositionList[i];
             boxColliderList.Add(boxCollider);
+
+            // 임시 //
+            Instantiate(sprite, this.transform).transform.localPosition = (Vector2)areaPositionList[i];
         }
+    }
+    void OnAbilityDisable()
+    {
+        for (int i = 0; i < areaPositionList.Count; i++)
+        {
+            if (boxColliderList[i].enabled)
+            {
+                Enemy enemy = enemyManager.GetEnemy(transform.position + GameManager.ChangeCoord(areaPositionList[i]), false);
+                if (enemy != null) exitEvent(enemy);
+            }
+        }
+        Destroy(this.gameObject);
     }
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.tag == "Enemy") enterEvent(other.GetComponent<Enemy>());
+        if (other.tag == "Enemy")
+        {
+            enterEvent(other.GetComponent<Enemy>());
+            if (lifeType == ELifeType.Count)
+            {
+                OnAbilityDisable();
+            }
+        }
     }
     private void OnTriggerStay2D(Collider2D other)
     {

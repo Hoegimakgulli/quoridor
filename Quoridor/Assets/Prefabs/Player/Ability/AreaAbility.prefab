@@ -44,7 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5dfe8cbd08cebd44ca81d293538ad003, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lifeType: 0
   life: 0
   targetList: []
   areaPositionList: []
   canPenetrate: 0
+  sprite: {fileID: 3087686276284275909, guid: fdb76e0e7967b3f40b8a7c64b3951562, type: 3}

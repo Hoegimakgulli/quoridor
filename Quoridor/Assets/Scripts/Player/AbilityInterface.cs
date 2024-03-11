@@ -18,11 +18,11 @@ public interface IActiveAbility  // 액티브 능력 인터페이스
     bool[] canPenetrate { get; }           // 공격 관통 여부  [0]:플레이어to타깃 관통 [1]:투사체 중심 부터 다른 범위
     Vector2Int targetPos { get; set; } // 투척 좌표
 }
-public interface IAreaAbility
+public interface IAreaAbility // 지속&배치형 능력 인터페이스
 {
-    EnterEvent enterEvent { get; }
-    StayEvent stayEvent { get; }
-    ExitEvent exitEvent { get; }
+    EnterEvent enterEvent { get; } // Enter 이벤트
+    StayEvent stayEvent { get; }   // Stay 이벤트
+    ExitEvent exitEvent { get; }   // Exit 이벤트
 }
 // public class AreaAbility // 지속형 능력 class
 // {

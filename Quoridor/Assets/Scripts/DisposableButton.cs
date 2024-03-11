@@ -13,6 +13,7 @@ public class DisposableButton : MonoBehaviour
     public ActiveCondition activeCondition = ActiveCondition.None;
     public bool isAlreadyUsed = false;
     bool isTargetAbility = false;
+
     private void Start()
     {
         player = GameObject.FindWithTag("Player").GetComponent<Player>();
@@ -55,5 +56,7 @@ public class DisposableButton : MonoBehaviour
     {
         button.interactable = false;
         isAlreadyUsed = true;
+        // Debug.Log("비활성화됨");
+        gameManager.playerActionUI.PassiveUI();
     }
 }

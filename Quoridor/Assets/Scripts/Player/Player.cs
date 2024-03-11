@@ -80,6 +80,7 @@ public class Player : MonoBehaviour
     void Awake()
     {
         playerActionUI = Instantiate(playerPrefabs.actionUI, transform).transform.GetChild(0).GetComponent<PlayerActionUI>();
+        playerActionUI.GetComponentInParent<Canvas>().sortingLayerName = "Text"; // 임시 적용
     }
     void Start()
     {
@@ -186,6 +187,7 @@ public class Player : MonoBehaviour
                     break;
                 case GameManager.EPlayerControlStatus.Ability:
                     if (abilityCount > 0) UseAbility();
+                    else ResetPreview();
                     break;
                 default:
                     break;

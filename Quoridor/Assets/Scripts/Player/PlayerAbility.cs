@@ -140,12 +140,15 @@ public class PlayerAbility : MonoBehaviour
                 ability.Reset();
             }
         }
-        for (int i = 0; i < player.abilityCount; i++) // 버튼마다 버튼 이름과 쿨타임에 따른 활성화여부 설정
+        if (resetTime == EResetTime.OnEnemyTurnStart)
         {
-            Button abilityButton = player.abilityUI.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(i).GetComponent<Button>();
-            abilityButton.gameObject.SetActive(false);
+            for (int i = 0; i < player.abilityCount; i++) // 버튼마다 버튼 이름과 쿨타임에 따른 활성화여부 설정
+            {
+                Button abilityButton = player.abilityUI.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(i).GetComponent<Button>();
+                abilityButton.gameObject.SetActive(false);
+            }
+            shouldSetUpAbilityUI = true;
         }
-        shouldSetUpAbilityUI = true;
     }
     public void MoveEvent()
     {
@@ -314,10 +317,11 @@ public class PlayerAbility : MonoBehaviour
         abilitiesID.RemoveAt(index);
         player.abilityCount = abilities.Count(ability => ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive);
     }
-    public AreaAbility SetAreaAbility(int life, Vector2Int targetPos, List<Vector2Int> areaPositionList, bool canPenetrate, EnterEvent enterEvent, StayEvent stayEvent, ExitEvent exitEvent)
+    public AreaAbility SetAreaAbility(AreaAbility.ELifeType lifeType, int life, Vector2Int targetPos, List<Vector2Int> areaPositionList, bool canPenetrate, EnterEvent enterEvent, StayEvent stayEvent, ExitEvent exitEvent)
     {
         GameObject areaAbilityObject = Instantiate(abilityPrefabs.AreaAbilityPrefab, GameManager.ChangeCoord(targetPos), Quaternion.identity);
         AreaAbility areaAbility = areaAbilityObject.GetComponent<AreaAbility>();
+        areaAbility.lifeType = lifeType;
         areaAbility.life = life;
         areaAbility.areaPositionList = areaPositionList;
         areaAbility.canPenetrate = canPenetrate;
@@ -817,7 +821,7 @@ public class PlayerAbility : MonoBehaviour
         {
             Debug.Log($"{targetPos}");
             // mAreaAbilityList.Add(new AreaAbility(2, targetPos));
-            thisScript.SetAreaAbility(2, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            thisScript.SetAreaAbility(AreaAbility.ELifeType.Turn, 2, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
             canEvent = false;
             mCount--;
             tempTurn = GameManager.Turn;
@@ -887,7 +891,7 @@ public class PlayerAbility : MonoBehaviour
             Debug.Log($"{targetPos}");
             mValue = 1 + thisScript.additionalAbilityStat.throwingDamage;
             // mAreaAbilityList.Add(new AreaAbility(2, targetPos));
-            thisScript.SetAreaAbility(2, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            thisScript.SetAreaAbility(AreaAbility.ELifeType.Turn, 2, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
             canEvent = false;
             mCount--;
             tempTurn = GameManager.Turn;
@@ -1168,7 +1172,7 @@ public class PlayerAbility : MonoBehaviour
             return;
         }
     }
-    class AutoTrapSetting : IAbility // 22.자동 덫 설치
+    class AutoTrapSetting : IAbility, IAreaAbility // 22.자동 덫 설치
     {
         private EAbilityType mAbilityType = EAbilityType.MovePassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
@@ -1176,7 +1180,7 @@ public class PlayerAbility : MonoBehaviour
         private int mCount = 1;
 
         private int moveCount = 1; // 1인 이유는 이 MovePassive자체가 1번 움직이고 실행되는 코드이기 때문에 미리 1을 더해둠
-        private Transform playerBeforePos;
+        private Vector3 playerBeforePos;
 
         PlayerAbility thisScript;
         public AutoTrapSetting(PlayerAbility playerAbility) { thisScript = playerAbility; }
@@ -1184,17 +1188,32 @@ public class PlayerAbility : MonoBehaviour
         public EAbilityType abilityType { get { return mAbilityType; } }
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public EnterEvent enterEvent
+        {
+            get
+            {
+                return (Enemy enemy) =>
+                {
+                    enemy.moveCtrl[1] -= 3;
+                    // thisScript.enemyManager.GetEnemyValues(enemy.transform.position).moveCtrl -= 3;
+                    enemy.AttackedEnemy(1);
+                };
+            }
+        }
+        public StayEvent stayEvent { get { return (Enemy enemy) => { }; } }
+        public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
         {
             // 5번 움직였을 경우
             if (moveCount >= 5)
             {
-                Instantiate(thisScript.gameManager.autoTrap, playerBeforePos.position, Quaternion.identity); // 덫 설치용
+                // Instantiate(thisScript.gameManager.autoTrap, playerBeforePos.position, Quaternion.identity); // 덫 설치용
+                thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, GameManager.ChangeCoord(playerBeforePos), new List<Vector2Int>() { Vector2Int.zero }, true, enterEvent, stayEvent, exitEvent);
                 moveCount = 1; // player 움직인 누적 횟수 초기화
             }
             else
             {
-                playerBeforePos = thisScript.player.transform; // 플레이어 움직이고 난 후 transform 저장
+                playerBeforePos = thisScript.player.transform.position; // 플레이어 움직이고 난 후 transform 저장
                 moveCount += 1; // 
             }
             return false;
