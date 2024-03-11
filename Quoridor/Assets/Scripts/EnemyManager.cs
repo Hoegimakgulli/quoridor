@@ -483,7 +483,7 @@ public class EnemyManager : MonoBehaviour
         if (enemyBox != null) Destroy(enemyBox);
         enemyBox = Instantiate(enemyBoxPrefab);
     }
-    public GameObject GetEnemyObject(Vector3 position)
+    public GameObject GetEnemyObject(Vector3 position, bool shouldLog = true)
     {
         foreach (Transform child in enemyBox.transform)
         {
@@ -493,10 +493,10 @@ public class EnemyManager : MonoBehaviour
                 return child.gameObject;
             }
         }
-        Debug.LogError("EnemyManager error : 어떤 Enemy 오브젝트를 찾지 못했습니다.");
+        if (shouldLog) Debug.LogError("EnemyManager error : 어떤 Enemy 오브젝트를 찾지 못했습니다.");
         return null;
     }
-    public EnemyValues GetEnemyValues(Vector3 position)
+    public EnemyValues GetEnemyValues(Vector3 position, bool shouldLog = true)
     {
         foreach (EnemyValues child in GameManager.enemyValueList)
         {
@@ -505,20 +505,20 @@ public class EnemyManager : MonoBehaviour
                 return child;
             }
         }
-        Debug.LogError("EnemyManager error : 어떤 EnemyValues도 찾지 못했습니다.");
+        if (shouldLog) Debug.LogError("EnemyManager error : 어떤 EnemyValues도 찾지 못했습니다.");
         return null; // 위치에 아무런 오브젝트도 못찾았을 경우
     }
-    public Enemy GetEnemy(Vector3 position)
+    public Enemy GetEnemy(Vector3 position, bool shouldLog = true)
     {
         foreach (Transform child in enemyBox.transform)
         {
-            Debug.Log(child.position);
+            // Debug.Log(child.position);
             if (child.position == position)
             {
                 return child.GetComponent<Enemy>();
             }
         }
-        Debug.LogError("EnemyManager error : 어떤 Enemy 스크립트를 찾지 못했습니다.");
+        if (shouldLog) Debug.LogError("EnemyManager error : 어떤 Enemy 스크립트를 찾지 못했습니다.");
         return null;
     }
     public GameObject GetEnemyObject(int index)

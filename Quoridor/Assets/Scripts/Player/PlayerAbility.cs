@@ -314,6 +314,19 @@ public class PlayerAbility : MonoBehaviour
         abilitiesID.RemoveAt(index);
         player.abilityCount = abilities.Count(ability => ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive);
     }
+    public AreaAbility SetAreaAbility(int life, Vector2Int targetPos, List<Vector2Int> areaPositionList, bool canPenetrate, EnterEvent enterEvent, StayEvent stayEvent, ExitEvent exitEvent)
+    {
+        GameObject areaAbilityObject = Instantiate(abilityPrefabs.AreaAbilityPrefab, GameManager.ChangeCoord(targetPos), Quaternion.identity);
+        AreaAbility areaAbility = areaAbilityObject.GetComponent<AreaAbility>();
+        areaAbility.life = life;
+        areaAbility.areaPositionList = areaPositionList;
+        areaAbility.canPenetrate = canPenetrate;
+        areaAbility.enterEvent = enterEvent;
+        areaAbility.stayEvent = stayEvent;
+        areaAbility.exitEvent = exitEvent;
+        areaAbility.SetUp();
+        return areaAbility;
+    }
     class AtkUp1 : IAbility // 1.공격력 증가 +1
     {
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
@@ -762,7 +775,7 @@ public class PlayerAbility : MonoBehaviour
             Debug.Log(canEvent);
         }
     }
-    class SmokeGrenade : IAbility, IActiveAbility // 13.연막탄
+    class SmokeGrenade : IAbility, IActiveAbility, IAreaAbility // 13.연막탄
     {
         private EAbilityType mAbilityType = EAbilityType.TargetActive;
         private EResetTime mResetTime = EResetTime.OnEveryTick;
@@ -797,10 +810,14 @@ public class PlayerAbility : MonoBehaviour
         public EAbilityType abilityType { get { return mAbilityType; } }
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.canAttack = false; }; } }
+        public StayEvent stayEvent { get { return (Enemy enemy) => { enemy.canAttack = false; }; } }
+        public ExitEvent exitEvent { get { return (Enemy enemy) => { enemy.canAttack = true; }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
-            mAreaAbilityList.Add(new AreaAbility(2, targetPos));
+            // mAreaAbilityList.Add(new AreaAbility(2, targetPos));
+            thisScript.SetAreaAbility(2, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
             canEvent = false;
             mCount--;
             tempTurn = GameManager.Turn;
@@ -811,7 +828,6 @@ public class PlayerAbility : MonoBehaviour
             if (canEvent)
             {
                 mAttackRange = originAttackRange.Concat(thisScript.additionalAbilityStat.throwingRange).ToList();
-                return;
             }
             if (GameManager.Turn == 1)
             {
@@ -820,38 +836,15 @@ public class PlayerAbility : MonoBehaviour
             }
             if (GameManager.Turn % 2 == Player.playerOrder && tempTurn != GameManager.Turn)
             {
-                List<AreaAbility> tempAreaAbility = mAreaAbilityList.ToList();
-                foreach (var areaAbility in mAreaAbilityList)
-                {
-                    areaAbility.life--;
-                    if (areaAbility.life <= 0) tempAreaAbility.Remove(areaAbility);
-                }
-                mAreaAbilityList = tempAreaAbility.ToList();
                 tempTurn = GameManager.Turn;
                 if (mCount > 0)
                 {
                     canEvent = true;
                 }
             }
-
-            foreach (var areaAbility in mAreaAbilityList)
-            {
-                foreach (var attackPosition in attackScale)
-                {
-                    bool[] result = thisScript.player.CheckRay(GameManager.ChangeCoord(areaAbility.targetPos), GameManager.ChangeCoord(attackPosition));
-                    if (result[0]) continue;
-                    if (result[1] || canPenetrate[1])
-                    {
-                        GameObject targetEnemyObject = thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(areaAbility.targetPos + attackPosition));
-                        if (targetEnemyObject == null) continue;
-                        Enemy targetEnemy = targetEnemyObject.GetComponent<Enemy>();
-                        Debug.Log($"{targetEnemyObject.name} 에게 이벤트 발생중!");
-                    }
-                }
-            }
         }
     }
-    class PoisonBomb : IAbility, IActiveAbility // 14.독성 폭탄
+    class PoisonBomb : IAbility, IActiveAbility, IAreaAbility // 14.독성 폭탄
     {
         private EAbilityType mAbilityType = EAbilityType.TargetActive;
         private EResetTime mResetTime = EResetTime.OnEveryTick;
@@ -886,11 +879,15 @@ public class PlayerAbility : MonoBehaviour
         public EAbilityType abilityType { get { return mAbilityType; } }
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.moveCtrl[1] = Mathf.Max(enemy.moveCtrl[1] - 2, 0); }; } }
+        public StayEvent stayEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); }; } }
+        public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
             mValue = 1 + thisScript.additionalAbilityStat.throwingDamage;
-            mAreaAbilityList.Add(new AreaAbility(2, targetPos));
+            // mAreaAbilityList.Add(new AreaAbility(2, targetPos));
+            thisScript.SetAreaAbility(2, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
             canEvent = false;
             mCount--;
             tempTurn = GameManager.Turn;
@@ -901,7 +898,6 @@ public class PlayerAbility : MonoBehaviour
             if (canEvent)
             {
                 mAttackRange = originAttackRange.Concat(thisScript.additionalAbilityStat.throwingRange).ToList();
-                return;
             }
             if (GameManager.Turn == 1)
             {
@@ -910,51 +906,11 @@ public class PlayerAbility : MonoBehaviour
             }
             if (GameManager.Turn % 2 == Player.playerOrder && tempTurn != GameManager.Turn)
             {
-                List<AreaAbility> tempAreaAbility = mAreaAbilityList.ToList();
-                foreach (var areaAbility in mAreaAbilityList)
-                {
-                    areaAbility.life--;
-                    if (areaAbility.life <= 0) tempAreaAbility.Remove(areaAbility);
-                }
-                mAreaAbilityList = tempAreaAbility.ToList();
                 tempTurn = GameManager.Turn;
                 if (mCount > 0)
                 {
                     canEvent = true;
                 }
-            }
-
-            foreach (var areaAbility in mAreaAbilityList)
-            {
-                List<GameObject> tempTargetList = areaAbility.targetList.ToList();
-                areaAbility.targetList.Clear();
-                foreach (var attackPosition in attackScale)
-                {
-                    bool[] result = thisScript.player.CheckRay(GameManager.ChangeCoord(areaAbility.targetPos), GameManager.ChangeCoord(attackPosition));
-                    if (result[0]) continue;
-                    if (result[1] || canPenetrate[1])
-                    {
-                        GameObject targetEnemyObject = thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(areaAbility.targetPos + attackPosition));
-                        if (targetEnemyObject == null) continue;
-                        Enemy targetEnemy = targetEnemyObject.GetComponent<Enemy>();
-                        if (tempTargetList.Contains(targetEnemyObject))  // On Stay
-                        {
-                            targetEnemy.AttackedEnemy(mValue);
-                        }
-                        else  // On Enter
-                        {
-                            targetEnemy.moveCtrl[1] = Mathf.Max(targetEnemy.moveCtrl[1] - 2, 0);
-                        }
-                        areaAbility.targetList.Add(targetEnemyObject);
-                    }
-                }
-                // foreach (GameObject targetEnemyObject in tempTargetList.Except(areaAbility.targetList)) // On Exit
-                // { 
-                //     if (targetEnemyObject == null) // On Die
-                //     {
-                //         continue;
-                //     }
-                // }
             }
         }
     }
@@ -1018,7 +974,6 @@ public class PlayerAbility : MonoBehaviour
             if (canEvent)
             {
                 mAttackRange = originAttackRange.Concat(thisScript.additionalAbilityStat.throwingRange).ToList();
-                return;
             }
             if (GameManager.Turn == 1)
             {

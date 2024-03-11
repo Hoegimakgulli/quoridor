@@ -217,6 +217,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     //--------------- Attack 시작 ---------------//
     // playerAttack 함수 Raycast사용
+    public bool canAttack = true; // 연막탄 능력 때문에 적의 공격 가능 여부를 설정하는 변수 추가 - 동현
     public void AttackPlayer()
     {
         if (AttackCanEnemy() && state == EState.Attack)
@@ -229,7 +230,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             {
                 if (hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
                 {
-                    hit.transform.GetComponent<Player>().Die();
+                    if (canAttack) hit.transform.GetComponent<Player>().Die();
                 }
             }
         }

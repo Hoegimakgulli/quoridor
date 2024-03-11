@@ -72,6 +72,7 @@ public class Player : MonoBehaviour
     GameObject abilityUIButton;
 
     GameObject wallStorage;
+    GameObject previewStorage;
     PlayerActionUI playerActionUI;
 
     PlayerAbility playerAbility;
@@ -83,30 +84,33 @@ public class Player : MonoBehaviour
     void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        wallStorage = GameObject.Find("WallStorage");
+        wallStorage = GameObject.FindGameObjectWithTag("WallStorage");
+        previewStorage = GameObject.FindGameObjectWithTag("PreviewStorage");
         for (int i = 0; i < movablePositions.Count; i++) // 플레이어 미리보기 -> 미리소환하여 비활성화 해놓기
         {
-            playerPreviews.Add(Instantiate(playerPrefabs.playerPreview, transform.position, Quaternion.identity));
+            playerPreviews.Add(Instantiate(playerPrefabs.playerPreview, previewStorage.transform));
             playerPreviews[i].SetActive(false);
         }
         for (int i = 0; i < attackablePositions.Count; i++) // 플레이어 공격 미리보기 -> 미리소환하여 비활성화 해놓기
         {
-            playerAttackPreviews.Add(Instantiate(playerPrefabs.attackPreview, transform.position, Quaternion.identity));
+            playerAttackPreviews.Add(Instantiate(playerPrefabs.attackPreview, previewStorage.transform));
             playerAttackPreviews[i].SetActive(false);
         }
         for (int i = 0; i < attackPositions.Count; i++) // 플레이어 공격 하이라이트 -> 미리소환하여 비활성화 해놓기
         {
-            playerAttackHighlights.Add(Instantiate(playerPrefabs.attackHighlight, transform.position, Quaternion.identity));
+            playerAttackHighlights.Add(Instantiate(playerPrefabs.attackHighlight, previewStorage.transform));
             playerAttackHighlights[i].SetActive(false);
         }
         for (int i = 0; i < 81; i++) // 플레이어 능력 미리보기 -> 미리소환하여 비활성화 해놓기
         {
             playerAbilityPreviews.Add(Instantiate(playerPrefabs.attackPreview, new Vector3(i % 9 - 4, i / 9 - 4, 0) * GameManager.gridSize, Quaternion.identity));
+            playerAbilityPreviews[i].transform.parent = previewStorage.transform;
             playerAbilityPreviews[i].SetActive(false);
         }
         for (int i = 0; i < 81; i++) // 플레이어 능력 하이라이트 -> 미리소환하여 비활성화 해놓기
         {
             playerAbilityHighlights.Add(Instantiate(playerPrefabs.attackHighlight, new Vector3(i % 9 - 4, i / 9 - 4, 0) * GameManager.gridSize, Quaternion.identity));
+            playerAbilityHighlights[i].transform.parent = previewStorage.transform;
             playerAbilityHighlights[i].SetActive(false);
         }
         for (int i = 0; i < maxWallCount; i++)
