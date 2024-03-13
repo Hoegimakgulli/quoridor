@@ -124,6 +124,7 @@ public class Player : MonoBehaviour
         //playerUI = Instantiate(playerUI); // [디버그용]
         abilityUI = Instantiate(abilityUI); // [임시 능력 UI]
         playerAbility = GetComponent<PlayerAbility>();
+        playerAbility.LoadAbility();
     }
     public void Initialize()
     {
@@ -145,6 +146,8 @@ public class Player : MonoBehaviour
     {
         TouchSetUp();
         playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEveryTick);
+        if (playerAbility.NeedSave)
+            playerAbility.SaveAbility();
         GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position);
         if (GameManager.Turn % 2 == playerOrder) // 플레이어 차례인지 확인
         {

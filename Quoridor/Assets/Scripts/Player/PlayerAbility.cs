@@ -5,6 +5,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Unity.VisualScripting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.IO;
 #if UNITY_EDITOR
 using UnityEditor.PackageManager;
 #endif
@@ -72,6 +75,9 @@ public class PlayerAbility : MonoBehaviour
 
     public bool shouldSetUpAbilityUI = true; // [임시 능력 UI]
 
+
+    private bool needSave = true;
+    public bool NeedSave { get { return needSave; } }
     private void Start()
     {
         player = GetComponent<Player>();
@@ -300,6 +306,7 @@ public class PlayerAbility : MonoBehaviour
         }
         if (isSuccess) abilitiesID.Add(id);
         player.abilityCount = abilities.Count(ability => ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive);
+        needSave = true;
     }
     public void RemoveAbility(int id)
     {
@@ -313,8 +320,56 @@ public class PlayerAbility : MonoBehaviour
         abilities.RemoveAt(index);
         abilitiesID.RemoveAt(index);
         player.abilityCount = abilities.Count(ability => ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive);
+        needSave = true;
     }
-    class AtkUp1 : IAbility // 1.공격력 증가 +1
+
+    public void SaveAbility()
+    {
+        string filePath = Application.persistentDataPath + "/ability.json";
+        List<object> jsonList = new List<object>();
+        for (int i = 0; i < abilities.Count; i++)
+        {
+            int index = abilitiesID[i];
+            string result = abilities[i].Save();
+            if (result == string.Empty)
+                continue;
+            Debug.Log($"[{index}] {result}");
+            jsonList.Add(result);
+        }
+        if (jsonList.Count < 1)
+            return;
+
+        var json = JsonConvert.SerializeObject(jsonList);
+        Debug.Log($"Final: {json}, in {filePath}");
+        File.WriteAllText(filePath, json);
+        needSave = false;
+    }
+    public bool LoadAbility()
+    {
+        string filePath = Application.persistentDataPath + "/ability.json";
+        if (!File.Exists(filePath)) return false;
+
+        string json = File.ReadAllText(filePath);
+        List<object> jsonList = JsonConvert.DeserializeObject<List<object>>(json);
+        for (int i = 0; i < jsonList.Count; i++)
+        {
+            var abilityData = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonList[i].ToString());
+
+            if (abilityData.ContainsKey("AbilityID"))
+            {
+                int index = int.Parse(abilityData["AbilityID"].ToString());
+                Debug.Log($"[{index}]: {jsonList[i]}");
+                //해당 index에 대응하는 Load(jsonList[i]) 호출
+            }
+            else
+            {
+                Debug.LogError($"ContainsKey(AbilityID) false: {jsonList[i]}");
+            }
+        }
+
+        return true;
+    }
+    class AtkUp1 : IAbility, ISaveLoad // 1.공격력 증가 +1
     {
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
@@ -341,6 +396,27 @@ public class PlayerAbility : MonoBehaviour
         public void Reset()
         {
             return;
+        }
+        public string Save()
+        {
+            string result = string.Empty;
+            Dictionary<string, object> data = new Dictionary<string, object>();
+
+            data.Add("AbilityID", 1);
+            data.Add("canEvent", canEvent);
+            data.Add("mValue", mValue);
+
+            result = JsonConvert.SerializeObject(data);
+            return result;
+        }
+        public void Load(string data)
+        {
+            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
+
+            bool canEvent = (bool)root["canEvent"];
+            int mValue = (int)root["mValue"];
+
+            Debug.Log($"Load: {canEvent}");
         }
     }
     class AtkUp2 : IAbility // 2.공격력 증가 +2
@@ -371,6 +447,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class WallUp1 : IAbility // 3.벽 소지 +1
     {
@@ -400,6 +478,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class WallUp2 : IAbility // 4.벽 소지 +2
     {
@@ -429,6 +509,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class WallUp3 : IAbility // 5.벽 소지 +3
     {
@@ -458,6 +540,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class Shield : IAbility // 6.보호막
     {
@@ -500,6 +584,8 @@ public class PlayerAbility : MonoBehaviour
                 thisScript.RemoveAbility(6);
             }
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class ToughSurvival : IAbility // 7.질긴 생존
     {
@@ -545,6 +631,8 @@ public class PlayerAbility : MonoBehaviour
                 canEvent = true;
             }
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class Reload : IAbility // 8.재장전
     {
@@ -569,6 +657,8 @@ public class PlayerAbility : MonoBehaviour
         {
             canEvent = true;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class ChainLightning : IAbility // 9.체인라이트닝
     {
@@ -609,6 +699,8 @@ public class PlayerAbility : MonoBehaviour
         {
             canEvent = true;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class ChaineExplosion : IAbility // 10.연쇄폭발
     {
@@ -669,6 +761,8 @@ public class PlayerAbility : MonoBehaviour
             canEvent = true;
             exploablePosition.Clear();
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class PenetrateAttack : IAbility // 11.관통 공격
     {
@@ -698,7 +792,7 @@ public class PlayerAbility : MonoBehaviour
                 return false;
             }
 
-            
+
             // 실행 코드
             GameObject enemyBackTarget = thisScript.enemyManager.GetEnemyObject(thisScript.targetEnemy.transform.position + new Vector3(0, 1.3f, 0));
             if (!enemyBackTarget) // 처치된 적 뒤에 아무런 유닛도 없을 경우
@@ -716,6 +810,8 @@ public class PlayerAbility : MonoBehaviour
         {
             canEvent = true;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class PrecisionAttack : IAbility, IActiveAbility // 12.정밀 공격
     {
@@ -761,6 +857,8 @@ public class PlayerAbility : MonoBehaviour
             if (mCount > 0) canEvent = true;
             Debug.Log(canEvent);
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class SmokeGrenade : IAbility, IActiveAbility // 13.연막탄
     {
@@ -850,6 +948,8 @@ public class PlayerAbility : MonoBehaviour
                 }
             }
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class PoisonBomb : IAbility, IActiveAbility // 14.독성 폭탄
     {
@@ -957,6 +1057,8 @@ public class PlayerAbility : MonoBehaviour
                 // }
             }
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class Grenade : IAbility, IActiveAbility // 15.수류탄
     {
@@ -1034,6 +1136,8 @@ public class PlayerAbility : MonoBehaviour
                 }
             }
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class ThrowingDamageUp1 : IAbility // 16.투척 데미지 증가1
     {
@@ -1063,6 +1167,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class ThrowingDamageUp2 : IAbility // 17.투척 데미지 증가2
     {
@@ -1092,6 +1198,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class ThrowingRangeUp1 : IAbility // 18.투척 사거리 확장1
     {
@@ -1123,6 +1231,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class ThrowingRangeUp2 : IAbility // 19.투척 사거리 확장2
     {
@@ -1154,6 +1264,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class ThrowingCountUp1 : IAbility // 20.투척 개수 증가1
     {
@@ -1183,6 +1295,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class ThrowingCountUp2 : IAbility // 21.투척 개수 증가2
     {
@@ -1212,6 +1326,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class AutoTrapSetting : IAbility // 22.자동 덫 설치
     {
@@ -1248,6 +1364,8 @@ public class PlayerAbility : MonoBehaviour
         {
             canEvent = true;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class PrecisionBomb : IAbility, IActiveAbility // 32.정밀 폭격
     {
@@ -1312,6 +1430,8 @@ public class PlayerAbility : MonoBehaviour
         {
             if (GameManager.Turn == 1) canEvent = true;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class EvasiveManeuver : IAbility // 33.회피 기동
     {
@@ -1348,6 +1468,8 @@ public class PlayerAbility : MonoBehaviour
             thisScript.player.movablePositions = originMovablePositions.ToList();
             thisScript.player.shouldMove = false;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class ConstructionManeuver : IAbility // 34.건설 기동
     {
@@ -1374,6 +1496,8 @@ public class PlayerAbility : MonoBehaviour
             thisScript.player.shouldBuild = true;
             thisScript.player.shouldMove = true;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class KnockBack : IAbility // 36.넉백
     {
@@ -1403,6 +1527,8 @@ public class PlayerAbility : MonoBehaviour
         {
             canEvent = true;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class Pressure : IAbility // 37.위압감
     {
@@ -1433,6 +1559,8 @@ public class PlayerAbility : MonoBehaviour
                 }
             }
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class AnkleAttack : IAbility // 38.발목 공격
     {
@@ -1459,5 +1587,7 @@ public class PlayerAbility : MonoBehaviour
         {
             canEvent = true;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
 }

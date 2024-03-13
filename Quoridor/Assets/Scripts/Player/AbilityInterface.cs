@@ -9,6 +9,13 @@ public interface IAbility   // 능력 인터페이스
     bool Event(); // 이벤트 (능력 함수 적는 부분)
     PlayerAbility.EResetTime resetTime { get; }  // 리셋 주기
     void Reset(); // 리셋 (리셋, 쿨다운 관련, 턴이 넘어갈때마다 실행)
+    string Save();
+    void Load(string data);
+}
+public interface ISaveLoad
+{
+    string Save();
+    void Load(string data);
 }
 public interface IActiveAbility  // 액티브 능력 인터페이스
 {
