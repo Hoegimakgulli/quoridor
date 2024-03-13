@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using DG.Tweening;
 using TMPro;
+using UnityEngine.UI;
+using Unity.VisualScripting;
 
 public class AbilityDescription
 {
@@ -56,6 +58,9 @@ public class AbilitySelect : MonoBehaviour
     // key = 스테이지 번호, value = 각 스테이지에 해당하는 슬롯의 확률
     public Dictionary<int, AbilitySlot> slots = new Dictionary<int, AbilitySlot>();
 
+    // 대사 딕셔너리
+    public List<Dictionary<string, object>> talks = new List<Dictionary<string, object>>();
+
     // 등급별로 능력 분류
     private List<int> lowSkills = new List<int>();
     private List<int> middleSkills = new List<int>();
@@ -70,18 +75,10 @@ public class AbilitySelect : MonoBehaviour
     public PlayerAbility playerAbility;
     public GameManager gameManager;
 
-    public void Awake()
-    {
-        AbilityStart(); // skills 딕셔너리에 값 대입
-        SlotStart();    // slots 딕셔너리에 값 대입
-        ShareAbility();
-    }
-
     public void Start()
     {
         playerAbility = GameObject.FindWithTag("Player").GetComponent<PlayerAbility>();
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        
         int count = 0;
         foreach(Transform slotItem in GameObject.Find("AbilitySelectPanel").transform.GetChild(0).transform)
         {
@@ -89,7 +86,7 @@ public class AbilitySelect : MonoBehaviour
             count++;
         }
 
-        
+        Initialize();
     }
 
     public void Update()
@@ -103,7 +100,7 @@ public class AbilitySelect : MonoBehaviour
     public void Initialize()
     {
         // 기존에 가지고 있는 능력들 확인 후 딕셔너리에 체크
-        foreach(int IdNum in playerAbility.abilitiesID)
+        foreach (int IdNum in playerAbility.abilitiesID)
         {
             if (skills.ContainsKey(IdNum))
             {
@@ -115,6 +112,12 @@ public class AbilitySelect : MonoBehaviour
                 Debug.LogError("AbilitySelect : 등록된 능력이 없습니다. 다시 확인해주세요");
             }
         }
+
+        AbilityStart(); // skills 딕셔너리에 값 대입
+        SlotStart();    // slots 딕셔너리에 값 대입
+        TalkStart();    // talks 딕셔너리에 값 대입
+        ShareAbility();
+        CharacterTalkStart();
     }
 
     public void AbilityStart() // 초기 게임 실행 1번만 실행.
@@ -180,6 +183,39 @@ public class AbilitySelect : MonoBehaviour
         slots.Add(9, new AbilitySlot(2, 18, 80, 0, 2, 80, 18, 0, 2, 80, 18, 0));
     }
 
+    public void TalkStart()
+    {
+        switch (GameObject.FindWithTag("Player").name)
+        {
+            case "Angelique(Clone)":
+                talks = CSVReader.Read("Angelique");
+                break;
+            case "Chloe(Clone)":
+                talks = CSVReader.Read("Chloe");
+                break;
+            case "Isaac(Clone)":
+                talks = CSVReader.Read("Isaac");
+                break;
+            case "Joaquin(Clone)":
+                talks = CSVReader.Read("Joaquin");
+                break;
+            case "Kaawa(Clone)":
+                talks = CSVReader.Read("Kaawa");
+                break;
+            case "Lucas(Clone)":
+                talks = CSVReader.Read("Lucas");
+                break;
+            case "Soldier(Clone)":
+                talks = CSVReader.Read("Soldier");
+                break;
+            default:
+                Debug.LogError("등록되지않은 캐릭터 이름입니다");
+                break;
+        }
+
+        GameObject.Find("PCTalk").GetComponent<TMP_Text>().text = talks[Random.Range((gameManager.currentStage * 3) - 3, (gameManager.currentStage * 3))]["Talk"].ToString();
+    }
+
     public void ShareAbility() // skills 딕셔너리에 들어있는 아이템들을 등급에 맞게 리스트에 넣어줌 이후 랜덤으로 돌려서 나오도록 조정.
     {
         foreach(KeyValuePair<int, AbilityDescription> item in skills)
@@ -203,6 +239,18 @@ public class AbilitySelect : MonoBehaviour
                     break;
             }
         }
+    }
+
+    public void CharacterTalkStart()
+    {
+        // 지금 플레이하고 있는 캐릭터 이미지를 따온 후 적용
+        GameObject playerChar = GameObject.FindWithTag("Player");
+        Image playerUiImage = GameObject.Find("PCImage").GetComponent<Image>();
+
+        playerUiImage.sprite = playerChar.transform.GetComponent<SpriteRenderer>().sprite;
+        playerUiImage.color = playerChar.transform.GetComponent<SpriteRenderer>().color;
+
+        //GameObject.Find("PCTalk").GetComponent<TMP_Text>().text =
     }
 
     private List<int> tmpSkillNumBox = new List<int>(); // 임시로 뽑힌 능력이 어떤 번호인지 담아두는 변수
