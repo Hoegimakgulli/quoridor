@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using DG.Tweening;
 using TMPro;
 
 public class AbilityDescription
@@ -60,7 +62,10 @@ public class AbilitySelect : MonoBehaviour
     private List<int> highSkills = new List<int>();
     private List<int> specialSkills = new List<int>();
 
+    // AbilitySelectPanel안에 들어 있는 오브젝트들 현 비활성화 되어있음
     public GameObject[] slotUi = new GameObject[3];
+    public GameObject selectButton;
+    public float popDuring = 1f;
 
     public PlayerAbility playerAbility;
     public GameManager gameManager;
@@ -83,6 +88,8 @@ public class AbilitySelect : MonoBehaviour
             slotUi[count] = slotItem.gameObject;
             count++;
         }
+
+        
     }
 
     public void Update()
@@ -198,6 +205,7 @@ public class AbilitySelect : MonoBehaviour
         }
     }
 
+    private List<int> tmpSkillNumBox = new List<int>(); // 임시로 뽑힌 능력이 어떤 번호인지 담아두는 변수
     public void AbilitySelectStart()
     {
         AbilitySlot currentSlot = null;
@@ -210,12 +218,12 @@ public class AbilitySelect : MonoBehaviour
             Debug.LogError("AbilitySelect Scripts AbilitySelectStart 함수 : 해당 스테이지에 맞는 slots를 찾지 못했습니다.");
         }
 
-        List<int> tmpSkillNumBox = new List<int>(); // 임시로 뽑힌 능력이 어떤 번호인지 담아두는 변수
         for (int slotCount = 0; slotCount < 3; slotCount++) // 첫번째 슬롯 두번째 슬롯 세번째 슬롯까지 총 3개 뽑는 과정 실시
         {
             float select = Random.Range(0.0f, 100.0f); // 확률계산
             float sum = 0; // 확률 계산에 필요한 sum 변수
             int count = 0; // 저 중 고 특수중 어떤 등급을 뽑아야하는지 결정하는 float함수
+
             switch (slotCount) // 각 슬롯에 해당하는 저 중 고 특성 순서대로 비교 연산 
             {
                 case 0:
@@ -289,7 +297,81 @@ public class AbilitySelect : MonoBehaviour
             
             slotUi[slotCount].transform.GetChild(1).GetComponent<TMP_Text>().text = skills[skillSelect].skillName; // 스킬 이름 넣어주는 파트
             slotUi[slotCount].transform.GetChild(2).GetComponent<TMP_Text>().text = skills[skillSelect].skillDescription; // 스킬 설명 넣어주는 파트
-            GameObject.Find("AbilitySelectPanel").transform.GetChild(0).gameObject.SetActive(true);
         }
+
+        // 정보 저장 이후 능력 선택창이 생성되는 부분
+
+        StartCoroutine(SelectSkillUiPop());
+    }
+
+    public void SelectButtonTrigger() // Select 버튼을 클릭했을 때
+    {
+        int itemCount = 0;
+        AbilitySelect AS = GameObject.Find("GameManager").GetComponent<AbilitySelect>();
+        playerAbility = GameObject.FindWithTag("Player").GetComponent<PlayerAbility>();
+
+        selectButton = AS.selectButton;
+
+        if (!selectButton)
+        {
+            Debug.LogError("원하는 능력을 골라주세요");
+        }
+
+        else
+        {
+            foreach (GameObject Item in AS.slotUi)
+            {
+                if (selectButton == Item)
+                {
+                    break;
+                }
+
+                itemCount++;
+            }
+
+            if(itemCount == 3)
+            {
+                Debug.Log("어떤 스킬도 선택하지 않았습니다");
+            }
+            else
+            {
+                playerAbility.AddAbility(AS.tmpSkillNumBox[itemCount]); // 선택한 능력 추가
+                AS.skills[AS.tmpSkillNumBox[itemCount]].isGet = true; // 얻은 스킬은 얻었다는 표시를 남겨줌
+                AS.tmpSkillNumBox.Clear(); // 담아뒀던 임시 능력 번호는 초기화
+
+                // 능력 선택한 이후 애니메이션 추가 예정
+                SelectSkillUiDePop();
+            }
+        }
+    }
+
+    public void SelectSkillHighlighting() // 어떤 능력을 고를지 선택
+    {
+        GameObject.Find("GameManager").GetComponent<AbilitySelect>().selectButton = EventSystem.current.currentSelectedGameObject;
+    }
+
+    IEnumerator SelectSkillUiPop() // 능력 선택 창이 내려오는 함수
+    {
+        foreach(GameObject uiItem in slotUi)
+        {
+            uiItem.GetComponent<RectTransform>().DOAnchorPosY(0, popDuring).SetEase(Ease.OutCirc);
+            yield return new WaitForSeconds(popDuring);
+        }
+        GameObject.Find("PlayerChaBox").GetComponent<RectTransform>().DOAnchorPosX(0, popDuring).SetEase(Ease.OutCirc);
+        yield return new WaitForSeconds(popDuring);
+
+        GameObject.Find("SelectBox").GetComponent<RectTransform>().DOAnchorPosY(0, popDuring).SetEase(Ease.OutCirc);
+    }
+
+    public void SelectSkillUiDePop() // 능력 선택 창이 올라가는 함수
+    {
+        float popDuring = GameObject.Find("GameManager").GetComponent<AbilitySelect>().popDuring;
+        foreach (GameObject uiItem in GameObject.Find("GameManager").GetComponent<AbilitySelect>().slotUi)
+        {
+            uiItem.GetComponent<RectTransform>().DOAnchorPosY(950, popDuring).SetEase(Ease.OutCirc);
+        }
+        GameObject.Find("PlayerChaBox").GetComponent<RectTransform>().DOAnchorPosX(-1500, popDuring).SetEase(Ease.OutCirc);
+
+        GameObject.Find("SelectBox").GetComponent<RectTransform>().DOAnchorPosY(-350, popDuring).SetEase(Ease.OutCirc);
     }
 }
