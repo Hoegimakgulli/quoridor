@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6551029922462568091}
   - component: {fileID: 8153990614069101066}
   - component: {fileID: 1664343263}
+  - component: {fileID: 1874758035}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -72,6 +73,7 @@ MonoBehaviour:
   sortingList: 
   turnEndButton: {fileID: 0}
   WallCountText: {fileID: 0}
+  freezeButton: 0
 --- !u!114 &8153990614069101066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -132,3 +134,22 @@ MonoBehaviour:
   gameManager: {fileID: 0}
   stageUI: {fileID: 5946504288105859631, guid: 71481e6e3a90d694da49ff0822cfa597, type: 3}
   enemyStatePrefab: {fileID: 970041399232811901, guid: b7b3ce9447a57e84baf49738d48e74c9, type: 3}
+--- !u!114 &1874758035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6551029922462568088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d8d8e53e40283a4f820f11b65735513, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slotUi:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  selectButton: {fileID: 0}
+  playerAbility: {fileID: 0}
+  gameManager: {fileID: 0}

@@ -10,7 +10,9 @@ using UnityEngine;
 public class EnemyValues
 {
     public int hp; // 유닛 hp
+    public int maxHp; // 유닛 최대 hp
     public int moveCtrl; // 실시간 행동력 체크
+    public int maxMoveCtrl; // 유닛이 가질 수 있는 최대 행동력
     public int uniqueNum; // 어떤 유닛을 생성할지 정하는 번호
     public int spawnNum; // 생성할 때 넣는 번호
     public Vector3 tmpPosition; // position이 바뀌기 전 위치값
