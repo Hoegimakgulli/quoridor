@@ -102,7 +102,7 @@ MonoBehaviour:
   - {fileID: 5098181600813880054, guid: c50fb871971ce1e458f5f134b40ad790, type: 3}
   - {fileID: 5098181600813880054, guid: 99761d4bae87a9e4f91fd0a4909efc40, type: 3}
   - {fileID: 5098181600813880054, guid: 0e0fb8e97028bca46abdab99d0bc84c2, type: 3}
-  enemyBox: {fileID: 2903932607343671340, guid: 427ba129aedc7bf45846f3347eb26b36, type: 3}
+  enemyBoxPrefab: {fileID: 2903932607343671340, guid: 427ba129aedc7bf45846f3347eb26b36, type: 3}
   enemyUiCanvas: {fileID: 7471301692746399857, guid: c66b0b28a89089a4b88996256d7e4d4d, type: 3}
   FinalPathList: []
   bottomLeft: {x: 0, y: 0}

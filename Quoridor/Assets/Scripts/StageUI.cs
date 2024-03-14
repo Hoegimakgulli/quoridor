@@ -24,7 +24,7 @@ public class StageUI : MonoBehaviour
 
             gameManager.Initialize();
             player.Initialize();
-            enemyStage.EnemyInitialied();
+            enemyStage.EnemyInitialize();
 
             Destroy(this.gameObject);
         }

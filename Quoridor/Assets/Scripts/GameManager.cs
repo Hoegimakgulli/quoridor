@@ -9,41 +9,45 @@ using UnityEngine;
 
 public class EnemyValues
 {
+    private Vector3 mPosition; // position
+
     public int hp; // 유닛 hp
     public int maxHp; // 유닛 최대 hp
     public int moveCtrl; // 실시간 행동력 체크
     public int maxMoveCtrl; // 유닛이 가질 수 있는 최대 행동력
     public int uniqueNum; // 어떤 유닛을 생성할지 정하는 번호
-    public int spawnNum; // 생성할 때 넣는 번호
-    public Vector3 tmpPosition; // position이 바뀌기 전 위치값
+    public int index; // 생성 순서, EnemyBox 내 Index
     public Vector3 position // position이 변경될때 일어나는 것
     {
         get
         {
-            return tmpPosition;
+            return mPosition;
         }
 
         set
         {
             GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
+            // enemyBox.transform.GetChild(spawnNum).position = value;
+            // mPosition = value;
             foreach (Transform enemyPos in enemyBox.transform)
             {
-                if (enemyPos.position == tmpPosition) // 만약 
+                Debug.Log($"EV: {value}");
+                if (enemyPos.position == mPosition) // 만약 
                 {
                     enemyPos.position = value;
-                    tmpPosition = value;
+                    mPosition = value;
                 }
             }
         }
     }
 
-    public EnemyValues(int hp, int moveCtrl, int uniqueNum, int spawnNum, Vector3 position)
+    public EnemyValues(int hp, int moveCtrl, int uniqueNum, int index, Vector3 position)
     {
         this.hp = hp;
         this.moveCtrl = moveCtrl;
         this.uniqueNum = uniqueNum;
-        this.spawnNum = spawnNum;
-        tmpPosition = position;
+        this.index = index;
+        mPosition = position;
     }
 }
 
