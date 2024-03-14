@@ -53,12 +53,13 @@ public class Player : MonoBehaviour
     public bool shouldReset = true;
 
     public bool canAction = true;
-    public bool shouldMove = false;
-    public bool shouldBuild = false;
+    public int moveCount = 0;
+    public int buildCount = 0;
     public bool canAttack = true;
     public int abilityCount = 0;
     protected bool canSignAbility = true;
     public int usingAbilityID;
+    public bool isDisposableMove = false;
 
     int[] previousWallInfo = new int[3];
     int[,] tempMapGraph = new int[81, 81];
@@ -159,8 +160,8 @@ public class Player : MonoBehaviour
                 Transform canvas = playerUI.transform.GetChild(0);
                 canvas.GetChild(5).GetComponent<Text>().text = $"{maxWallCount - wallCount}/{maxWallCount}";
                 // [디버그용] //
-                canvas.GetChild(1).GetComponent<Button>().interactable = canAction || shouldBuild;  // 건설 버튼
-                canvas.GetChild(2).GetComponent<Button>().interactable = canAction || shouldMove;   // 이동 버튼
+                canvas.GetChild(1).GetComponent<Button>().interactable = canAction || buildCount > 0;  // 건설 버튼
+                canvas.GetChild(2).GetComponent<Button>().interactable = canAction || moveCount > 0;   // 이동 버튼
                 canvas.GetChild(0).GetComponent<Button>().interactable = canAttack;                 // 공격 버튼
                 canvas.GetChild(3).GetComponent<Button>().interactable = abilityCount == 0;         // 능력 버튼
             }
@@ -174,11 +175,11 @@ public class Player : MonoBehaviour
             switch (gameManager.playerControlStatus)
             {
                 case GameManager.EPlayerControlStatus.Move:
-                    if (canAction || shouldMove) MovePlayer();
+                    if (canAction || moveCount > 0) MovePlayer();
                     else ResetPreview();
                     break;
                 case GameManager.EPlayerControlStatus.Build:
-                    if (canAction || shouldBuild) BuildWall();
+                    if (canAction || buildCount > 0) BuildWall();
                     else ResetPreview();
                     break;
                 case GameManager.EPlayerControlStatus.Attack:
@@ -206,6 +207,8 @@ public class Player : MonoBehaviour
         gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
         canAction = true;
         canAttack = true;
+        moveCount = 0;
+        buildCount = 0;
         ResetPreview();
         playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEnemyTurnStart);
         shouldReset = false;
@@ -244,16 +247,23 @@ public class Player : MonoBehaviour
                 {
                     transform.position = previewHit.transform.position; //플레이어 위치 이동
                     GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position); //플레이어 위치정보 저장
-                    canAction = false; // 이동이나 벽 설치 불가
+                    if (!canAction || moveCount > 0) moveCount--;
+                    if (!isDisposableMove)
+                    {
+                        canAction = false; // 이동이나 벽 설치 불가
+                    }
+                    else isDisposableMove = false;
                     playerAbility.MoveEvent();
-                    if (shouldMove) shouldMove = false;
+                    if (gameManager.playerControlStatus == GameManager.EPlayerControlStatus.Move) gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
                     playerActionUI.ActiveUI(); //플레이어 행동 UI 등장 애니메이션
+                    ResetPreview();
                     return;
                 }
             }
             else //다른 곳 클릭 시 다시 선택으로
             {
                 gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
+                if (isDisposableMove) isDisposableMove = false;
                 playerActionUI.ActiveUI();
                 ResetPreview();
             }
@@ -276,8 +286,9 @@ public class Player : MonoBehaviour
             GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position);
             tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
             wallCount++; // 설치한 벽 개수 +1
+            if (!canAction || buildCount > 0) buildCount--;
             canAction = false; // 이동이나 벽 설치 불가
-            shouldBuild = false;
+
             return true;
         }
         else return false;
@@ -310,8 +321,13 @@ public class Player : MonoBehaviour
                                 //if (enemy.hp <= 0) enemy.DieEnemy();
                                 Debug.Log($"{enemyHit.transform.name}의 현재 체력 {enemy.hp}");
                                 canAttack = false;
-                                playerActionUI.ActiveUI(); //플레이어 행동 UI 등장 애니메이션
                                 playerAbility.PostAttackEvent((bool)isDead, enemy);
+                                if (gameManager.playerControlStatus == GameManager.EPlayerControlStatus.Attack)
+                                {
+                                    gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
+                                    playerActionUI.ActiveUI();
+                                }
+                                ResetPreview();
                             }
                         }
                     }
@@ -491,8 +507,6 @@ public class Player : MonoBehaviour
     {
         for (int i = 0; i < movablePositions.Count; i++)
         {
-            RaycastHit2D tokenHit = Physics2D.RaycastAll(transform.position, ((Vector2)movablePositions[i]).normalized, GameManager.gridSize * movablePositions[i].magnitude, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Enemy").FirstOrDefault(); // 적에 의해 완전히 막힘
-
             bool[] result = CheckRay(transform.position, (Vector2)movablePositions[i]);
             if (result[0])
             {
@@ -501,7 +515,7 @@ public class Player : MonoBehaviour
             }
             if (result[1])
             {
-                if (!tokenHit)
+                if (!result[2])
                 {
                     Debug.DrawRay(transform.position, (Vector2)movablePositions[i] * GameManager.gridSize, Color.green, 0.1f);
                     playerPreviews[i].transform.position = transform.position + GameManager.ChangeCoord(movablePositions[i]);
