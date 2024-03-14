@@ -151,5 +151,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   selectButton: {fileID: 0}
+  popDuring: 0.2
   playerAbility: {fileID: 0}
   gameManager: {fileID: 0}
