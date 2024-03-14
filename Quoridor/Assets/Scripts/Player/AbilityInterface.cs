@@ -12,11 +12,11 @@ public interface IAbility   // 능력 인터페이스
     string Save();
     void Load(string data);
 }
-public interface ISaveLoad
-{
-    string Save();
-    void Load(string data);
-}
+// public interface ISaveLoad
+// {
+//     string Save();
+//     void Load(string data);
+// }
 public interface IActiveAbility  // 액티브 능력 인터페이스
 {
     DisposableButton.ActiveCondition activeCondition { get; } // 능력 사용 전제 조건 설정

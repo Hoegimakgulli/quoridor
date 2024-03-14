@@ -289,6 +289,33 @@ public class PlayerAbility : MonoBehaviour
             case 22:
                 abilities.Add(new AutoTrapSetting(this));
                 break;
+            case 23:
+                abilities.Add(new KnifeMine(this));
+                break;
+            case 24:
+                abilities.Add(new SlipperyJelly(this));
+                break;
+            case 25:
+                abilities.Add(new PlaceDamageUp1(this));
+                break;
+            case 26:
+                abilities.Add(new PlaceDamageUp2(this));
+                break;
+            case 27:
+                abilities.Add(new PlaceCountUp1(this));
+                break;
+            case 28:
+                abilities.Add(new PlaceCountUp2(this));
+                break;
+            case 29:
+                abilities.Add(new PlaceDummy(this));
+                break;
+            case 30:
+                abilities.Add(new ArtilleryFire(this));
+                break;
+            case 31:
+                abilities.Add(new RequestSniping(this));
+                break;
             case 32:
                 abilities.Add(new PrecisionBomb(this));
                 break;
@@ -298,11 +325,23 @@ public class PlayerAbility : MonoBehaviour
             case 34:
                 abilities.Add(new ConstructionManeuver(this));
                 break;
+            case 35:
+                abilities.Add(new FastManeuver(this));
+                break;
             case 36:
                 abilities.Add(new KnockBack(this));
                 break;
+            case 37:
+                abilities.Add(new Pressure(this));
+                break;
             case 38:
                 abilities.Add(new AnkleAttack(this));
+                break;
+            case 39:
+                abilities.Add(new PlaceCountUp1(this));
+                break;
+            case 40:
+                abilities.Add(new MindControl(this));
                 break;
             default:
                 Debug.LogError("Invalid Ability Id");
@@ -388,7 +427,7 @@ public class PlayerAbility : MonoBehaviour
 
         return true;
     }
-    class AtkUp1 : IAbility, ISaveLoad // 1.공격력 증가 +1
+    class AtkUp1 : IAbility // 1.공격력 증가 +1
     {
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
@@ -943,6 +982,8 @@ public class PlayerAbility : MonoBehaviour
                 canEvent = true;
             }
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class PoisonBomb : IAbility, IActiveAbility, IAreaAbility // 14.독성 폭탄
     {
@@ -1009,6 +1050,8 @@ public class PlayerAbility : MonoBehaviour
                 canEvent = true;
             }
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class Grenade : IAbility, IActiveAbility, IAreaAbility // 15.수류탄
     {
@@ -1379,6 +1422,8 @@ public class PlayerAbility : MonoBehaviour
                 canEvent = true;
             }
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class SlipperyJelly : IAbility, IActiveAbility, IAreaAbility // 24. 미끌 젤리
     {
@@ -1440,6 +1485,8 @@ public class PlayerAbility : MonoBehaviour
                 canEvent = true;
             }
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class PlaceDamageUp1 : IAbility // 25.설치 데미지 증가1
     {
@@ -1469,6 +1516,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class PlaceDamageUp2 : IAbility // 26.설치 데미지 증가2
     {
@@ -1498,6 +1547,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class PlaceCountUp1 : IAbility // 27.설치 개수 증가1
     {
@@ -1527,6 +1578,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class PlaceCountUp2 : IAbility // 28.설치 개수 증가2
     {
@@ -1556,6 +1609,8 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class PlaceDummy : IAbility, IActiveAbility, IAreaAbility // 29. 더미 설치
     {
@@ -1617,6 +1672,8 @@ public class PlayerAbility : MonoBehaviour
                 canEvent = true;
             }
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class ArtilleryFire : IAbility, IActiveAbility, IAreaAbility // 30.포병 화력
     {
@@ -1679,6 +1736,8 @@ public class PlayerAbility : MonoBehaviour
         {
             if (GameManager.Turn == 1) canEvent = true;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class RequestSniping : IAbility, IActiveAbility, IAreaAbility // 31.저격 요청
     {
@@ -1726,6 +1785,8 @@ public class PlayerAbility : MonoBehaviour
         {
             if (GameManager.Turn == 1) canEvent = true;
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
     class PrecisionBomb : IAbility, IActiveAbility, IAreaAbility // 32.정밀 폭격
     {
@@ -2054,5 +2115,7 @@ public class PlayerAbility : MonoBehaviour
             if (mCount > 0) canEvent = true;
             Debug.Log(canEvent);
         }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
     }
 }
