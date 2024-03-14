@@ -130,10 +130,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1874758035, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
-      propertyPath: popDuring
-      value: 0.2
-      objectReference: {fileID: 0}
     - target: {fileID: 6551029922462568088, guid: 15f64db0c4fef9746a9e87e1eebc3c11, type: 3}
       propertyPath: m_Name
       value: GameManager

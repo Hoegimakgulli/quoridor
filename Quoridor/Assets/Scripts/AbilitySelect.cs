@@ -100,7 +100,7 @@ public class AbilitySelect : MonoBehaviour
     public void Initialize()
     {
         // 기존에 가지고 있는 능력들 확인 후 딕셔너리에 체크
-        foreach (int IdNum in playerAbility.abilitiesID)
+        foreach (int IdNum in playerAbility.startAbilities)
         {
             if (skills.ContainsKey(IdNum))
             {
