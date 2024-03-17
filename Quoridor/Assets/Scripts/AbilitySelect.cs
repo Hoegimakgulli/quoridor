@@ -26,9 +26,9 @@ public class AbilityDescription
 
 public class AbilitySlot
 {
-    public float[] firstSlot  = new float[4];
+    public float[] firstSlot = new float[4];
     public float[] secondSlot = new float[4];
-    public float[] thirdSlot  = new float[4];
+    public float[] thirdSlot = new float[4];
 
     // 생성자 (Low, Middle, High, Special) 4개 순서대로 진행되는데 first, second, third로 나누어 저장
     public AbilitySlot(float FF, float FS, float FT, float FP, float SF, float SS, float ST, float SP, float TF, float TS, float TT, float TP)
@@ -80,7 +80,7 @@ public class AbilitySelect : MonoBehaviour
         playerAbility = GameObject.FindWithTag("Player").GetComponent<PlayerAbility>();
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         int count = 0;
-        foreach(Transform slotItem in GameObject.Find("AbilitySelectPanel").transform.GetChild(0).transform)
+        foreach (Transform slotItem in GameObject.Find("AbilitySelectPanel").transform.GetChild(0).transform)
         {
             slotUi[count] = slotItem.gameObject;
             count++;
@@ -91,7 +91,7 @@ public class AbilitySelect : MonoBehaviour
 
     public void Update()
     {
-        if (Input.GetKey(KeyCode.K))
+        if (Input.GetKeyDown(KeyCode.K))
         {
             AbilitySelectStart();
         }
@@ -218,7 +218,7 @@ public class AbilitySelect : MonoBehaviour
 
     public void ShareAbility() // skills 딕셔너리에 들어있는 아이템들을 등급에 맞게 리스트에 넣어줌 이후 랜덤으로 돌려서 나오도록 조정.
     {
-        foreach(KeyValuePair<int, AbilityDescription> item in skills)
+        foreach (KeyValuePair<int, AbilityDescription> item in skills)
         {
             switch (item.Value.rank)
             {
@@ -275,10 +275,10 @@ public class AbilitySelect : MonoBehaviour
             switch (slotCount) // 각 슬롯에 해당하는 저 중 고 특성 순서대로 비교 연산 
             {
                 case 0:
-                    foreach(float num in currentSlot.firstSlot)
+                    foreach (float num in currentSlot.firstSlot)
                     {
                         sum += num;
-                        if(select <= sum)
+                        if (select <= sum)
                         {
                             break;
                         }
@@ -342,7 +342,7 @@ public class AbilitySelect : MonoBehaviour
             /*
              * 스킬 선택창을 열고 중복되는 슬롯에 중복되는 능려이 안뜨게 작성할것
              */
-            
+
             slotUi[slotCount].transform.GetChild(1).GetComponent<TMP_Text>().text = skills[skillSelect].skillName; // 스킬 이름 넣어주는 파트
             slotUi[slotCount].transform.GetChild(2).GetComponent<TMP_Text>().text = skills[skillSelect].skillDescription; // 스킬 설명 넣어주는 파트
         }
@@ -377,18 +377,20 @@ public class AbilitySelect : MonoBehaviour
                 itemCount++;
             }
 
-            if(itemCount == 3)
+            if (itemCount == 3)
             {
                 Debug.Log("어떤 스킬도 선택하지 않았습니다");
             }
             else
             {
+                // 능력 선택한 이후 애니메이션 추가 예정
+                SelectSkillUiDePop();
+                Debug.Log(AS.tmpSkillNumBox[itemCount]);
                 playerAbility.AddAbility(AS.tmpSkillNumBox[itemCount]); // 선택한 능력 추가
                 AS.skills[AS.tmpSkillNumBox[itemCount]].isGet = true; // 얻은 스킬은 얻었다는 표시를 남겨줌
                 AS.tmpSkillNumBox.Clear(); // 담아뒀던 임시 능력 번호는 초기화
 
-                // 능력 선택한 이후 애니메이션 추가 예정
-                SelectSkillUiDePop();
+
             }
         }
     }
@@ -400,7 +402,7 @@ public class AbilitySelect : MonoBehaviour
 
     IEnumerator SelectSkillUiPop() // 능력 선택 창이 내려오는 함수
     {
-        foreach(GameObject uiItem in slotUi)
+        foreach (GameObject uiItem in slotUi)
         {
             uiItem.GetComponent<RectTransform>().DOAnchorPosY(0, popDuring).SetEase(Ease.OutCirc);
             yield return new WaitForSeconds(popDuring);

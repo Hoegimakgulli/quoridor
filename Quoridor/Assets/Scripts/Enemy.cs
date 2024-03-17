@@ -21,6 +21,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     // 0 - 전진해 player를 공격, 1 - 뒤 포지션을 잡으면서 플레이어 공격, 2 - 자기 구역을 사수하면서 플레이어를 공격 
     // 추후 유닛 특성 상속받을 때 사용 현재 미사용.
     public enum ECharacteristic { Forward, BackWard, Hold };
+    public enum EDebuff { CantAttack, CantMove, Sleep } // 디버프 관련 enum 추가 - 동현
+    public Dictionary<EDebuff, int> debuffs = new Dictionary<EDebuff, int>() { { EDebuff.CantAttack, 0 }, { EDebuff.CantMove, 0 }, { EDebuff.Sleep, 0 } }; // 디버프를 저장하는 딕셔너리 추가 - 동현
     //------------------------------------------//
 
     public EState state = EState.Idle;
@@ -148,6 +150,11 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 child.hp = hp;
             }
         }
+        if (debuffs[EDebuff.Sleep] > 0)
+        {
+            debuffs[EDebuff.Sleep] = 0;
+            debuffs[EDebuff.CantMove] = 0;
+        }
 
         for (int i = 0; i < GameManager.enemyValueList.Count; i++)
         {
@@ -217,7 +224,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     //--------------- Attack 시작 ---------------//
     // playerAttack 함수 Raycast사용
-    public bool canAttack = true; // 연막탄 능력 때문에 적의 공격 가능 여부를 설정하는 변수 추가 - 동현
+    // public bool canAttack = true; // 연막탄 능력 때문에 적의 공격 가능 여부를 설정하는 변수 추가 - 동현
     public void AttackPlayer()
     {
         if (AttackCanEnemy() && state == EState.Attack)
@@ -230,7 +237,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             {
                 if (hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
                 {
-                    if (canAttack) hit.transform.GetComponent<Player>().Die();
+                    hit.transform.GetComponent<Player>().Die();
                 }
             }
         }
@@ -242,6 +249,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     public bool AttackCanEnemy()
     {
+        if (debuffs[EDebuff.CantAttack] > 0) return false;
         int attackCount;
         Vector2 currentAttackPoint;
         Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position / GameManager.gridSize;
@@ -301,6 +309,10 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             useShake = false;
             StartCoroutine(ShakeTokenAction());
         }
+        if (Input.GetKeyDown(KeyCode.Backspace))
+        {
+            Debug.Log($"{transform.name} : (CantAttack, {debuffs[EDebuff.CantAttack]}), (CantMove, {debuffs[EDebuff.CantMove]}), (Sleep, {debuffs[EDebuff.Sleep]})");
+        }
     }
 
     IEnumerator ShakeTokenAction()
@@ -320,5 +332,12 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             highlightSPR.DOFade(0, fadeTime);
             yield return new WaitForSeconds(fadeTime);
         }
+    }
+    // 매 턴마다 실행되는 함수 (사용처 : 디버프 턴 감소용) - 동현
+    public void UpdateTurn()
+    {
+        debuffs[EDebuff.CantAttack] = Mathf.Max(0, debuffs[EDebuff.CantAttack] - 1);
+        debuffs[EDebuff.CantMove] = Mathf.Max(0, debuffs[EDebuff.CantMove] - 1);
+        if (debuffs[EDebuff.Sleep] > 0 && debuffs[EDebuff.CantMove] == 0) debuffs[EDebuff.CantMove] = 1;
     }
 }

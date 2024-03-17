@@ -57,6 +57,7 @@ public class DisposableButton : MonoBehaviour
         button.interactable = false;
         isAlreadyUsed = true;
         // Debug.Log("비활성화됨");
-        gameManager.playerActionUI.PassiveUI();
+        PlayerAbility playerAbility = player.GetComponent<PlayerAbility>();
+        if (isTargetAbility) gameManager.playerActionUI.PassiveUI();
     }
 }

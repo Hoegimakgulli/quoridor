@@ -338,10 +338,22 @@ public class PlayerAbility : MonoBehaviour
                 abilities.Add(new AnkleAttack(this));
                 break;
             case 39:
-                abilities.Add(new PlaceCountUp1(this));
+                abilities.Add(new Imprison(this));
                 break;
             case 40:
                 abilities.Add(new MindControl(this));
+                break;
+            case 41:
+                abilities.Add(new ReRoll(this));
+                break;
+            case 42:
+                abilities.Add(new PoisonousCocktail(this));
+                break;
+            case 43:
+                abilities.Add(new Conciliation(this));
+                break;
+            case 44:
+                abilities.Add(new SleepingSand(this));
                 break;
             default:
                 Debug.LogError("Invalid Ability Id");
@@ -953,9 +965,9 @@ public class PlayerAbility : MonoBehaviour
         public EAbilityType abilityType { get { return mAbilityType; } }
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
-        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.canAttack = false; }; } }
-        public StayEvent stayEvent { get { return (Enemy enemy) => { enemy.canAttack = false; }; } }
-        public ExitEvent exitEvent { get { return (Enemy enemy) => { enemy.canAttack = true; }; } }
+        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.debuffs[Enemy.EDebuff.CantAttack] = 1; }; } }
+        public StayEvent stayEvent { get { return (Enemy enemy) => { enemy.debuffs[Enemy.EDebuff.CantAttack] = 1; }; } }
+        public ExitEvent exitEvent { get { return (Enemy enemy) => { enemy.debuffs[Enemy.EDebuff.CantAttack] = 0; }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
@@ -1842,6 +1854,7 @@ public class PlayerAbility : MonoBehaviour
         private EResetTime mResetTime = EResetTime.OnEveryTick;
         private bool mbEvent = false;
         // private int mCount = 1;
+        private int tempTurn;
 
         private List<Vector2Int> originMovablePositions;
         private List<Vector2Int> newMovablePositions = new List<Vector2Int>() { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
@@ -1864,21 +1877,32 @@ public class PlayerAbility : MonoBehaviour
             thisScript.player.moveCount++;
             thisScript.player.isDisposableMove = true;
             canEvent = false;
+            tempTurn = GameManager.Turn;
             return false;
         }
         public void Reset()
         {
-            if (!canEvent && !thisScript.player.isDisposableMove)
+            if (!canEvent)
             {
-                canEvent = true;
-                thisScript.player.movablePositions = originMovablePositions.ToList();
+                if (!thisScript.player.isDisposableMove)
+                {
+                    canEvent = true;
+                    thisScript.player.movablePositions = originMovablePositions.ToList();
+                }
+                if (GameManager.Turn == 1 && !canEvent)
+                {
+                    canEvent = true;
+                    thisScript.player.isDisposableMove = false;
+                    thisScript.player.movablePositions = originMovablePositions.ToList();
+                }
+                if (tempTurn != GameManager.Turn)
+                {
+                    canEvent = true;
+                    thisScript.player.isDisposableMove = false;
+                    thisScript.player.movablePositions = originMovablePositions.ToList();
+                }
             }
-            if (GameManager.Turn == 1 && !canEvent)
-            {
-                canEvent = true;
-                thisScript.player.isDisposableMove = false;
-                thisScript.player.movablePositions = originMovablePositions.ToList();
-            }
+
         }
         public string Save() { return string.Empty; }
         public void Load(string data) { }
@@ -2056,6 +2080,70 @@ public class PlayerAbility : MonoBehaviour
         public string Save() { return string.Empty; }
         public void Load(string data) { }
     }
+    class Imprison : IAbility, IActiveAbility // 39.수감
+    {
+        private EAbilityType mAbilityType = EAbilityType.TargetActive;
+        private EResetTime mResetTime = EResetTime.OnEveryTick;
+        private bool mbEvent = true;
+        private int mCount = 1;
+        private int mValue = 3;
+        private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
+        private List<Vector2Int> mAttackRange = new List<Vector2Int>();
+        private List<Vector2Int> mAttackScale = new List<Vector2Int>() { Vector2Int.zero };
+        private bool[] bCanPenetrate = new bool[2] { true, true };
+        private Vector2Int mTargetPos;
+        private Vector2Int tempPosition;
+        private int tempTurn = 1;
+        private bool shouldSetRange = true;
+
+        PlayerAbility thisScript;
+        public Imprison(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            playerAbility.shouldSetUpAbilityUI = true;
+        }
+        public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
+        public List<Vector2Int> attackRange { get { return mAttackRange; } }
+        public List<Vector2Int> attackScale { get { return mAttackScale; } }
+        public bool[] canPenetrate { get { return bCanPenetrate; } }
+        public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.enemyManager.GetEnemy(GameManager.ChangeCoord(targetPos)).debuffs[Enemy.EDebuff.CantMove] = 2;
+            canEvent = false;
+            return false;
+        }
+        public void Reset()
+        {
+            if (tempTurn != GameManager.Turn)
+            {
+                if (GameManager.Turn == 1)
+                {
+                    canEvent = true;
+                }
+                shouldSetRange = true;
+                tempTurn = GameManager.Turn;
+            }
+            if (canEvent & GameManager.Turn == Player.playerOrder)
+            {
+                if (shouldSetRange)
+                {
+                    attackRange.Clear();
+                    foreach (var enemyValues in GameManager.enemyValueList)
+                    {
+                        attackRange.Add(GameManager.ChangeCoord(enemyValues.position) - GameManager.playerGridPosition);
+                    }
+                    tempPosition = GameManager.playerGridPosition;
+                }
+                if (tempPosition != GameManager.playerGridPosition) shouldSetRange = true;
+            }
+        }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
+    }
     class MindControl : IAbility, IActiveAbility // 40.정신 조종
     {
         private EAbilityType mAbilityType = EAbilityType.InstantActive;
@@ -2107,6 +2195,7 @@ public class PlayerAbility : MonoBehaviour
             else closestEnemy.Item1.AttackedEnemy(mValue);
             mCount--;
             canEvent = false;
+            thisScript.RemoveAbility(40);
             return false;
         }
         public void Reset()
@@ -2114,6 +2203,182 @@ public class PlayerAbility : MonoBehaviour
             if (GameManager.Turn == 1) mCount = 1;
             if (mCount > 0) canEvent = true;
             Debug.Log(canEvent);
+        }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
+    }
+    class ReRoll : IAbility // 41.리롤
+    {
+        private EAbilityType mAbilityType = EAbilityType.ValuePassive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
+        private bool mbEvent = false;
+        private int mCount = 1;
+
+        PlayerAbility thisScript;
+        public ReRoll(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            thisScript.gameManager.GetComponent<AbilitySelect>().AbilitySelectStart();
+            thisScript.RemoveAbility(41);
+        }
+
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            return false;
+        }
+
+        public void Reset()
+        {
+        }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
+    }
+    class PoisonousCocktail : IAbility, IActiveAbility // 42.약독주
+    {
+        private EAbilityType mAbilityType = EAbilityType.InstantActive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
+        private bool mbEvent = true;
+        private int mCount = 3;
+        private int mValue = 3;
+        private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
+        private List<Vector2Int> mAttackRange = new List<Vector2Int>();
+        private List<Vector2Int> mAttackScale = new List<Vector2Int>();
+        private bool[] bCanPenetrate = new bool[2] { true, true };
+        private Vector2Int mTargetPos;
+
+        PlayerAbility thisScript;
+        public PoisonousCocktail(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            playerAbility.shouldSetUpAbilityUI = true;
+        }
+        public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
+        public List<Vector2Int> attackRange { get { return mAttackRange; } }
+        public List<Vector2Int> attackScale { get { return mAttackScale; } }
+        public bool[] canPenetrate { get { return bCanPenetrate; } }
+        public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            thisScript.player.atk += mValue;
+
+            canEvent = false;
+            return false;
+        }
+        public void Reset()
+        {
+            if (!canEvent)
+            {
+                mCount--;
+                if (mCount == 1)
+                {
+                    thisScript.player.atk -= mValue + 1;
+                }
+                else if (mCount == 0)
+                {
+                    thisScript.player.atk += 1;
+                    thisScript.RemoveAbility(42);
+                }
+            }
+        }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
+    }
+    class Conciliation : IAbility, IActiveAbility // 43.회유
+    {
+        private EAbilityType mAbilityType = EAbilityType.InstantActive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
+        private bool mbEvent = true;
+        private int mCount = 3;
+        private int mValue = 3;
+        private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
+        private List<Vector2Int> mAttackRange = new List<Vector2Int>(){
+            new Vector2Int(1, 0), new Vector2Int(-1, 0),new Vector2Int(0, 1),new Vector2Int(0, -1),
+            new Vector2Int(1, 1), new Vector2Int(-1, 1), new Vector2Int(1, -1), new Vector2Int(-1, -1),
+        };
+        private List<Vector2Int> mAttackScale = new List<Vector2Int>();
+        private bool[] bCanPenetrate = new bool[2] { true, true };
+        private Vector2Int mTargetPos;
+
+        PlayerAbility thisScript;
+        public Conciliation(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            playerAbility.shouldSetUpAbilityUI = true;
+        }
+        public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
+        public List<Vector2Int> attackRange { get { return mAttackRange; } }
+        public List<Vector2Int> attackScale { get { return mAttackScale; } }
+        public bool[] canPenetrate { get { return bCanPenetrate; } }
+        public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            foreach (var attackPosition in attackRange)
+            {
+                if (thisScript.enemyManager.GetEnemy(out Enemy enemy, GameManager.ChangeCoord(GameManager.playerGridPosition + attackPosition), false) != null)
+                {
+                    enemy.AttackedEnemy(enemy.hp);
+                }
+            }
+            canEvent = false;
+            thisScript.RemoveAbility(43);
+            return false;
+        }
+        public void Reset()
+        {
+        }
+        public string Save() { return string.Empty; }
+        public void Load(string data) { }
+    }
+    class SleepingSand : IAbility, IActiveAbility // 44.수면 모래
+    {
+        private EAbilityType mAbilityType = EAbilityType.InstantActive;
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
+        private bool mbEvent = true;
+        private int mCount = 3;
+        private int mValue = 3;
+        private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
+        private List<Vector2Int> mAttackRange = new List<Vector2Int>();
+        private List<Vector2Int> mAttackScale = new List<Vector2Int>();
+        private bool[] bCanPenetrate = new bool[2] { true, true };
+        private Vector2Int mTargetPos;
+
+        PlayerAbility thisScript;
+        public SleepingSand(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            playerAbility.shouldSetUpAbilityUI = true;
+        }
+        public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
+        public List<Vector2Int> attackRange { get { return mAttackRange; } }
+        public List<Vector2Int> attackScale { get { return mAttackScale; } }
+        public bool[] canPenetrate { get { return bCanPenetrate; } }
+        public Vector2Int targetPos { get { return mTargetPos; } set { mTargetPos = value; } }
+        public EAbilityType abilityType { get { return mAbilityType; } }
+        public EResetTime resetTime { get { return mResetTime; } }
+        public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
+        public bool Event()
+        {
+            foreach (Transform child in GameObject.FindWithTag("EnemyBox").transform)
+            {
+                Enemy enemy = child.GetComponent<Enemy>();
+                enemy.debuffs[Enemy.EDebuff.Sleep] = 1;
+                enemy.debuffs[Enemy.EDebuff.CantMove] = 1;
+            }
+            canEvent = false;
+            thisScript.RemoveAbility(44);
+            return false;
+        }
+        public void Reset()
+        {
         }
         public string Save() { return string.Empty; }
         public void Load(string data) { }
