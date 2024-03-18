@@ -109,7 +109,10 @@ public class GameManager : MonoBehaviour
     }
     private void Start()
     {
-        //playerActionUI.ActiveUI(); //플레이어 행동 UI 등장 애니메이션 실행
+        // 프레임 60fps로 설정
+#if UNITY_ANDROID
+        Application.targetFrameRate = 60;
+#endif
     }
     public void Initialize()
     {
