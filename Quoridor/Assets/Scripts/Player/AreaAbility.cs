@@ -97,7 +97,10 @@ public class AreaAbility : MonoBehaviour
             enterEvent(other.GetComponent<Enemy>());
             if (lifeType == ELifeType.Count)
             {
-                OnAbilityDisable();
+                if (--life == 0)
+                {
+                    OnAbilityDisable();
+                }
             }
         }
     }
