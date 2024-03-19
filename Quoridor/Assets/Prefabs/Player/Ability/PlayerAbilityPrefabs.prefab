@@ -45,3 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   smokeGrenadePrefab: {fileID: 8248572011207238124, guid: 93bce53a074699c46a759ce95cfe5efa, type: 3}
+  AreaAbilityPrefab: {fileID: 6659155344950193458, guid: 1c8695473cbaf8344b514d4e64a52de7, type: 3}

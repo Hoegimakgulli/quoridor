@@ -34,7 +34,8 @@ public class EnemyManager : MonoBehaviour
     public List<GameObject> enemyPrefabs; // 모든 유닛들 통합으로 관리
 
     // public static int gameManager.currentStage = 0;
-    public GameObject enemyBox; // 경고 표기 담아두는 박스
+    public GameObject enemyBoxPrefab; // 경고 표기 담아두는 박스
+    GameObject enemyBox;
     public GameObject enemyUiCanvas;
 
     private bool enemyTurnAnchor = true;
@@ -44,7 +45,7 @@ public class EnemyManager : MonoBehaviour
 
     private void Awake()
     {
-        Instantiate(enemyBox);
+        SetEnemyBox();
         //GameObject enemyUi = Instantiate(enemyUiCanvas);
         //Instantiate(EnemyStatePanel, enemyUi.transform);
         Debug.Log("ui Spawned");
@@ -250,7 +251,6 @@ public class EnemyManager : MonoBehaviour
     private GameObject blockEmemyObj;
     private bool CheckEnemyPos(Vector2 currentPos)
     {
-        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         foreach (Transform enemy in enemyBox.transform)
         {
             Vector2 enemyPos = enemy.position;
@@ -426,13 +426,16 @@ public class EnemyManager : MonoBehaviour
         for (count = 0; count < GameManager.enemyValueList.Count; count++)
         {
             Debug.Log("문제의 그녀석 부분" + GameManager.enemyValueList[originSortingList[count]].position);
-            currentEnemyState = GetEnemyObject(GameManager.enemyValueList[originSortingList[count]].position).GetComponent<Enemy>();
+            currentEnemyState = GetEnemy(GameManager.enemyValueList[originSortingList[count]].position);
             originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl;
 
-            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
-            GameManager.enemyValueList[originSortingList[count]].moveCtrl += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
-            currentEnemyState.moveCtrl[1] = GameManager.enemyValueList[originSortingList[count]].moveCtrl; // 기존 유닛에 들어오는 무브 컨트롤 수정
-            //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            if (currentEnemyState.debuffs[Enemy.EDebuff.CantMove] == 0)
+            {
+                //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
+                GameManager.enemyValueList[originSortingList[count]].moveCtrl += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
+                currentEnemyState.moveCtrl[1] = GameManager.enemyValueList[originSortingList[count]].moveCtrl; // 기존 유닛에 들어오는 무브 컨트롤 수정
+                //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
+            }
 
             uiManager.SortEnemyStates(); //행동력에 따라 적 상태창 순서 정렬
             yield return StartCoroutine(uiManager.CountMovectrlAnim(originSortingList[count], originMoveCtrl, GameManager.enemyValueList[originSortingList[count]].moveCtrl, false)); //원래 행동력에서 바뀐 행동력까지 숫자가 바뀌는 애니메이션
@@ -476,24 +479,28 @@ public class EnemyManager : MonoBehaviour
 
                 }
             }*/
+            currentEnemyState.UpdateTurn(); // 매턴마다 시행 - 동현
         }
     }
-
-    public GameObject GetEnemyObject(Vector3 position)
+    public void SetEnemyBox()
     {
-        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
+        if (enemyBox != null) Destroy(enemyBox);
+        enemyBox = Instantiate(enemyBoxPrefab);
+    }
+    public GameObject GetEnemyObject(Vector3 position, bool shouldLog = true)
+    {
         foreach (Transform child in enemyBox.transform)
         {
-            Debug.Log(child.position);
+            // Debug.Log(child.position);
             if (child.position == position)
             {
                 return child.gameObject;
             }
         }
-        //Debug.LogError("EnemyManager error : 어떤 Enemy 오브젝트를 찾지 못했습니다.");
+        if (shouldLog) Debug.LogError("EnemyManager error : 어떤 Enemy 오브젝트를 찾지 못했습니다.");
         return null;
     }
-    public EnemyValues GetEnemyValues(Vector3 position)
+    public EnemyValues GetEnemyValues(Vector3 position, bool shouldLog = true)
     {
         foreach (EnemyValues child in GameManager.enemyValueList)
         {
@@ -502,26 +509,36 @@ public class EnemyManager : MonoBehaviour
                 return child;
             }
         }
-        Debug.LogError("EnemyManager error : 어떤 EnemyValues도 찾지 못했습니다.");
+        if (shouldLog) Debug.LogError("EnemyManager error : 어떤 EnemyValues도 찾지 못했습니다.");
         return null; // 위치에 아무런 오브젝트도 못찾았을 경우
     }
-    public Enemy GetEnemy(Vector3 position)
+    public Enemy GetEnemy(Vector3 position, bool shouldLog = true)
     {
-        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         foreach (Transform child in enemyBox.transform)
         {
-            Debug.Log(child.position);
+            // Debug.Log(child.position);
             if (child.position == position)
             {
                 return child.GetComponent<Enemy>();
             }
         }
-        Debug.LogError("EnemyManager error : 어떤 Enemy 스크립트를 찾지 못했습니다.");
+        if (shouldLog) Debug.LogError("EnemyManager error : 어떤 Enemy 스크립트를 찾지 못했습니다.");
         return null;
+    }
+    public GameObject GetEnemyObject(out GameObject enemyObject, Vector3 position, bool shouldLog = true)
+    {
+        return enemyObject = GetEnemyObject(position, shouldLog);
+    }
+    public EnemyValues GetEnemyValues(out EnemyValues enemyValues, Vector3 position, bool shouldLog = true)
+    {
+        return enemyValues = GetEnemyValues(position, shouldLog);
+    }
+    public Enemy GetEnemy(out Enemy enemy, Vector3 position, bool shouldLog = true)
+    {
+        return enemy = GetEnemy(position, shouldLog);
     }
     public GameObject GetEnemyObject(int index)
     {
-        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         return enemyBox.transform.GetChild(index).gameObject;
     }
     public EnemyValues GetEnemyValues(int index)
@@ -530,7 +547,6 @@ public class EnemyManager : MonoBehaviour
     }
     public Enemy GetEnemy(int index)
     {
-        GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
         return enemyBox.transform.GetChild(index).GetComponent<Enemy>();
     }
 }

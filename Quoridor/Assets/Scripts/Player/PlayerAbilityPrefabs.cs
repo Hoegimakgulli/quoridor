@@ -5,4 +5,5 @@ using UnityEngine;
 public class PlayerAbilityPrefabs : MonoBehaviour
 {
     public GameObject smokeGrenadePrefab;
+    public GameObject AreaAbilityPrefab;
 }

@@ -22,7 +22,7 @@ public class PlayerActionUI : MonoBehaviour
     void Awake()
     {
         rt = GetComponent<RectTransform>();
-        for(int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)
         {
             playerUIs[i] = transform.GetChild(i).GetComponent<RectTransform>();
             uiImages[i] = transform.GetChild(i).GetComponent<Image>();
@@ -82,9 +82,9 @@ public class PlayerActionUI : MonoBehaviour
                 uiImages2[i].DOFade(0.5f, 0);
             }
         }
-        else if((player != null && player.shouldBuild) || (player != null && player.shouldMove)) //플레이어가 건설 가능한 상태라면
+        else if ((player != null && player.buildCount > 0) || (player != null && player.moveCount > 0)) //플레이어가 건설 가능한 상태라면
         {
-            if (player.shouldBuild)
+            if (player.buildCount > 0)
             {
                 uiImages[1].raycastTarget = true; //버튼이 클릭 가능한 상태로
                 uiImages2[1].raycastTarget = true; //버튼이 클릭 가능한 상태로
@@ -93,7 +93,7 @@ public class PlayerActionUI : MonoBehaviour
                 uiImages[1].DOFade(0.5f, 0);
                 uiImages2[1].DOFade(0.5f, 0);
             }
-            if(player.shouldMove)
+            if (player.moveCount > 0)
             {
                 uiImages[0].raycastTarget = true; //버튼이 클릭 가능한 상태로
                 uiImages2[0].raycastTarget = true; //버튼이 클릭 가능한 상태로
@@ -175,7 +175,7 @@ public class PlayerActionUI : MonoBehaviour
             uiImages2[i].raycastTarget = false; //버튼이 사라지는 동안 클릭이 안되도록 만듦
             if (i != select)
             {
-                activeTweens.Add(playerUIs[i].DOScale(Vector2.zero, uiMoveTime/2).SetEase(Ease.InBack));
+                activeTweens.Add(playerUIs[i].DOScale(Vector2.zero, uiMoveTime / 2).SetEase(Ease.InBack));
             }
             else
             {
@@ -201,4 +201,3 @@ public class PlayerActionUI : MonoBehaviour
 
     }
 }
-            

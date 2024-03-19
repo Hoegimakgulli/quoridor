@@ -7,12 +7,15 @@ public class StageUI : MonoBehaviour
 {
     GameManager gameManager;
     EnemyStage enemyStage;
+    AbilitySelect abilitySelect;
     Player player;
     // Start is called before the first frame update
     void Start()
     {
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        enemyStage = GameObject.Find("GameManager").GetComponent<EnemyStage>();
+        GameObject gameManagerObject = GameObject.Find("GameManager");
+        gameManager = gameManagerObject.GetComponent<GameManager>();
+        enemyStage = gameManagerObject.GetComponent<EnemyStage>();
+        abilitySelect = gameManagerObject.GetComponent<AbilitySelect>();
         player = GameObject.FindWithTag("Player").GetComponent<Player>();
     }
 
@@ -24,7 +27,9 @@ public class StageUI : MonoBehaviour
 
             gameManager.Initialize();
             player.Initialize();
-            enemyStage.EnemyInitialied();
+            enemyStage.EnemyInitialize();
+
+            abilitySelect.AbilitySelectStart();
 
             Destroy(this.gameObject);
         }
