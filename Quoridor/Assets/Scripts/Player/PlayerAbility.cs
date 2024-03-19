@@ -1439,13 +1439,13 @@ public class PlayerAbility : MonoBehaviour
     }
     class SlipperyJelly : IAbility, IActiveAbility, IAreaAbility // 24. 미끌 젤리
     {
-        private EAbilityType mAbilityType = EAbilityType.TargetActive;
-        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
-        private bool mbEvent = true;
-        private int mCount = 1;
-        private int mValue = 1;
-        private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
-        private List<Vector2Int> mAttackRange = new List<Vector2Int>(){
+        private EAbilityType mAbilityType = EAbilityType.TargetActive; // 클릭 후 조준 후 바로 시작
+        private EResetTime mResetTime = EResetTime.OnEnemyTurnStart; // 적 턴이 시작했을 때 리셋
+        private bool mbEvent = true; // 초기 이벤트 설정 true
+        private int mCount = 1; // 능력 사용 횟수
+        private int mValue = 1; // 변수? 아마 적이 밟을 수 있는 최대 횟수를 저장해둔 것으로 추측
+        private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None; // 능력 사용 조건(Player 기준) 제약 없음
+        private List<Vector2Int> mAttackRange = new List<Vector2Int>(){ // 능력 사용 가능 범위
             new Vector2Int(1, 0), new Vector2Int(2, 0), new Vector2Int(-1, 0), new Vector2Int(-2, 0),
             new Vector2Int(0, 1), new Vector2Int(0, 2), new Vector2Int(0, -1), new Vector2Int(0, -2),
             new Vector2Int(1, 1), new Vector2Int(1, 2), new Vector2Int(2, 1),new Vector2Int(2, 2),
@@ -1453,10 +1453,10 @@ public class PlayerAbility : MonoBehaviour
             new Vector2Int(-1, 1), new Vector2Int(-1, 2), new Vector2Int(-2, 1),new Vector2Int(-2, 2),
             new Vector2Int(-1, -1), new Vector2Int(-1, -2), new Vector2Int(-2, -1),new Vector2Int(-2, -2)
         };
-        private List<Vector2Int> mAttackScale = new List<Vector2Int>(){
+        private List<Vector2Int> mAttackScale = new List<Vector2Int>(){ // 능력이 퍼짐 거리인데 추후 벽에 막힘에 따라 범위가 설정되어야 하므로 0,0 초기값 설정
             new Vector2Int(0, 0)
         };
-        private bool[] bCanPenetrate = new bool[2] { true, false };
+        private bool[] bCanPenetrate = new bool[2] { true, false }; // 엑티브 능력 중 설치 지속에 해당하는 배열을 가진건 알겠는데 각각 뭘 뜻하는지 잘 모르겠음
         private Vector2Int mTargetPos;
 
         PlayerAbility thisScript;
@@ -1465,6 +1465,7 @@ public class PlayerAbility : MonoBehaviour
             thisScript = playerAbility;
             playerAbility.shouldSetUpAbilityUI = true;
         }
+        // 이전에 저장해둔 변수 초기값을 그대로 이월
         public DisposableButton.ActiveCondition activeCondition { get { return mActiveCondition; } }
         public List<Vector2Int> attackRange { get { return mAttackRange; } }
         public List<Vector2Int> attackScale { get { return mAttackScale; } }
@@ -1479,7 +1480,7 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             Debug.Log($"{targetPos}");
-            mValue = 2 + thisScript.additionalAbilityStat.placeDamage;
+            mValue = 1 + thisScript.additionalAbilityStat.placeDamage; // 초기 데미지 1 + 데미지 증가 능력을 골랐을 때 더해줌
             thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
             mCount--;
             canEvent = false;
@@ -1487,12 +1488,12 @@ public class PlayerAbility : MonoBehaviour
         }
         public void Reset()
         {
-            if (GameManager.Turn == 1)
+            if (GameManager.Turn == 1) // 스테이지가 변경되었을 때 1회 실행
             {
                 canEvent = true;
-                mCount = 1 + thisScript.additionalAbilityStat.placeCount;
+                mCount = 1 + thisScript.additionalAbilityStat.placeCount; // 초기 사용 가능 횟수 1회에서 placeCount를 더해 횟수 조정
             }
-            if (mCount > 0)
+            if (mCount > 0) // 미끌젤리 사용 횟수가 남아있을 경우
             {
                 canEvent = true;
             }
