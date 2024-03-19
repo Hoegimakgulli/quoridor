@@ -291,6 +291,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         shakeSequence.Append(tmpObj.DOFade(1f, 1).SetEase(Ease.Linear));
         shakeSequence.Append(tmpObj.DOFade(0, 1).SetEase(Ease.Linear));
         //shakeSequence.Append(tmpObj.DOFade(1f, 1).SetEase(Ease.Linear));
+
     }
 
     public void Update()
@@ -319,5 +320,10 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             highlightSPR.DOFade(0, fadeTime);
             yield return new WaitForSeconds(fadeTime);
         }
+    }
+
+    public void EnemyActionInfo()
+    {
+        uiManager.ActiveEnemyActionInfo(moveablePoints, attackablePoints, GetComponent<SpriteRenderer>().color);
     }
 }

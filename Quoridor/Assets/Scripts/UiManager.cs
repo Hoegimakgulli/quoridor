@@ -27,6 +27,12 @@ public class UiManager : MonoBehaviour
     public GameObject turnEndButton;
     public Text WallCountText;
     public bool freezeButton = false; //true면 행동 및 턴 종료 버튼 작동 안함. (적 상태창 애니메이션 중 행동 제약)
+    GameObject enemyMoveInfo;
+    GameObject enemyAttackInfo;
+    Image[ , ] enemyMoveInfoDots = new Image[9, 7]; //적 이동 방식 알려주는 오브젝트들
+    Image[ , ] enemyAttackInfoDots = new Image[9, 7]; //적 공격 방식 알려주는 오브젝트들
+    Color[] enemyMoveInfoColor = new Color[2]; //0은 비활성화 컬러, 1은 활성화 컬러
+    Color[] enemyAttackInfoColor = new Color[2]; //0은 비활성화 컬러, 1은 활성화 컬러
 
     public class attackedEnemyValues
     {
@@ -49,11 +55,25 @@ public class UiManager : MonoBehaviour
 
     private void Awake()
     {
+        enemyMoveInfoColor[0] = new Color(1, 1, 1);
+        enemyMoveInfoColor[1] = new Color(0.5f, 0.8f, 1);
+        enemyAttackInfoColor[0] = new Color(1, 1, 1);
+        enemyAttackInfoColor[1] = new Color(1, 1, 0.5f);
         enemyManager = GetComponent<EnemyManager>();
         GameObject uiC = Instantiate(uiCanvas);
         turnEndButton = uiC.transform.GetChild(4).gameObject;
         turnEndButton.GetComponent<Button>().onClick.AddListener(() => PlayerTurnEnd());
         WallCountText = uiC.transform.GetChild(5).GetChild(2).GetComponent<Text>();
+        enemyMoveInfo = uiC.transform.GetChild(8).GetChild(1).GetChild(0).gameObject;
+        enemyAttackInfo = uiC.transform.GetChild(8).GetChild(2).GetChild(0).gameObject;
+        for(int i = 0; i < 9; i++)
+        {
+            for(int j = 0; j < 7; j++)
+            {
+                enemyMoveInfoDots[i,j] = enemyMoveInfo.transform.GetChild(i).GetChild(j).GetComponent<Image>();
+                enemyAttackInfoDots[i, j] = enemyAttackInfo.transform.GetChild(i).GetChild(j).GetComponent<Image>();
+            }
+        }
     }
     private void Start()
     {
@@ -429,6 +449,65 @@ public class UiManager : MonoBehaviour
             yield return new WaitForSeconds(uiMoveTime * 2);
         }
     }
+
+    //적 기물 클릭 시 적의 이동방식과 공격방식을 표기해주는 함수. 일단 구현만 해둔 상태. 가독성 별로라 변경하는 편이 좋아보이기도..
+    public void ActiveEnemyActionInfo(Vector2Int[] moveablePoints, Vector2Int[] attackablePoints, Color enemyColor)
+    {
+        //적 이동 및 공격 정보 색깔 초기화
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 7; j++)
+            {
+                //enemyMoveInfoDots[i, j].color = enemyMoveInfoColor[0];
+                //enemyAttackInfoDots[i, j].color = enemyAttackInfoColor[0];
+
+                enemyMoveInfoDots[i, j].gameObject.SetActive(false);
+                enemyAttackInfoDots[i, j].gameObject.SetActive(false);
+            }
+        }
+        enemyMoveInfoDots[4, 3].gameObject.SetActive(true);
+        enemyMoveInfoDots[4, 3].color = enemyColor;
+        enemyAttackInfoDots[4, 3].gameObject.SetActive(true);
+        enemyAttackInfoDots[4, 3].color = enemyColor;
+
+        float dotsSize = 2; //dots 사이즈. 기본은 2, 상하좌우 2칸이면 1.4, 상하좌우 3칸이면 1로
+        foreach(Vector2Int moveablePoint in moveablePoints)
+        {
+            enemyMoveInfoDots[(moveablePoint.y - 4) * -1, moveablePoint.x + 3].gameObject.SetActive(true);
+            enemyMoveInfoDots[(moveablePoint.y-4)*-1, moveablePoint.x+3].color = enemyMoveInfoColor[1];
+            if (dotsSize != 1)
+            {
+                if (Mathf.Abs(moveablePoint.x) >= 3 || Mathf.Abs(moveablePoint.y) >= 3)
+                {
+                    dotsSize = 1;
+                }
+                else if (Mathf.Abs(moveablePoint.x) == 2 || Mathf.Abs(moveablePoint.y) == 2)
+                {
+                    dotsSize = 1.4f;
+                }
+            }
+        }
+        enemyMoveInfo.transform.DOScale(new Vector3(dotsSize, dotsSize, 1), 0);
+        dotsSize = 2;
+        foreach (Vector2Int attackablePoint in attackablePoints)
+        {
+            enemyAttackInfoDots[(attackablePoint.y - 4) * -1, attackablePoint.x + 3].gameObject.SetActive(true);
+            enemyAttackInfoDots[(attackablePoint.y-4)*-1, attackablePoint.x+3].color = enemyAttackInfoColor[1];
+            if (dotsSize != 1)
+            {
+                if (Mathf.Abs(attackablePoint.x) >= 3 || Mathf.Abs(attackablePoint.y) >= 3)
+                {
+                    dotsSize = 1;
+                }
+                else if (Mathf.Abs(attackablePoint.x) == 2 || Mathf.Abs(attackablePoint.y) == 2)
+                {
+                    dotsSize = 1.4f;
+                }
+            }
+        }
+        enemyAttackInfo.transform.DOScale(new Vector3(dotsSize, dotsSize, 1), 0);
+    }
+
 
     //턴 종료 시 호출
     public void PlayerTurnEnd()
