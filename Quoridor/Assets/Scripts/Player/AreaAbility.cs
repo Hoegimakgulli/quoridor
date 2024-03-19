@@ -26,6 +26,7 @@ public class AreaAbility : MonoBehaviour
     EnemyManager enemyManager;
     Player player;
     List<BoxCollider2D> boxColliderList = new List<BoxCollider2D>();
+    List<GameObject> areaObjectList = new List<GameObject>();
     // Start is called before the first frame update
     void Start()
     {
@@ -43,14 +44,17 @@ public class AreaAbility : MonoBehaviour
             if (result[0])
             {
                 boxColliderList[i].enabled = false;
+                areaObjectList[i].SetActive(false);
             }
             if (result[1] || canPenetrate)
             {
                 boxColliderList[i].enabled = true;
+                areaObjectList[i].SetActive(true);
             }
             else
             {
                 boxColliderList[i].enabled = false;
+                areaObjectList[i].SetActive(false);
             }
         }
         if (GameManager.Turn % 2 == Player.playerOrder && tempTurn != GameManager.Turn)
@@ -75,7 +79,8 @@ public class AreaAbility : MonoBehaviour
             boxColliderList.Add(boxCollider);
 
             // 임시 //
-            Instantiate(sprite, this.transform).transform.localPosition = (Vector2)areaPositionList[i];
+            areaObjectList.Add(Instantiate(sprite, this.transform));
+            areaObjectList[i].transform.localPosition = (Vector2)areaPositionList[i];
         }
     }
     void OnAbilityDisable()
