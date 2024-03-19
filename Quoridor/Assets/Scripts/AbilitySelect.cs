@@ -13,6 +13,9 @@ public class AbilityDescription
     public string skillDescription; // 능력 설명
     public int rank; // 능력 등급
     public bool isGet; // 획득 여부
+    public bool canShow; // 선지 과정때 나와도 되는 능력인지 판단
+    public List<int> needAbilityPart = new List<int>(); // 출현 필요 조건 능력
+    public List<int> needAbilityMain = new List<int>(); // 무조건 나와야하는 능력
 
     // 스킬 이름, 스킬 설명, 등급 순으로 나열
     public AbilityDescription(string skillName, string skillDescription, int rank)
@@ -21,6 +24,7 @@ public class AbilityDescription
         this.skillDescription = skillDescription;
         this.rank = rank;
         isGet = false;
+        canShow = true;
     }
 }
 
@@ -86,18 +90,30 @@ public class AbilitySelect : MonoBehaviour
             count++;
         }
 
-        Initialize();
+        Initialize(); // 게임을 시작하고 초기에만 실행
     }
 
     public void Update()
     {
         if (Input.GetKeyDown(KeyCode.K))
         {
+            CanShowAbilityCheck();
             AbilitySelectStart();
         }
     }
 
     public void Initialize()
+    {
+        AbilityStart(); // skills 딕셔너리에 값 대입
+        SlotStart();    // slots 딕셔너리에 값 대입
+        TalkStart();    // talks 딕셔너리에 값 대입
+        AlreadyHaveAbility();
+        ShareAbility();
+        CanShowAbilityShare();
+        CharacterTalkStart();
+    }
+
+    private void AlreadyHaveAbility()
     {
         // 기존에 가지고 있는 능력들 확인 후 딕셔너리에 체크
         foreach (int IdNum in playerAbility.startAbilities)
@@ -112,12 +128,6 @@ public class AbilitySelect : MonoBehaviour
                 Debug.LogError("AbilitySelect : 등록된 능력이 없습니다. 다시 확인해주세요");
             }
         }
-
-        AbilityStart(); // skills 딕셔너리에 값 대입
-        SlotStart();    // slots 딕셔너리에 값 대입
-        TalkStart();    // talks 딕셔너리에 값 대입
-        ShareAbility();
-        CharacterTalkStart();
     }
 
     public void AbilityStart() // 초기 게임 실행 1번만 실행.
@@ -249,11 +259,125 @@ public class AbilitySelect : MonoBehaviour
 
         playerUiImage.sprite = playerChar.transform.GetComponent<SpriteRenderer>().sprite;
         playerUiImage.color = playerChar.transform.GetComponent<SpriteRenderer>().color;
+    }
 
-        //GameObject.Find("PCTalk").GetComponent<TMP_Text>().text =
+    private void CanShowAbilityCheck() // 능력 중 의존 능력들의 필요 조건이 충족됐는지 확인하는 함수
+    {
+        foreach (KeyValuePair<int, AbilityDescription> item in skills)
+        {
+            bool isMain = true; // needAbilityMain 리스트관리 변수
+            bool isPart = false; // needAbilityPart 리스트관리 변수
+            if (item.Value.needAbilityMain.Count == 0 && item.Value.needAbilityPart.Count == 0)
+            {
+                continue;
+            }
+            else
+            {
+                foreach(int skillNum in item.Value.needAbilityMain)
+                {
+                    if (!playerAbility.abilitiesID.Contains(skillNum))
+                    {
+                        isMain = false;
+                        break;
+                    }
+                }
+                if (isMain)
+                {
+                    foreach (int skillNum in item.Value.needAbilityPart)
+                    {
+                        if (playerAbility.abilitiesID.Contains(skillNum))
+                        {
+                            isPart = true;
+                            break;
+                        }
+                    }
+                }
+
+                if(isPart && isPart)
+                {
+                    item.Value.canShow = true;
+                }
+                else
+                {
+                    item.Value.canShow = false;
+                }
+            }
+        }
+    }
+
+    private void CanShowAbilityShare() // 각 능력중 필요한 능력들을 
+    {
+        foreach (KeyValuePair<int, AbilityDescription> item in skills)
+        {
+            switch (item.Key)
+            {
+                // Active 능력 패시브들 모음
+                case 16:
+                    item.Value.needAbilityPart.Add(14);
+                    item.Value.needAbilityPart.Add(15);
+                    break;
+                case 17:
+                    item.Value.needAbilityPart.Add(14);
+                    item.Value.needAbilityPart.Add(15);
+
+                    item.Value.needAbilityMain.Add(16);
+                    break;
+                case 18:
+                    item.Value.needAbilityPart.Add(13);
+                    item.Value.needAbilityPart.Add(14);
+                    item.Value.needAbilityPart.Add(15);
+                    break;
+                case 19:
+                    item.Value.needAbilityPart.Add(13);
+                    item.Value.needAbilityPart.Add(14);
+                    item.Value.needAbilityPart.Add(15);
+
+                    item.Value.needAbilityMain.Add(18);
+                    break;
+                case 20:
+                    item.Value.needAbilityPart.Add(13);
+                    item.Value.needAbilityPart.Add(14);
+                    item.Value.needAbilityPart.Add(15);
+                    break;
+                case 21:
+                    item.Value.needAbilityPart.Add(13);
+                    item.Value.needAbilityPart.Add(14);
+                    item.Value.needAbilityPart.Add(15);
+                    break;
+                // 설치 능력 패시브 모음
+                case 25:
+                    item.Value.needAbilityPart.Add(22);
+                    item.Value.needAbilityPart.Add(23);
+                    item.Value.needAbilityPart.Add(24);
+                    break;
+                case 26:
+                    item.Value.needAbilityPart.Add(22);
+                    item.Value.needAbilityPart.Add(23);
+                    item.Value.needAbilityPart.Add(24);
+
+                    item.Value.needAbilityMain.Add(25);
+                    break;
+                case 27:
+                    item.Value.needAbilityPart.Add(23);
+                    item.Value.needAbilityPart.Add(24);
+                    item.Value.needAbilityPart.Add(29);
+                    break;
+                case 28:
+                    item.Value.needAbilityPart.Add(23);
+                    item.Value.needAbilityPart.Add(24);
+                    item.Value.needAbilityPart.Add(29);
+
+                    item.Value.needAbilityMain.Add(27);
+                    break;
+
+                default:
+                    break;
+            }
+        }
     }
 
     private List<int> tmpSkillNumBox = new List<int>(); // 임시로 뽑힌 능력이 어떤 번호인지 담아두는 변수
+
     public void AbilitySelectStart()
     {
         AbilitySlot currentSlot = null;
@@ -282,7 +406,7 @@ public class AbilitySelect : MonoBehaviour
                         {
                             break;
                         }
-                        count++;
+                        count++; // ++ 될때 마다 등급 상승
                     }
                     break;
                 case 1:
@@ -316,25 +440,25 @@ public class AbilitySelect : MonoBehaviour
                     do
                     {
                         skillSelect = lowSkills[Random.Range(0, lowSkills.Count)];
-                    } while (skills[skillSelect].isGet && tmpSkillNumBox.Contains(skillSelect));
+                    } while (skills[skillSelect].isGet || !skills[skillSelect].canShow || tmpSkillNumBox.Contains(skillSelect));
                     break;
                 case 1:
                     do
                     {
                         skillSelect = middleSkills[Random.Range(0, middleSkills.Count)];
-                    } while (skills[skillSelect].isGet && tmpSkillNumBox.Contains(skillSelect));
+                    } while (skills[skillSelect].isGet || !skills[skillSelect].canShow || tmpSkillNumBox.Contains(skillSelect));
                     break;
                 case 2:
                     do
                     {
                         skillSelect = highSkills[Random.Range(0, highSkills.Count)];
-                    } while (skills[skillSelect].isGet && tmpSkillNumBox.Contains(skillSelect));
+                    } while (skills[skillSelect].isGet || !skills[skillSelect].canShow || tmpSkillNumBox.Contains(skillSelect));
                     break;
                 case 3:
                     do
                     {
                         skillSelect = specialSkills[Random.Range(0, specialSkills.Count)];
-                    } while (skills[skillSelect].isGet && tmpSkillNumBox.Contains(skillSelect));
+                    } while (skills[skillSelect].isGet || !skills[skillSelect].canShow || tmpSkillNumBox.Contains(skillSelect));
                     break;
             }
 
