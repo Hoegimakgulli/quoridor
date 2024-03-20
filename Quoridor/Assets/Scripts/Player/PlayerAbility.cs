@@ -12,6 +12,7 @@ using UnityEditor.PackageManager;
 #endif
 using UnityEngine;
 using UnityEngine.UI;
+using System.Data.Common;
 #if UNITY_EDITOR
 namespace UnityEditor
 {
@@ -213,7 +214,7 @@ public class PlayerAbility : MonoBehaviour
         }
         return shouldDie;
     }
-    public void AddAbility(int id)
+    public void AddAbility(int id, string abilityData = "")
     {
         if (abilitiesID.Contains(id))
         {
@@ -361,8 +362,10 @@ public class PlayerAbility : MonoBehaviour
                 break;
         }
         if (isSuccess) abilitiesID.Add(id);
-        player.abilityCount = abilities.Count(ability => ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive);
+        //player.abilityCount = abilities.Count(ability => ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive);
         needSave = true;
+        if (!string.IsNullOrEmpty(abilityData))
+            abilities[abilities.Count - 1].Load(abilityData);
     }
     public void RemoveAbility(int id)
     {
@@ -419,25 +422,37 @@ public class PlayerAbility : MonoBehaviour
         string filePath = Application.persistentDataPath + "/ability.json";
         if (!File.Exists(filePath)) return false;
 
+        bool isAllDataVaild = true;
+
         string json = File.ReadAllText(filePath);
         List<object> jsonList = JsonConvert.DeserializeObject<List<object>>(json);
         for (int i = 0; i < jsonList.Count; i++)
         {
-            var abilityData = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonList[i].ToString());
+            var dataDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonList[i].ToString());
+            if (!dataDict.ContainsKey("intData"))
+            {
+                Debug.LogError($"ContainsKey(intData) false: {jsonList[i]}");
+                isAllDataVaild = false;
+                continue;
+            }
+            int index = JsonConvert.DeserializeObject<List<int>>(dataDict["intData"].ToString())[0];
 
-            if (abilityData.ContainsKey("AbilityID"))
-            {
-                int index = int.Parse(abilityData["AbilityID"].ToString());
-                Debug.Log($"[{index}]: {jsonList[i]}");
-                //해당 index에 대응하는 Load(jsonList[i]) 호출
-            }
-            else
-            {
-                Debug.LogError($"ContainsKey(AbilityID) false: {jsonList[i]}");
-            }
+            AddAbility(index, jsonList[i].ToString());
         }
 
-        return true;
+        return isAllDataVaild;
+    }
+    public class AbilityData
+    {
+        /// <summary>
+        /// ability ID를 항상 index 0로 설정
+        /// </summary>
+        public List<int> intData;
+        public List<string> stringData;
+        public List<float> floatData;
+        public List<bool> boolData;
+        public List<Vector3> Vector3Data;
+        public List<Vector2> Vector2Data;
     }
     class AtkUp1 : IAbility // 1.공격력 증가 +1
     {
@@ -446,12 +461,17 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = false;
         // private int mCount = 1;
         private int mValue = 1;
+        private AbilityData mAbilityData = new AbilityData()
+        {
+            boolData = new List<bool>(1) { false },
+            intData = new List<int>(1) { 1 }
+        };
 
         PlayerAbility thisScript;
         public AtkUp1(PlayerAbility playerAbility)
         {
             thisScript = playerAbility;
-            thisScript.player.atk += mValue;
+            //thisScript.player.atk += mValue;
         }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
@@ -460,7 +480,6 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             thisScript.player.atk -= mValue;
-
             return false;
         }
         public void Reset()
@@ -472,21 +491,26 @@ public class PlayerAbility : MonoBehaviour
             string result = string.Empty;
             Dictionary<string, object> data = new Dictionary<string, object>();
 
-            data.Add("AbilityID", 1);
-            data.Add("canEvent", canEvent);
-            data.Add("mValue", mValue);
+            mAbilityData.boolData[0] = mbEvent;
+            mAbilityData.intData[0] = 1; // ability ID
+            data.Add("intData", mAbilityData.intData);
+            data.Add("boolData", mAbilityData.boolData);
 
             result = JsonConvert.SerializeObject(data);
             return result;
         }
         public void Load(string data)
         {
+            Debug.Log(data);
             var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
 
-            bool canEvent = (bool)root["canEvent"];
-            int mValue = (int)root["mValue"];
+            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
+            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
 
-            Debug.Log($"Load: {canEvent}");
+            int loadedID = intData[0];
+            bool loadedEvent = boolData[0];
+
+            Debug.Log($"Loaded[{loadedID}]: {loadedEvent} ");
         }
     }
     class AtkUp2 : IAbility // 2.공격력 증가 +2
