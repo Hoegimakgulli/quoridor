@@ -1439,7 +1439,7 @@ public class PlayerAbility : MonoBehaviour
         public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
         {
-            Debug.Log($"{targetPos}");
+            // Debug.Log($"{targetPos}");
             mValue = 2 + thisScript.additionalAbilityStat.placeDamage;
             thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
             mCount--;
