@@ -13,6 +13,7 @@ TagManager:
   - EnemyBox
   - Trap
   - PreviewStorage
+  - PlayerDump
   layers:
   - Default
   - TransparentFX
