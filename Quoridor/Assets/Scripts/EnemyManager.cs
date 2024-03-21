@@ -450,9 +450,7 @@ public class EnemyManager : MonoBehaviour
             if (currentEnemyState.moveCtrl[0] <= GameManager.enemyValueList[originSortingList[count]].moveCtrl)
             {
                 //GameObject currenEnemy = FindValuesObj(GameManager.enemyValueList[count].position);
-                bool isPlayer = true; // true == player, false == dump
-                GameObject currenEnemy = GetEnemyObject(GameManager.enemyValueList[originSortingList[count]].position);
-                ///////////////////요 윗부분 originalSortingList랑 그 안에 어쩌구 뭐 있었는데 테스트하느라 지웠다함!!! 문제생기면 여기일듯??ㅁㅁㅇㅁㄴㄻㄴㅇ훠ㅑㅁㅈ둬모ㅓ몬ㅇ 
+                GameObject currenEnemy = FindValuesObj(GameManager.enemyValueList[originSortingList[count]].position);
 
                 GameObject player = GameObject.FindWithTag("Player");
                 currentEnemyState.state = Enemy.EState.Move;
