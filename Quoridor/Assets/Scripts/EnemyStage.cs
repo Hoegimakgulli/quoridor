@@ -221,5 +221,6 @@ public class EnemyStage : MonoBehaviour
         uiManager.SortEnemyStates(); //상태창 순서 정렬 (행동력 기준으로)
         uiManager.DeploymentEnemyStates(); //상태창 각각 배치
         gameManager.PlayerTurnSet(); //플레이어 턴 시작 시 실행되어야 할것잉 모여있는 함수 (규빈 작성)
+        uiManager.CreateEnemyInfoUI(); //적의 정보(공격 범위, 이동 범위)를 표시하는 UI 생성
     }
 }

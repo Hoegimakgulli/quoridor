@@ -9,7 +9,7 @@ public delegate void ExitEvent(Enemy enemy);
 
 public class AreaAbility : MonoBehaviour
 {
-    public enum ELifeType { Turn, Count }
+    public enum ELifeType { Turn, Count, Dummy }
     public ELifeType lifeType;
     public int life;  // 지속 기간
     public List<GameObject> targetList = new List<GameObject>(); // 타깃 오브젝트
@@ -81,6 +81,11 @@ public class AreaAbility : MonoBehaviour
             // 임시 //
             areaObjectList.Add(Instantiate(sprite, this.transform));
             areaObjectList[i].transform.localPosition = (Vector2)areaPositionList[i];
+        }
+        if (lifeType == ELifeType.Dummy)
+        {
+            transform.tag = "PlayerDummy";
+            gameObject.layer = LayerMask.NameToLayer("Token");
         }
     }
     void OnAbilityDisable()
