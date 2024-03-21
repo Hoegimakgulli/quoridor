@@ -470,7 +470,6 @@ public class UiManager : MonoBehaviour
         if (enemyActionInfoPanel == null)
         {
             enemyActionInfoPanel = new GameObject("Enemy Action Info Panel");
-            Instantiate(enemyActionInfoPanel);//새 게임 오브젝트 생성
             Image ActionInfoImage = enemyActionInfoPanel.AddComponent<Image>(); //이미지 컴포넌트를 추가.
             enemyActionInfoPanel.transform.SetParent(uiCanvas.transform); //uiCanvas의 자식으로 넣어줌
             enemyActionInfoPanel.GetComponent<RectTransform>().sizeDelta = panelSize;
@@ -484,7 +483,6 @@ public class UiManager : MonoBehaviour
         if (enemyMoveInfoPanel == null)
         {
             enemyMoveInfoPanel = new GameObject("Enemy Move Info Panel");
-            Instantiate(enemyMoveInfoPanel);
             Image MoveInfoImage = enemyMoveInfoPanel.AddComponent<Image>();
             RectTransform moveInfoRT = enemyMoveInfoPanel.GetComponent<RectTransform>();
             enemyMoveInfoPanel.transform.SetParent(enemyActionInfoPanel.transform);
@@ -492,7 +490,6 @@ public class UiManager : MonoBehaviour
             moveInfoRT.anchoredPosition = new Vector2(-panelSize.x / 2 + childPanelSize / 2 + childInterver, 0);
             MoveInfoImage.color = new Color(1, 1, 1, 0.8f);
             moveablePointsParent = new GameObject("Moveable Points");
-            Instantiate(moveablePointsParent);
             moveablePointsParent.transform.SetParent(enemyMoveInfoPanel.transform);
             moveablePointsParent.AddComponent<RectTransform>().anchoredPosition = Vector3.zero;
         }
@@ -503,7 +500,6 @@ public class UiManager : MonoBehaviour
         if (enemyAttackInfoPanel == null)
         {
             enemyAttackInfoPanel = new GameObject("Enemy Attack Info Panel");
-            Instantiate(enemyAttackInfoPanel);
             Image AttackInfoImage = enemyAttackInfoPanel.AddComponent<Image>();
             RectTransform attackInfoRT = enemyAttackInfoPanel.GetComponent<RectTransform>();
             enemyAttackInfoPanel.transform.SetParent(enemyActionInfoPanel.transform);
@@ -511,7 +507,6 @@ public class UiManager : MonoBehaviour
             attackInfoRT.anchoredPosition = new Vector2(panelSize.x / 2 - childPanelSize / 2 - childInterver, 0);
             AttackInfoImage.color = new Color(1, 1, 1, 0.8f);
             attackablePointsParent = new GameObject("Attackable Points");
-            Instantiate(attackablePointsParent);
             attackablePointsParent.transform.SetParent(enemyAttackInfoPanel.transform);
             attackablePointsParent.AddComponent<RectTransform>().anchoredPosition = Vector3.zero;
         }
@@ -533,7 +528,6 @@ public class UiManager : MonoBehaviour
         for(int i = 0; i <= moveablePointsSize; i++) //이동가능 포인트의 최대 개수 만큼만 moveablePoint를 생성
         {
             GameObject moveablePoint = new GameObject("Moveable Point " + i);
-            Instantiate(moveablePoint);
             Image moveablePointImage = moveablePoint.AddComponent<Image>();
             moveablePoint.transform.SetParent(moveablePointsParent.transform);
             moveablePointImage.color = i == 0 ? Color.gray : enemyMoveableColor[1];
@@ -542,7 +536,6 @@ public class UiManager : MonoBehaviour
         for (int i = 0; i <= attackablePointsSize; i++) //공격가능 포인트의 최대 개수 만큼만 attackablePoint를 생성
         {
             GameObject attackablePoint = new GameObject("Attackable Point " + i);
-            Instantiate(attackablePoint);
             Image attackablePointImage = attackablePoint.AddComponent<Image>();
             attackablePoint.transform.SetParent(attackablePointsParent.transform);
             attackablePointImage.color = i == 0 ? Color.gray : enemyAttackableColor[1];
