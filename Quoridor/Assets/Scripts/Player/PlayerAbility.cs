@@ -393,6 +393,21 @@ public class PlayerAbility : MonoBehaviour
         return areaAbility;
     }
 
+    public AreaAbility SetAreaDumpAbility(AreaAbility.ELifeType lifeType, int life, Vector2Int targetPos, List<Vector2Int> areaPositionList, bool canPenetrate, EnterEvent enterEvent, StayEvent stayEvent, ExitEvent exitEvent)
+    {
+        GameObject areaAbilityObject = Instantiate(abilityPrefabs.DumpAbilityPrefab, GameManager.ChangeCoord(targetPos), Quaternion.identity);
+        AreaAbility areaAbility = areaAbilityObject.GetComponent<AreaAbility>();
+        areaAbility.lifeType = lifeType;
+        areaAbility.life = life;
+        areaAbility.areaPositionList = areaPositionList;
+        areaAbility.canPenetrate = canPenetrate;
+        areaAbility.enterEvent = enterEvent;
+        areaAbility.stayEvent = stayEvent;
+        areaAbility.exitEvent = exitEvent;
+        areaAbility.SetUp();
+        return areaAbility;
+    }
+
     public void SaveAbility()
     {
         string filePath = Application.persistentDataPath + "/ability.json";
@@ -1642,7 +1657,7 @@ public class PlayerAbility : MonoBehaviour
             new Vector2Int(-1, -1), new Vector2Int(-1, -2), new Vector2Int(-2, -1),new Vector2Int(-2, -2)
         };
         private List<Vector2Int> mAttackScale = new List<Vector2Int>(){
-            new Vector2Int(0, 0), new Vector2Int(1, 0), new Vector2Int(-1, 0),  new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
+            new Vector2Int(0, 0)
         };
         private bool[] bCanPenetrate = new bool[2] { true, false };
         private Vector2Int mTargetPos;
@@ -1661,14 +1676,13 @@ public class PlayerAbility : MonoBehaviour
         public EAbilityType abilityType { get { return mAbilityType; } }
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
-        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); ; }; } }
+        public EnterEvent enterEvent { get { return (Enemy enemy) => { }; } }
         public StayEvent stayEvent { get { return (Enemy enemy) => { }; } }
         public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
-            mValue = 2 + thisScript.additionalAbilityStat.placeDamage;
-            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            thisScript.SetAreaDumpAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
             mCount--;
             canEvent = false;
             return false;

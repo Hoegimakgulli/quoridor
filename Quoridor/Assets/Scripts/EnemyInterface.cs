@@ -1,10 +1,10 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public interface IMove
 {
-    void GetShortRoad(List<Path> path);
+    void GetShortRoad(List<Path> path, bool isPlayer);
     void GetBackRoad();
     void GetHoldRoad();
 }
