@@ -618,7 +618,7 @@ public class UiManager : MonoBehaviour
             maxY = attackablePoint.y > maxY ? attackablePoint.y : maxY;
         }
         Debug.Log("minX " + minX + "   max X " + maxX + "   min Y " + minY + "   maxY " + maxY);
-        maxLength = maxX - minX > maxY - minY ? maxX - minX + 1 : maxY - minY + 1; //가로길이 세로길이 중 긴 것을 포인트들의 크기를 정하는 데 사용
+        maxLength = maxX - minX > maxY - minY ? maxX - minX + 1 : maxY - minY + 1; //가로길이 세로길이 중 긴 것을 포인트들의 크기를 정하는 데 사용함
         horizontalMean = (maxX + minX) / 2.0f; //가로의 중간 위치
         verticalMean = (maxY + minY) / 2.0f; //세로의 중간 위치
         pointsMove = enemyAttackInfoPanel.GetComponent<RectTransform>().sizeDelta.x / maxLength; //point의 한칸 이동 거리
