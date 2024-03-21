@@ -147,7 +147,7 @@ public class GameManager : MonoBehaviour
     }
     void Update()
     {
-        if(playerControlStatus == EPlayerControlStatus.None)
+        if (playerControlStatus == EPlayerControlStatus.None)
         {
             if (player.GetComponent<Player>().touchState == ETouchState.Began)
             {
@@ -165,11 +165,18 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.B)) 
+        if (Input.GetKeyDown(KeyCode.B))
         {
             EnemyManager em = GetComponent<EnemyManager>();
             em.GetEnemyObject(0).transform.position += new Vector3(0, -1, 0);
             Debug.Log(enemyValueList[0].position);
+        }
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            for (int i = 0; i < enemyValueList.Count; i++)
+            {
+                enemyValueList[i].position = ChangeCoord(new Vector2Int(0, 4 - i));
+            }
         }
 
         if (Turn % 2 == 0 && Input.GetKey(KeyCode.Space)) //[디버그용] space 키를 통해 적턴 넘기기

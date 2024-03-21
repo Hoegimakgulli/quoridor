@@ -392,22 +392,6 @@ public class PlayerAbility : MonoBehaviour
         areaAbility.SetUp();
         return areaAbility;
     }
-
-    public AreaAbility SetAreaDumpAbility(AreaAbility.ELifeType lifeType, int life, Vector2Int targetPos, List<Vector2Int> areaPositionList, bool canPenetrate, EnterEvent enterEvent, StayEvent stayEvent, ExitEvent exitEvent)
-    {
-        GameObject areaAbilityObject = Instantiate(abilityPrefabs.DumpAbilityPrefab, GameManager.ChangeCoord(targetPos), Quaternion.identity);
-        AreaAbility areaAbility = areaAbilityObject.GetComponent<AreaAbility>();
-        areaAbility.lifeType = lifeType;
-        areaAbility.life = life;
-        areaAbility.areaPositionList = areaPositionList;
-        areaAbility.canPenetrate = canPenetrate;
-        areaAbility.enterEvent = enterEvent;
-        areaAbility.stayEvent = stayEvent;
-        areaAbility.exitEvent = exitEvent;
-        areaAbility.SetUp();
-        return areaAbility;
-    }
-
     public void SaveAbility()
     {
         string filePath = Application.persistentDataPath + "/ability.json";
@@ -644,12 +628,28 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             Vector2Int newGridPosition = GameManager.playerGridPosition + new Vector2Int(0, -2);
-            if (thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(newGridPosition)) != null)
+
+            bool[] result = thisScript.player.CheckRay(thisScript.transform.position, new Vector2(0, -2));
+
+            if (result[0] || !result[1] || result[2])
             {
-                newGridPosition = GameManager.playerGridPosition + new Vector2Int(0, -1);
-                if (thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(newGridPosition)) != null) newGridPosition = GameManager.playerGridPosition;
+                result = thisScript.player.CheckRay(thisScript.transform.position, new Vector2(0, -1));
+
+                if (result[0] || !result[1] || result[2])
+                {
+                    newGridPosition = GameManager.playerGridPosition;
+                }
+                else
+                {
+                    newGridPosition = GameManager.playerGridPosition + new Vector2Int(0, -1);
+                }
             }
-            if (newGridPosition.y < -4) newGridPosition.y = -4;
+            else
+            {
+                newGridPosition = GameManager.playerGridPosition + new Vector2Int(0, -2);
+            }
+
+
             thisScript.transform.position = GameManager.ChangeCoord(newGridPosition);
             GameManager.playerGridPosition = newGridPosition;
 
@@ -677,7 +677,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.DiePassive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
-        private int mCount = 3;
+        private int mCount = 2;
         private bool mbDidEvent = false;
 
         PlayerAbility thisScript;
@@ -864,7 +864,7 @@ public class PlayerAbility : MonoBehaviour
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
-            Vector2Int enemyTrimPos = new Vector2Int((int)(thisScript.transform.position.x / GameManager.gridSize), (int)(thisScript.transform.position.y / GameManager.gridSize)) + new Vector2Int(4, 4);
+            Vector2Int enemyTrimPos = GameManager.ChangeCoord(thisScript.targetEnemy.transform.position) + new Vector2Int(4, 4);
             int enemyMapNumber = enemyTrimPos.x + (enemyTrimPos.y * 9);
 
             // 예외 처리
@@ -1682,7 +1682,7 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             Debug.Log($"{targetPos}");
-            thisScript.SetAreaDumpAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            thisScript.SetAreaAbility(AreaAbility.ELifeType.Dummy, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
             mCount--;
             canEvent = false;
             return false;
