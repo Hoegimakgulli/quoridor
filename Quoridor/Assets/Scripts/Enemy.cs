@@ -140,6 +140,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     // Attack 받았을 때 실행하는 함수
     public bool AttackedEnemy(int playerAtk)
     {
+        Debug.Log(GetComponent<SpriteRenderer>().color);
         int originHP = hp;
         hp -= playerAtk;
 
@@ -300,6 +301,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         shakeSequence.Append(tmpObj.DOFade(1f, 1).SetEase(Ease.Linear));
         shakeSequence.Append(tmpObj.DOFade(0, 1).SetEase(Ease.Linear));
         //shakeSequence.Append(tmpObj.DOFade(1f, 1).SetEase(Ease.Linear));
+
     }
 
     public void Update()
@@ -332,6 +334,11 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             highlightSPR.DOFade(0, fadeTime);
             yield return new WaitForSeconds(fadeTime);
         }
+    }
+
+    public void EnemyActionInfo()
+    {
+        uiManager.ActiveEnemyInfoUI(transform.position, moveablePoints, attackablePoints, GetComponent<SpriteRenderer>().color);
     }
     // 매 턴마다 실행되는 함수 (사용처 : 디버프 턴 감소용) - 동현
     public void UpdateTurn()

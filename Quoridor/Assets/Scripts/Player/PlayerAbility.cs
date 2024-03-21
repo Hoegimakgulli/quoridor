@@ -108,26 +108,26 @@ public class PlayerAbility : MonoBehaviour
     {
         if (!shouldSetUpAbilityUI) return; // Do Once
         // 능력 UI 활성화
-        Transform ContentBox = player.abilityUI.transform.GetChild(0).GetChild(0).GetChild(0);
+        Transform ContentBox = player.abilityUI.transform.GetChild(0).GetChild(0).GetChild(0); //실제 버튼들이 담겨있는 박스
 
         ContentBox.GetComponent<RectTransform>().sizeDelta = new Vector2(player.abilityCount * 190f, 0); // 패널 크기 설정
 
         int index = 0;
         foreach (var ability in abilities)
         {
-            if (ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive)
+            if (ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive) //액티브 능력이 있다면
             {
                 Button abilityButton = ContentBox.GetChild(index).GetComponent<Button>();
-                abilityButton.gameObject.SetActive(true);
-                abilityButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(index * 120f + 70f, 0);
+                abilityButton.gameObject.SetActive(true);//버튼의 갯수만큼 활성화
+                abilityButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(index * 120f + 70f, 0); //버튼 위치 설정
                 int abilityIndex = abilities.IndexOf(ability);
-                abilityButton.transform.GetChild(0).GetComponent<Text>().text = abilitiesID[abilityIndex].ToString();
-                abilityButton.interactable = ability.canEvent;
-                abilityButton.onClick.RemoveAllListeners();
-                if (ability.abilityType == EAbilityType.InstantActive) abilityButton.onClick.AddListener(() => ability.Event());
-                else abilityButton.onClick.AddListener(() => TargetEvent(abilitiesID[abilityIndex]));
-                abilityButton.GetComponent<DisposableButton>().activeCondition = (ability as IActiveAbility).activeCondition;
-                abilityButton.GetComponent<DisposableButton>().isAlreadyUsed = !ability.canEvent;
+                abilityButton.transform.GetChild(0).GetComponent<Text>().text = abilitiesID[abilityIndex].ToString(); //버튼의 텍스트를 버튼의 고유 아이디로
+                abilityButton.interactable = ability.canEvent; //버튼의 활성화 여부를 능력의 사용가능 여부와 동일하게
+                abilityButton.onClick.RemoveAllListeners(); //버튼의 추가 이벤트를 초기화 (버튼의 순서가 바뀌었을 수 있으므로)
+                if (ability.abilityType == EAbilityType.InstantActive) abilityButton.onClick.AddListener(() => ability.Event()); //즉발 능력일 경우, 누르는 즉시 이벤트가 작동되도록 리스너를 달아줌
+                else abilityButton.onClick.AddListener(() => TargetEvent(abilitiesID[abilityIndex])); //타겟팅 능력일 경우, 타겟 이벤트라는 함수를 실행하도록 리스너연결
+                abilityButton.GetComponent<DisposableButton>().activeCondition = (ability as IActiveAbility).activeCondition; //능력 사용 버튼에 전제조건 넣어줌
+                abilityButton.GetComponent<DisposableButton>().isAlreadyUsed = !ability.canEvent; //플레이어 능력이 이미 사용됐다면 그것도 적용시켜줌
                 index++;
             }
         }
@@ -135,8 +135,8 @@ public class PlayerAbility : MonoBehaviour
     }
     public void TargetEvent(int abilityID)
     {
-        player.usingAbilityID = abilityID;
-        gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Ability;
+        player.usingAbilityID = abilityID; //플레이어한테 사용중인 능력을 알려줌.
+        gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Ability; //플레이어 상태 변경
     }
     public void ResetEvent(EResetTime resetTime)
     {
