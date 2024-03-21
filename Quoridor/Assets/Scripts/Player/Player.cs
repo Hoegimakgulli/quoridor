@@ -151,6 +151,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         TouchSetUp();
+        // Debug.Log(touchState.ToString());
         playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEveryTick);
         if (playerAbility.NeedSave)
             playerAbility.SaveAbility();
@@ -233,7 +234,7 @@ public class Player : MonoBehaviour
             if (EventSystem.current.IsPointerOverGameObject(touch.fingerId) == true) return;
             if (touch.phase == TouchPhase.Began)  touchState = ETouchState.Began;
             else if (touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary) touchState = ETouchState.Moved;
-            else if (touch.phase == TouchPhase.Ended)touchState = ETouchState.Ended;
+            else if (touch.phase == TouchPhase.Ended) if (touchState != ETouchState.None) touchState = ETouchState.Ended;
             touchPosition = touch.position;
         }else touchState = ETouchState.None;
 #endif
