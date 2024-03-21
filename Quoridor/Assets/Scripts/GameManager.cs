@@ -11,10 +11,22 @@ using static Player;
 public class EnemyValues
 {
     private Vector3 mPosition; // position
+    private int mMoveCtrl; // moveCtrl
 
     public int hp; // 유닛 hp
     public int maxHp; // 유닛 최대 hp
-    public int moveCtrl; // 실시간 행동력 체크
+    public int moveCtrl {
+        get
+        {
+            return mMoveCtrl;
+        }
+
+        set 
+        {
+            GameObject correctEnemy = EnemyManager.GetEnemyObject(mPosition);
+            correctEnemy.GetComponent<Enemy>().moveCtrl[1] = value;
+        } 
+    }
     public int maxMoveCtrl; // 유닛이 가질 수 있는 최대 행동력
     public int uniqueNum; // 어떤 유닛을 생성할지 정하는 번호
     public int index; // 생성 순서, EnemyBox 내 Index
