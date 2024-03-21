@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 #endif
 using UnityEngine;
+using static Player;
 
 public class EnemyValues
 {
@@ -148,10 +149,10 @@ public class GameManager : MonoBehaviour
     {
         if(playerControlStatus == EPlayerControlStatus.None)
         {
-            if (Input.GetMouseButtonDown(0))
+            if (player.GetComponent<Player>().touchState == ETouchState.Began)
             {
                 Vector2 clickPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                RaycastHit2D hit = Physics2D.Raycast(clickPosition, Vector3.forward, 15f, LayerMask.GetMask("Token"));
+                RaycastHit2D hit = Physics2D.Raycast(player.GetComponent<Player>().touchPosition, Vector3.forward, 15f, LayerMask.GetMask("Token"));
 
                 if (hit.collider != null && hit.collider.gameObject.tag == "Enemy")
                 {

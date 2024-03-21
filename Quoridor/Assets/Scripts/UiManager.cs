@@ -62,9 +62,9 @@ public class UiManager : MonoBehaviour
     private void Awake()
     {
         enemyMoveableColor[0] = new Color(1, 1, 1);
-        enemyMoveableColor[1] = new Color(0.5f, 0.8f, 1);
+        enemyMoveableColor[1] = new Color(0.4f, 0.8f, 1);
         enemyAttackableColor[0] = new Color(1, 1, 1);
-        enemyAttackableColor[1] = new Color(1, 1, 0.5f);
+        enemyAttackableColor[1] = new Color(1f, 0.8f, 0.4f);
         enemyManager = GetComponent<EnemyManager>();
         uiCanvas = Instantiate(uiCanvas);
         turnEndButton = uiCanvas.transform.GetChild(4).gameObject;
@@ -474,7 +474,7 @@ public class UiManager : MonoBehaviour
             Image ActionInfoImage = enemyActionInfoPanel.AddComponent<Image>(); //이미지 컴포넌트를 추가.
             enemyActionInfoPanel.transform.SetParent(uiCanvas.transform); //uiCanvas의 자식으로 넣어줌
             enemyActionInfoPanel.GetComponent<RectTransform>().sizeDelta = panelSize;
-            ActionInfoImage.color = new Color(1, 1, 1, 0.6f); //반투명하게 설정
+            ActionInfoImage.color = new Color(1, 1, 1, 0.8f); //반투명하게 설정
         }
 
 
@@ -490,7 +490,7 @@ public class UiManager : MonoBehaviour
             enemyMoveInfoPanel.transform.SetParent(enemyActionInfoPanel.transform);
             moveInfoRT.sizeDelta = new Vector2(childPanelSize, childPanelSize);
             moveInfoRT.anchoredPosition = new Vector2(-panelSize.x / 2 + childPanelSize / 2 + childInterver, 0);
-            MoveInfoImage.color = new Color(1, 1, 1, 0.6f);
+            MoveInfoImage.color = new Color(1, 1, 1, 0.8f);
             moveablePointsParent = new GameObject("Moveable Points");
             Instantiate(moveablePointsParent);
             moveablePointsParent.transform.SetParent(enemyMoveInfoPanel.transform);
@@ -509,7 +509,7 @@ public class UiManager : MonoBehaviour
             enemyAttackInfoPanel.transform.SetParent(enemyActionInfoPanel.transform);
             attackInfoRT.sizeDelta = new Vector2(childPanelSize, childPanelSize);
             attackInfoRT.anchoredPosition = new Vector2(panelSize.x / 2 - childPanelSize / 2 - childInterver, 0);
-            AttackInfoImage.color = new Color(1, 1, 1, 0.6f);
+            AttackInfoImage.color = new Color(1, 1, 1, 0.8f);
             attackablePointsParent = new GameObject("Attackable Points");
             Instantiate(attackablePointsParent);
             attackablePointsParent.transform.SetParent(enemyAttackInfoPanel.transform);
@@ -536,7 +536,7 @@ public class UiManager : MonoBehaviour
             Instantiate(moveablePoint);
             Image moveablePointImage = moveablePoint.AddComponent<Image>();
             moveablePoint.transform.SetParent(moveablePointsParent.transform);
-            moveablePointImage.color = i == 0 ? Color.red : enemyMoveableColor[1];
+            moveablePointImage.color = i == 0 ? Color.gray : enemyMoveableColor[1];
             enemyMoveablePoints.Add(moveablePoint.GetComponent<RectTransform>());
         }
         for (int i = 0; i <= attackablePointsSize; i++) //공격가능 포인트의 최대 개수 만큼만 attackablePoint를 생성
@@ -545,16 +545,18 @@ public class UiManager : MonoBehaviour
             Instantiate(attackablePoint);
             Image attackablePointImage = attackablePoint.AddComponent<Image>();
             attackablePoint.transform.SetParent(attackablePointsParent.transform);
-            attackablePointImage.color = i == 0 ? Color.blue : enemyAttackableColor[1];
+            attackablePointImage.color = i == 0 ? Color.gray : enemyAttackableColor[1];
             enemyAttackablePoints.Add(attackablePoint.GetComponent<RectTransform>());
         }
         enemyActionInfoPanel.gameObject.SetActive(false);
 
     }
 
-    //적 이동범위, 공격범위 표시하는 UI를 활성화
-    public void ActiveEnemyInfoUI(Vector2 enemyPosition, Vector2Int[] moveablePoints, Vector2Int[] attackablePoints)
+    //적 이동범위, 공격범위 표시하는 UI를 활성화 (위로 펼칠건지 아래로 펼칠건지 결정하기 위한 적의 위치, 적의 이동가능 포인트들, 적의 공격 가능 포인트들, 적의 색깔)
+    public void ActiveEnemyInfoUI(Vector2 enemyPosition, Vector2Int[] moveablePoints, Vector2Int[] attackablePoints, Color enemyColor)
     {
+        enemyMoveablePoints[0].GetComponent<Image>().color = enemyColor;
+        enemyAttackablePoints[0].GetComponent<Image>().color = enemyColor;
         enemyActionInfoPanel.gameObject.SetActive(true);
         if (enemyPosition.y > 0)
         {

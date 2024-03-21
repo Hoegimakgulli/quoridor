@@ -15,7 +15,7 @@ public class Player : MonoBehaviour
 
     public enum ETouchState { None, Began, Moved, Ended }; //모바일과 에디터 모두 가능하게 터치 & 마우스 처리
     public ETouchState touchState = ETouchState.None;
-    Vector2 touchPosition;
+    public Vector2 touchPosition;
 
     [SerializeField]
     public List<Vector2Int> movablePositions = new List<Vector2Int>(); // 플레이어의 가능한 이동 좌표들
