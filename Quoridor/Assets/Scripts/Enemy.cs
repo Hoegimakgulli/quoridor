@@ -30,17 +30,18 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public EValue value = EValue.Normal;
     public bool ShieldTrue = false; // 방패병 한정 변수
 
+    private bool isPlayer = true;
 
     //--------------- Move 시작 ---------------//
     // 모든 enemy 객체 동시에 움직임 실시
-    public void EnemyMove(List<Path> path)
+    public void EnemyMove(List<Path> path, bool isPlayer)
     {
         // enemy가 Move 상태일 때 유닛의 특징에 따라 움직이는 범위 조정
         if (state == EState.Move)
         {
             if (characteristic == ECharacteristic.Forward)
             {
-                GetShortRoad(path);
+                GetShortRoad(path, isPlayer);
             }
             else if (characteristic == ECharacteristic.BackWard)
             {
@@ -56,9 +57,10 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public GameManager gameManager;
 
     // A* 알고리즘
-    public void GetShortRoad(List<Path> path)
+    public void GetShortRoad(List<Path> path, bool isPlayer)
     {
-        Vector2 playerPos = GameObject.FindWithTag("Player").transform.position / GameManager.gridSize;
+        this.isPlayer = isPlayer;
+        Vector2 playerPos = (isPlayer) ? GameObject.FindWithTag("Player").transform.position / GameManager.gridSize : GameObject.FindWithTag("PlayerDump").transform.position / GameManager.gridSize;
         if (!AttackCanEnemy())
         {
             Vector2 unitPos = transform.position / GameManager.gridSize;
@@ -230,15 +232,22 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     {
         if (AttackCanEnemy() && state == EState.Attack)
         {
-            Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
+            Vector2 playerPos = (isPlayer) ? GameObject.FindGameObjectWithTag("Player").transform.position : GameObject.FindGameObjectWithTag("PlayerDump").transform.position;
             RaycastHit2D hitWall = Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, GameManager.gridSize * Math.Abs((playerPos - (Vector2)transform.position).magnitude), LayerMask.GetMask("Wall")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Wall").FirstOrDefault();
-            RaycastHit2D hit = Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Player").FirstOrDefault(); ; // enemy 위치에서 player까지 ray쏘기
-
+            RaycastHit2D hit = 
+                (isPlayer) ? Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Player").FirstOrDefault() :
+                Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "PlayerDump").FirstOrDefault(); // enemy 위치에서 player까지 ray쏘기
+            
             if (!hitWall)
             {
-                if (hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
+                if (hit.transform.tag == "Player" && isPlayer) // 닿은 ray가 Player 태그를 가지고 있다면
                 {
                     hit.transform.GetComponent<Player>().Die();
+                }
+
+                if(hit.transform.tag == "PlayerDump" && !isPlayer)
+                {
+                    Destroy(hit.transform.gameObject);
                 }
             }
         }
@@ -253,13 +262,12 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         if (debuffs[EDebuff.CantAttack] > 0) return false;
         int attackCount;
         Vector2 currentAttackPoint;
-        Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position / GameManager.gridSize;
+        Vector2 playerPos = (isPlayer) ? GameObject.FindGameObjectWithTag("Player").transform.position / GameManager.gridSize : GameObject.FindGameObjectWithTag("PlayerDump").transform.position / GameManager.gridSize; ;
         playerPos = new Vector2Int(Mathf.FloorToInt(playerPos.x), Mathf.FloorToInt(playerPos.y));
         Vector2 enemyPos = transform.position / GameManager.gridSize;
         enemyPos = new Vector2Int(Mathf.FloorToInt(enemyPos.x), Mathf.FloorToInt(enemyPos.y));
 
-
-        Vector2 playerPosT = GameObject.FindGameObjectWithTag("Player").transform.position;
+        Vector2 playerPosT = (isPlayer) ? GameObject.FindGameObjectWithTag("Player").transform.position : GameObject.FindGameObjectWithTag("PlayerDump").transform.position;
         RaycastHit2D hitWall = Physics2D.Raycast(transform.position, playerPosT - (Vector2)transform.position, GameManager.gridSize * Math.Abs((playerPosT - (Vector2)transform.position).magnitude), LayerMask.GetMask("Wall"));
 
         if (!hitWall)

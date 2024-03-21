@@ -271,56 +271,56 @@ public class EnemyManager : MonoBehaviour
     }
     */
     static public bool turnCheck = false;
-    void MoveCtrlUpdate()
-    {
-        Enemy currentEnemyState;
-        int count;
-        for (count = 0; count < GameManager.enemyObjects.Count; count++)
-        {
-            currentEnemyState = GameManager.enemyObjects[count].GetComponent<Enemy>();
+    //void MoveCtrlUpdate()
+    //{
+    //    Enemy currentEnemyState;
+    //    int count;
+    //    for (count = 0; count < GameManager.enemyObjects.Count; count++)
+    //    {
+    //        currentEnemyState = GameManager.enemyObjects[count].GetComponent<Enemy>();
 
-            //Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
-            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
+    //        //Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
+    //        currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
+    //        Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
 
-            //currentEnemyState.moveCtrl[1] += 10; // test 용 추가
+    //        //currentEnemyState.moveCtrl[1] += 10; // test 용 추가
 
-            if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
-            {
-                GameObject currenEnemy = GameManager.enemyObjects[count];
-                GameObject player = GameObject.FindWithTag("Player");
-                currentEnemyState.state = Enemy.EState.Move;
-                PathFinding(currenEnemy, player);
-                currentEnemyState.EnemyMove(FinalPathList);
-                currentEnemyState.moveCtrl[1] = 0; // 현재 행동력 초기화
-                /*
-                foreach(Transform child in GameObject.FindWithTag("WarningBox").transform)
-                {
-                    if(child.GetComponent<Text>().text == GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text)
-                    {
-                        child
-                    }
-                }
-                GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
-                */
-                if (!turnCheck)
-                {
-                    turnCheck = true;
-                    GameManager.Turn++;
-                }
-            }
+    //        if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
+    //        {
+    //            GameObject currenEnemy = GameManager.enemyObjects[count];
+    //            GameObject player = GameObject.FindWithTag("Player");
+    //            currentEnemyState.state = Enemy.EState.Move;
+    //            PathFinding(currenEnemy, player);
+    //            currentEnemyState.EnemyMove(FinalPathList);
+    //            currentEnemyState.moveCtrl[1] = 0; // 현재 행동력 초기화
+    //            /*
+    //            foreach(Transform child in GameObject.FindWithTag("WarningBox").transform)
+    //            {
+    //                if(child.GetComponent<Text>().text == GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text)
+    //                {
+    //                    child
+    //                }
+    //            }
+    //            GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
+    //            */
+    //            if (!turnCheck)
+    //            {
+    //                turnCheck = true;
+    //                GameManager.Turn++;
+    //            }
+    //        }
 
-            else
-            {
-                if (!turnCheck)
-                {
-                    turnCheck = true;
-                    GameManager.Turn++;
+    //        else
+    //        {
+    //            if (!turnCheck)
+    //            {
+    //                turnCheck = true;
+    //                GameManager.Turn++;
 
-                }
-            }
-        }
-    }
+    //            }
+    //        }
+    //    }
+    //}
 
     void testMove()
     {
@@ -425,7 +425,7 @@ public class EnemyManager : MonoBehaviour
         int originMoveCtrl;  //원래 행동력.
         for (count = 0; count < GameManager.enemyValueList.Count; count++)
         {
-            Debug.Log("문제의 그녀석 부분" + GameManager.enemyValueList[originSortingList[count]].position);
+            //Debug.Log("문제의 그녀석 부분" + GameManager.enemyValueList[originSortingList[count]].position);
             currentEnemyState = GetEnemy(GameManager.enemyValueList[originSortingList[count]].position);
             originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl;
 
@@ -450,13 +450,32 @@ public class EnemyManager : MonoBehaviour
             if (currentEnemyState.moveCtrl[0] <= GameManager.enemyValueList[originSortingList[count]].moveCtrl)
             {
                 //GameObject currenEnemy = FindValuesObj(GameManager.enemyValueList[count].position);
+                bool isPlayer = true; // true == player, false == dump
                 GameObject currenEnemy = GetEnemyObject(GameManager.enemyValueList[originSortingList[count]].position);
                 ///////////////////요 윗부분 originalSortingList랑 그 안에 어쩌구 뭐 있었는데 테스트하느라 지웠다함!!! 문제생기면 여기일듯??ㅁㅁㅇㅁㄴㄻㄴㅇ훠ㅑㅁㅈ둬모ㅓ몬ㅇ 
 
                 GameObject player = GameObject.FindWithTag("Player");
                 currentEnemyState.state = Enemy.EState.Move;
-                PathFinding(currenEnemy, player);
-                currentEnemyState.EnemyMove(FinalPathList);
+
+                // 능력 29번 부분
+                if (GameObject.FindWithTag("PlayerDump"))
+                {
+                    PathFinding(currenEnemy, GameObject.FindWithTag("PlayerDump"));
+                    List<Path> playerDumpPathList = FinalPathList;
+                    PathFinding(currenEnemy, player);
+                    List<Path> playerPathList = FinalPathList;
+
+                    if(playerDumpPathList.Count <= playerPathList.Count)
+                    {
+                        FinalPathList = playerDumpPathList;
+                        isPlayer = false;
+                    }
+                }
+                else
+                {
+                    PathFinding(currenEnemy, player);
+                }
+                currentEnemyState.EnemyMove(FinalPathList, isPlayer);
                 GameManager.enemyValueList[originSortingList[count]].moveCtrl = -1; //상태창 순서를 행동력 순으로 정렬했을 때, 방금 이동한 적의 순서가 가장 아래로 내려오도록 행동력을 마이너스로 수정.
                 uiManager.SortEnemyStates(); //방금 이동한 적의 상태창이 아래로 내려오도록 리스트를 재정렬
                 GameManager.enemyValueList[originSortingList[count]].moveCtrl = originMoveCtrl - currentEnemyState.moveCtrl[0]; //적의 행동력 감소
