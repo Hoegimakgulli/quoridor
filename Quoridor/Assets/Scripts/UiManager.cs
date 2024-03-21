@@ -6,6 +6,7 @@ using DG.Tweening;
 using static UnityEngine.UI.Image;
 using Unity.VisualScripting;
 using JetBrains.Annotations;
+using TMPro.EditorUtilities;
 
 public class UiManager : MonoBehaviour
 {
@@ -27,12 +28,17 @@ public class UiManager : MonoBehaviour
     public GameObject turnEndButton;
     public Text WallCountText;
     public bool freezeButton = false; //true면 행동 및 턴 종료 버튼 작동 안함. (적 상태창 애니메이션 중 행동 제약)
-    GameObject enemyMoveInfo;
-    GameObject enemyAttackInfo;
-    Image[ , ] enemyMoveInfoDots = new Image[9, 7]; //적 이동 방식 알려주는 오브젝트들
-    Image[ , ] enemyAttackInfoDots = new Image[9, 7]; //적 공격 방식 알려주는 오브젝트들
-    Color[] enemyMoveInfoColor = new Color[2]; //0은 비활성화 컬러, 1은 활성화 컬러
-    Color[] enemyAttackInfoColor = new Color[2]; //0은 비활성화 컬러, 1은 활성화 컬러
+
+    Color[] enemyMoveableColor = new Color[2]; //0은 비활성화 컬러, 1은 활성화 컬러
+    Color[] enemyAttackableColor = new Color[2]; //0은 비활성화 컬러, 1은 활성화 컬러
+
+    GameObject enemyActionInfoPanel; //적 이동, 공격 범위를 표시할 UI를 담을 Panel
+    GameObject enemyAttackInfoPanel; //적의 공격 범위를 표시할 UI를 담을 Panel
+    GameObject enemyMoveInfoPanel; //적의 이동 범위를 표시할 UI를 담을 Panel
+    List<RectTransform> enemyAttackablePoints = new List<RectTransform>(); //적 공격 가능 위치를 표시할 오브젝트들의 RectTransform
+    List<RectTransform> enemyMoveablePoints = new List<RectTransform>(); //적 이동 가능 위치를 표시할 오브젝트들의 RectTransform
+
+
 
     public class attackedEnemyValues
     {
@@ -55,25 +61,16 @@ public class UiManager : MonoBehaviour
 
     private void Awake()
     {
-        enemyMoveInfoColor[0] = new Color(1, 1, 1);
-        enemyMoveInfoColor[1] = new Color(0.5f, 0.8f, 1);
-        enemyAttackInfoColor[0] = new Color(1, 1, 1);
-        enemyAttackInfoColor[1] = new Color(1, 1, 0.5f);
+        enemyMoveableColor[0] = new Color(1, 1, 1);
+        enemyMoveableColor[1] = new Color(0.5f, 0.8f, 1);
+        enemyAttackableColor[0] = new Color(1, 1, 1);
+        enemyAttackableColor[1] = new Color(1, 1, 0.5f);
         enemyManager = GetComponent<EnemyManager>();
-        GameObject uiC = Instantiate(uiCanvas);
-        turnEndButton = uiC.transform.GetChild(4).gameObject;
+        uiCanvas = Instantiate(uiCanvas);
+        turnEndButton = uiCanvas.transform.GetChild(4).gameObject;
         turnEndButton.GetComponent<Button>().onClick.AddListener(() => PlayerTurnEnd());
-        WallCountText = uiC.transform.GetChild(5).GetChild(2).GetComponent<Text>();
-        enemyMoveInfo = uiC.transform.GetChild(8).GetChild(1).GetChild(0).gameObject;
-        enemyAttackInfo = uiC.transform.GetChild(8).GetChild(2).GetChild(0).gameObject;
-        for(int i = 0; i < 9; i++)
-        {
-            for(int j = 0; j < 7; j++)
-            {
-                enemyMoveInfoDots[i,j] = enemyMoveInfo.transform.GetChild(i).GetChild(j).GetComponent<Image>();
-                enemyAttackInfoDots[i, j] = enemyAttackInfo.transform.GetChild(i).GetChild(j).GetComponent<Image>();
-            }
-        }
+        WallCountText = uiCanvas.transform.GetChild(5).GetChild(2).GetComponent<Text>();
+
     }
     private void Start()
     {
@@ -103,6 +100,7 @@ public class UiManager : MonoBehaviour
         {
             StartCoroutine(PlayerPanelPop());
         }
+
     }
 
     public void HistoryPanelPop() // history panel 열고 닫기 함수
@@ -450,64 +448,206 @@ public class UiManager : MonoBehaviour
         }
     }
 
-    //적 기물 클릭 시 적의 이동방식과 공격방식을 표기해주는 함수. 일단 구현만 해둔 상태. 가독성 별로라 변경하는 편이 좋아보이기도..
-    public void ActiveEnemyActionInfo(Vector2Int[] moveablePoints, Vector2Int[] attackablePoints, Color enemyColor)
+    //적 정보 표시 UI를 생성하는 함수 (공격범위, 이동범위 등)
+    public void CreateEnemyInfoUI()
     {
-        //적 이동 및 공격 정보 색깔 초기화
-        for (int i = 0; i < 9; i++)
-        {
-            for (int j = 0; j < 7; j++)
-            {
-                //enemyMoveInfoDots[i, j].color = enemyMoveInfoColor[0];
-                //enemyAttackInfoDots[i, j].color = enemyAttackInfoColor[0];
+        Vector2 panelSize = new Vector2(800, 600); //적 정보 표시 Panel의 사이즈. 이 값만으로 UI 사이즈 조절 가능
+        float childPanelSize = panelSize.x / 2.5f; //이동 정보 표시 Panel과 공격 정보 표시 Panel의 사이즈
+        float childInterver = (panelSize.x - (childPanelSize * 2)) / 3; //자식 Panel들 사이의 간격
 
-                enemyMoveInfoDots[i, j].gameObject.SetActive(false);
-                enemyAttackInfoDots[i, j].gameObject.SetActive(false);
-            }
+        //Destroy(enemyActionInfoPanel); //기존의 것을 삭제
+        for(int i = enemyAttackablePoints.Count - 1; i>= 0; i--)
+        {
+            Destroy(enemyAttackablePoints[i].gameObject);
         }
-        enemyMoveInfoDots[4, 3].gameObject.SetActive(true);
-        enemyMoveInfoDots[4, 3].color = enemyColor;
-        enemyAttackInfoDots[4, 3].gameObject.SetActive(true);
-        enemyAttackInfoDots[4, 3].color = enemyColor;
+        for(int i = enemyMoveablePoints.Count - 1; i>= 0; i--)
+        {
+            Destroy(enemyMoveablePoints[i].gameObject);
+        }
+        enemyAttackablePoints.Clear();
+        enemyMoveablePoints.Clear();
 
-        float dotsSize = 2; //dots 사이즈. 기본은 2, 상하좌우 2칸이면 1.4, 상하좌우 3칸이면 1로
-        foreach(Vector2Int moveablePoint in moveablePoints)
+        if (enemyActionInfoPanel == null)
         {
-            enemyMoveInfoDots[(moveablePoint.y - 4) * -1, moveablePoint.x + 3].gameObject.SetActive(true);
-            enemyMoveInfoDots[(moveablePoint.y-4)*-1, moveablePoint.x+3].color = enemyMoveInfoColor[1];
-            if (dotsSize != 1)
-            {
-                if (Mathf.Abs(moveablePoint.x) >= 3 || Mathf.Abs(moveablePoint.y) >= 3)
-                {
-                    dotsSize = 1;
-                }
-                else if (Mathf.Abs(moveablePoint.x) == 2 || Mathf.Abs(moveablePoint.y) == 2)
-                {
-                    dotsSize = 1.4f;
-                }
-            }
+            enemyActionInfoPanel = new GameObject("Enemy Action Info Panel");
+            Instantiate(enemyActionInfoPanel);//새 게임 오브젝트 생성
+            Image ActionInfoImage = enemyActionInfoPanel.AddComponent<Image>(); //이미지 컴포넌트를 추가.
+            enemyActionInfoPanel.transform.SetParent(uiCanvas.transform); //uiCanvas의 자식으로 넣어줌
+            enemyActionInfoPanel.GetComponent<RectTransform>().sizeDelta = panelSize;
+            ActionInfoImage.color = new Color(1, 1, 1, 0.6f); //반투명하게 설정
         }
-        enemyMoveInfo.transform.DOScale(new Vector3(dotsSize, dotsSize, 1), 0);
-        dotsSize = 2;
-        foreach (Vector2Int attackablePoint in attackablePoints)
+
+
+        GameObject moveablePointsParent;
+        GameObject attackablePointsParent;
+        //같은 방식으로 이동범위 Panel과 공격범위 Panel을 생성 및 배치
+        if (enemyMoveInfoPanel == null)
         {
-            enemyAttackInfoDots[(attackablePoint.y - 4) * -1, attackablePoint.x + 3].gameObject.SetActive(true);
-            enemyAttackInfoDots[(attackablePoint.y-4)*-1, attackablePoint.x+3].color = enemyAttackInfoColor[1];
-            if (dotsSize != 1)
-            {
-                if (Mathf.Abs(attackablePoint.x) >= 3 || Mathf.Abs(attackablePoint.y) >= 3)
-                {
-                    dotsSize = 1;
-                }
-                else if (Mathf.Abs(attackablePoint.x) == 2 || Mathf.Abs(attackablePoint.y) == 2)
-                {
-                    dotsSize = 1.4f;
-                }
-            }
+            enemyMoveInfoPanel = new GameObject("Enemy Move Info Panel");
+            Instantiate(enemyMoveInfoPanel);
+            Image MoveInfoImage = enemyMoveInfoPanel.AddComponent<Image>();
+            RectTransform moveInfoRT = enemyMoveInfoPanel.GetComponent<RectTransform>();
+            enemyMoveInfoPanel.transform.SetParent(enemyActionInfoPanel.transform);
+            moveInfoRT.sizeDelta = new Vector2(childPanelSize, childPanelSize);
+            moveInfoRT.anchoredPosition = new Vector2(-panelSize.x / 2 + childPanelSize / 2 + childInterver, 0);
+            MoveInfoImage.color = new Color(1, 1, 1, 0.6f);
+            moveablePointsParent = new GameObject("Moveable Points");
+            Instantiate(moveablePointsParent);
+            moveablePointsParent.transform.SetParent(enemyMoveInfoPanel.transform);
+            moveablePointsParent.AddComponent<RectTransform>().anchoredPosition = Vector3.zero;
         }
-        enemyAttackInfo.transform.DOScale(new Vector3(dotsSize, dotsSize, 1), 0);
+        else
+        {
+            moveablePointsParent = enemyMoveInfoPanel.transform.GetChild(0).gameObject;
+        }
+        if (enemyAttackInfoPanel == null)
+        {
+            enemyAttackInfoPanel = new GameObject("Enemy Attack Info Panel");
+            Instantiate(enemyAttackInfoPanel);
+            Image AttackInfoImage = enemyAttackInfoPanel.AddComponent<Image>();
+            RectTransform attackInfoRT = enemyAttackInfoPanel.GetComponent<RectTransform>();
+            enemyAttackInfoPanel.transform.SetParent(enemyActionInfoPanel.transform);
+            attackInfoRT.sizeDelta = new Vector2(childPanelSize, childPanelSize);
+            attackInfoRT.anchoredPosition = new Vector2(panelSize.x / 2 - childPanelSize / 2 - childInterver, 0);
+            AttackInfoImage.color = new Color(1, 1, 1, 0.6f);
+            attackablePointsParent = new GameObject("Attackable Points");
+            Instantiate(attackablePointsParent);
+            attackablePointsParent.transform.SetParent(enemyAttackInfoPanel.transform);
+            attackablePointsParent.AddComponent<RectTransform>().anchoredPosition = Vector3.zero;
+        }
+        else
+        {
+            attackablePointsParent = enemyAttackInfoPanel.transform.GetChild(0).gameObject;
+        }
+
+        int moveablePointsSize = 0; //이동가능 포인트의 최대 개수
+        int attackablePointsSize = 0; //공격 가능 포인트의 최대 개수
+
+        for(int i = 0; i < GameManager.enemyValueList.Count; i++)
+        {
+            Enemy enemy = enemyManager.GetEnemy(i);
+
+            moveablePointsSize = enemy.moveablePoints.Length > moveablePointsSize ? enemy.moveablePoints.Length : moveablePointsSize;
+            attackablePointsSize = enemy.attackablePoints.Length > attackablePointsSize ? enemy.attackablePoints.Length : attackablePointsSize;
+        }
+        for(int i = 0; i <= moveablePointsSize; i++) //이동가능 포인트의 최대 개수 만큼만 moveablePoint를 생성
+        {
+            GameObject moveablePoint = new GameObject("Moveable Point " + i);
+            Instantiate(moveablePoint);
+            Image moveablePointImage = moveablePoint.AddComponent<Image>();
+            moveablePoint.transform.SetParent(moveablePointsParent.transform);
+            moveablePointImage.color = i == 0 ? Color.red : enemyMoveableColor[1];
+            enemyMoveablePoints.Add(moveablePoint.GetComponent<RectTransform>());
+        }
+        for (int i = 0; i <= attackablePointsSize; i++) //공격가능 포인트의 최대 개수 만큼만 attackablePoint를 생성
+        {
+            GameObject attackablePoint = new GameObject("Attackable Point " + i);
+            Instantiate(attackablePoint);
+            Image attackablePointImage = attackablePoint.AddComponent<Image>();
+            attackablePoint.transform.SetParent(attackablePointsParent.transform);
+            attackablePointImage.color = i == 0 ? Color.blue : enemyAttackableColor[1];
+            enemyAttackablePoints.Add(attackablePoint.GetComponent<RectTransform>());
+        }
+        enemyActionInfoPanel.gameObject.SetActive(false);
+
     }
 
+    //적 이동범위, 공격범위 표시하는 UI를 활성화
+    public void ActiveEnemyInfoUI(Vector2 enemyPosition, Vector2Int[] moveablePoints, Vector2Int[] attackablePoints)
+    {
+        enemyActionInfoPanel.gameObject.SetActive(true);
+        if (enemyPosition.y > 0)
+        {
+            enemyActionInfoPanel.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 1);
+        }
+        else
+        {
+            enemyActionInfoPanel.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0);
+        }
+        enemyActionInfoPanel.transform.position = Camera.main.WorldToScreenPoint(enemyPosition);
+        enemyActionInfoPanel.transform.localScale = Vector2.zero;
+        enemyActionInfoPanel.GetComponent<RectTransform>().DOScale(new Vector2(0.7f, 0.7f), uiMoveTime);
+        int minX = 0, minY = 0, maxX = 0, maxY = 0; //왼쪽, 아래쪽, 오른쪽, 위쪽으로 각각 최대 몇칸 필요한지 파악하기 위한 변수
+
+        enemyMoveablePoints[0].anchoredPosition = Vector2.zero;
+        foreach(var enemyMoveablePoint in enemyMoveablePoints)
+        {
+            enemyMoveablePoint.gameObject.SetActive(false);
+        }
+        enemyMoveablePoints[0].gameObject.SetActive(true);
+        foreach (var moveablePoint in moveablePoints)
+        {
+            minX = moveablePoint.x < minX ? moveablePoint.x : minX;
+            maxX = moveablePoint.x > maxX ? moveablePoint.x : maxX;
+            minY = moveablePoint.y < minY ? moveablePoint.y : minY;
+            maxY = moveablePoint.y > maxY ? moveablePoint.y : maxY;
+        }
+
+        int maxLength = maxX - minX > maxY - minY ? maxX - minX + 1 : maxY - minY + 1; //가로길이 세로길이 중 긴 것을 포인트들의 크기를 정하는 데 사용
+        float horizontalMean = (maxX + minX) / 2.0f; //가로의 중간 위치
+        float verticalMean = (maxY + minY) / 2.0f; //세로의 중간 위치
+        float pointsMove = enemyMoveInfoPanel.GetComponent<RectTransform>().sizeDelta.x / maxLength; //point의 한칸 이동 거리
+        Vector2 pointSize = new Vector2(pointsMove/1.2f, pointsMove/1.2f);
+
+        enemyMoveInfoPanel.transform.GetChild(0).GetComponent<RectTransform>().anchoredPosition = new Vector2(-horizontalMean * pointsMove, -verticalMean * pointsMove);
+
+        enemyMoveablePoints[0].anchoredPosition = Vector2.zero;
+        enemyMoveablePoints[0].sizeDelta = pointSize;
+
+        for (int i = 0; i < moveablePoints.Length; i++)
+        {
+            enemyMoveablePoints[i + 1].gameObject.SetActive(true);
+            float x = 0; float y = 0;
+            if (moveablePoints[i].x > 0) x = (moveablePoints[i].x * 2 - 1) * pointsMove;
+            else if (moveablePoints[i].x < 0) x = (moveablePoints[i].x * 2 + 1) * pointsMove;
+            if (moveablePoints[i].y > 0) y = (moveablePoints[i].y * 2 - 1) * pointsMove;
+            else if (moveablePoints[i].y < 0) y = (moveablePoints[i].y * 2 + 1) * pointsMove;
+            enemyMoveablePoints[i + 1].anchoredPosition = new Vector2(moveablePoints[i].x*pointsMove, moveablePoints[i].y*pointsMove);
+            enemyMoveablePoints[i + 1].sizeDelta = pointSize;
+        }
+
+
+
+        minX = 0; minY = 0; maxX = 0; maxY = 0;
+        enemyAttackablePoints[0].anchoredPosition = Vector2.zero;
+        foreach (var enemyattackablePoint in enemyAttackablePoints)
+        {
+            enemyattackablePoint.gameObject.SetActive(false);
+        }
+        enemyAttackablePoints[0].gameObject.SetActive(true);
+        foreach (var attackablePoint in attackablePoints)
+        {
+            minX = attackablePoint.x < minX ? attackablePoint.x : minX;
+            maxX = attackablePoint.x > maxX ? attackablePoint.x : maxX;
+            minY = attackablePoint.y < minY ? attackablePoint.y : minY;
+            maxY = attackablePoint.y > maxY ? attackablePoint.y : maxY;
+        }
+        Debug.Log("minX " + minX + "   max X " + maxX + "   min Y " + minY + "   maxY " + maxY);
+        maxLength = maxX - minX > maxY - minY ? maxX - minX + 1 : maxY - minY + 1; //가로길이 세로길이 중 긴 것을 포인트들의 크기를 정하는 데 사용
+        horizontalMean = (maxX + minX) / 2.0f; //가로의 중간 위치
+        verticalMean = (maxY + minY) / 2.0f; //세로의 중간 위치
+        pointsMove = enemyAttackInfoPanel.GetComponent<RectTransform>().sizeDelta.x / maxLength; //point의 한칸 이동 거리
+        Debug.Log(verticalMean);
+        pointSize = new Vector2(pointsMove / 1.2f, pointsMove / 1.2f);
+        enemyAttackInfoPanel.transform.GetChild(0).GetComponent<RectTransform>().anchoredPosition = new Vector2(-horizontalMean * pointsMove, -verticalMean * pointsMove);
+        enemyAttackablePoints[0].anchoredPosition = Vector2.zero;
+        enemyAttackablePoints[0].sizeDelta = pointSize;
+        for (int i = 0; i < attackablePoints.Length; i++)
+        {
+            enemyAttackablePoints[i + 1].gameObject.SetActive(true);
+            float x = 0; float y = 0;
+            if (attackablePoints[i].x > 0) x = (attackablePoints[i].x * 2 - 1) * pointsMove;
+            else if (attackablePoints[i].x < 0) x = (attackablePoints[i].x * 2 + 1) * pointsMove;
+            if (attackablePoints[i].y > 0) y = (attackablePoints[i].y * 2 - 1) * pointsMove;
+            else if (attackablePoints[i].y < 0) y = (attackablePoints[i].y * 2 + 1) * pointsMove;
+            enemyAttackablePoints[i + 1].anchoredPosition = new Vector2(attackablePoints[i].x * pointsMove, attackablePoints[i].y * pointsMove);
+            enemyAttackablePoints[i + 1].sizeDelta = pointSize;
+        }
+    }
+    public void PassiveEnemyInfoUI()
+    {
+        enemyActionInfoPanel.gameObject.SetActive(false);
+    }
 
     //턴 종료 시 호출
     public void PlayerTurnEnd()

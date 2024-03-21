@@ -153,9 +153,13 @@ public class GameManager : MonoBehaviour
                 Vector2 clickPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 RaycastHit2D hit = Physics2D.Raycast(clickPosition, Vector3.forward, 15f, LayerMask.GetMask("Token"));
 
-                if(hit.collider != null && hit.collider.gameObject.tag == "Enemy")
+                if (hit.collider != null && hit.collider.gameObject.tag == "Enemy")
                 {
                     hit.collider.gameObject.GetComponent<Enemy>().EnemyActionInfo();
+                }
+                else
+                {
+                    uiManager.PassiveEnemyInfoUI();
                 }
             }
         }

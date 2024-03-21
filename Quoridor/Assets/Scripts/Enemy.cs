@@ -338,7 +338,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     public void EnemyActionInfo()
     {
-        uiManager.ActiveEnemyActionInfo(moveablePoints, attackablePoints, GetComponent<SpriteRenderer>().color);
+        uiManager.ActiveEnemyInfoUI(transform.position, moveablePoints, attackablePoints);
     }
     // 매 턴마다 실행되는 함수 (사용처 : 디버프 턴 감소용) - 동현
     public void UpdateTurn()
