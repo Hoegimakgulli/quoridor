@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5581598338399416647}
   - component: {fileID: 1926252396808079753}
-  - component: {fileID: 6911122282121737944}
   m_Layer: 7
   m_Name: AreaDumpAbility
   m_TagString: PlayerDump
@@ -51,19 +50,3 @@ MonoBehaviour:
   areaPositionList: []
   canPenetrate: 0
   sprite: {fileID: 3087686276284275909, guid: fdb76e0e7967b3f40b8a7c64b3951562, type: 3}
---- !u!58 &6911122282121737944
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6874680110816137150}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Radius: 0.5

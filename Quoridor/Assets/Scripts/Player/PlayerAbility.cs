@@ -644,10 +644,10 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             Vector2Int newGridPosition = GameManager.playerGridPosition + new Vector2Int(0, -2);
-            if (thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(newGridPosition)) != null)
+            if (EnemyManager.GetEnemyObject(GameManager.ChangeCoord(newGridPosition)) != null)
             {
                 newGridPosition = GameManager.playerGridPosition + new Vector2Int(0, -1);
-                if (thisScript.enemyManager.GetEnemyObject(GameManager.ChangeCoord(newGridPosition)) != null) newGridPosition = GameManager.playerGridPosition;
+                if (EnemyManager.GetEnemyObject(GameManager.ChangeCoord(newGridPosition)) != null) newGridPosition = GameManager.playerGridPosition;
             }
             if (newGridPosition.y < -4) newGridPosition.y = -4;
             thisScript.transform.position = GameManager.ChangeCoord(newGridPosition);
@@ -768,7 +768,7 @@ public class PlayerAbility : MonoBehaviour
                 if (dist > Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position) && thisScript.targetEnemy.transform.position != enemysPos.position)
                 {
                     dist = Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position);
-                    enemyObj = thisScript.enemyManager.GetEnemyObject(enemysPos.position);
+                    enemyObj = EnemyManager.GetEnemyObject(enemysPos.position);
                     enemyValue = enemysPos;
                 }
             }
@@ -832,7 +832,7 @@ public class PlayerAbility : MonoBehaviour
             for (int i = 0; i < exploablePosition.Count; i++)
             {
                 Vector3 explosionPos = thisScript.targetEnemy.transform.position + ((Vector3)exploablePosition[i] * GameManager.gridSize);
-                GameObject enemyObj = thisScript.enemyManager.GetEnemyObject(explosionPos);
+                GameObject enemyObj = EnemyManager.GetEnemyObject(explosionPos);
                 if (enemyObj) // 만약 폭발 지점에 적이 존재했을 경우
                 {
                     enemyObj.transform.GetComponent<Enemy>().AttackedEnemy(1);
@@ -879,7 +879,7 @@ public class PlayerAbility : MonoBehaviour
 
 
             // 실행 코드
-            GameObject enemyBackTarget = thisScript.enemyManager.GetEnemyObject(thisScript.targetEnemy.transform.position + new Vector3(0, 1.3f, 0));
+            GameObject enemyBackTarget = EnemyManager.GetEnemyObject(thisScript.targetEnemy.transform.position + new Vector3(0, 1.3f, 0));
             if (!enemyBackTarget) // 처치된 적 뒤에 아무런 유닛도 없을 경우
             {
                 return false;
@@ -1469,7 +1469,8 @@ public class PlayerAbility : MonoBehaviour
             new Vector2Int(-1, -1), new Vector2Int(-1, -2), new Vector2Int(-2, -1),new Vector2Int(-2, -2)
         };
         private List<Vector2Int> mAttackScale = new List<Vector2Int>(){ // 능력이 퍼짐 거리인데 추후 벽에 막힘에 따라 범위가 설정되어야 하므로 0,0 초기값 설정
-            new Vector2Int(0, 0)
+            new Vector2Int(0, 0), new Vector2Int(-1, 0), new Vector2Int(-1, 1), new Vector2Int(0, 1), new Vector2Int(1, 1),
+            new Vector2Int(1, 0), new Vector2Int(1, -1), new Vector2Int(0, -1), new Vector2Int(-1, -1)
         };
         private bool[] bCanPenetrate = new bool[2] { true, false }; // 엑티브 능력 중 설치 지속에 해당하는 배열을 가진건 알겠는데 각각 뭘 뜻하는지 잘 모르겠음
         private Vector2Int mTargetPos;
@@ -1489,7 +1490,7 @@ public class PlayerAbility : MonoBehaviour
         public EAbilityType abilityType { get { return mAbilityType; } }
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
-        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); ; }; } }
+        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); ; }; } } // 들어가자마자 공격받고 사망할 시 그대로 장판 삭제와 함께 끝남
         public StayEvent stayEvent { get { return (Enemy enemy) => { }; } }
         public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
@@ -2012,14 +2013,14 @@ public class PlayerAbility : MonoBehaviour
             {
                 if (result[1])
                 {
-                    thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
+                    EnemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
                     return false;
                 }
                 if (thisScript.targetEnemy.name.Contains("EnemyShieldSoldier"))
                 {
                     if (!Physics2D.RaycastAll(thisScript.targetEnemy.transform.position, Vector2.up, GameManager.gridSize, LayerMask.GetMask("Wall")).Any(h => h.transform.name.Contains("PlayerWall")))
                     {
-                        thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
+                        EnemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
                         return false;
                     }
                 }
@@ -2083,7 +2084,7 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             // 피격받은 적 오브젝트 행동력 3 감소
-            thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).moveCtrl -= 3;
+            EnemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).moveCtrl -= 3;
             thisScript.targetEnemy.GetComponent<Enemy>().moveCtrl[1] -= 3;
             return false;
         }

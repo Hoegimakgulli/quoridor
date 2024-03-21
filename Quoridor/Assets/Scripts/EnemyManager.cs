@@ -506,9 +506,9 @@ public class EnemyManager : MonoBehaviour
         if (enemyBox != null) Destroy(enemyBox);
         enemyBox = Instantiate(enemyBoxPrefab);
     }
-    public GameObject GetEnemyObject(Vector3 position, bool shouldLog = true)
+    static public GameObject GetEnemyObject(Vector3 position, bool shouldLog = true)
     {
-        foreach (Transform child in enemyBox.transform)
+        foreach (Transform child in GameObject.FindWithTag("EnemyBox").transform)
         {
             // Debug.Log(child.position);
             if (child.position == position)
@@ -519,7 +519,7 @@ public class EnemyManager : MonoBehaviour
         if (shouldLog) Debug.LogError("EnemyManager error : 어떤 Enemy 오브젝트를 찾지 못했습니다.");
         return null;
     }
-    public EnemyValues GetEnemyValues(Vector3 position, bool shouldLog = true)
+    static public EnemyValues GetEnemyValues(Vector3 position, bool shouldLog = true)
     {
         foreach (EnemyValues child in GameManager.enemyValueList)
         {
