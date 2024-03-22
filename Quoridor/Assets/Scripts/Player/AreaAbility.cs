@@ -23,16 +23,21 @@ public class AreaAbility : MonoBehaviour
     public GameObject sprite;
 
     int tempTurn;
+    GameManager gameManager;
     EnemyManager enemyManager;
     Player player;
     List<BoxCollider2D> boxColliderList = new List<BoxCollider2D>();
     List<GameObject> areaObjectList = new List<GameObject>();
+
+    public int enemyCount;
+    public int counter;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         tempTurn = GameManager.Turn;
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
         enemyManager = GameObject.Find("GameManager").GetComponent<EnemyManager>();
+        gameManager = enemyManager.gameObject.GetComponent<GameManager>();
     }
 
     // Update is called once per frame
@@ -57,15 +62,22 @@ public class AreaAbility : MonoBehaviour
                 areaObjectList[i].SetActive(false);
             }
         }
-        if (GameManager.Turn % 2 == Player.playerOrder && tempTurn != GameManager.Turn)
+        if (tempTurn != GameManager.Turn)
         {
             tempTurn = GameManager.Turn;
-            if (lifeType == ELifeType.Turn)
+            if (GameManager.Turn % 2 == Player.playerOrder)
             {
-                if (--life == 0)
+                if (lifeType == ELifeType.Turn)
                 {
-                    OnAbilityDisable();
+                    if (--life == 0)
+                    {
+                        OnAbilityDisable();
+                    }
                 }
+            }
+            else
+            {
+                counter = 0;
             }
         }
     }
@@ -87,6 +99,7 @@ public class AreaAbility : MonoBehaviour
             transform.tag = "PlayerDummy";
             gameObject.layer = LayerMask.NameToLayer("Token");
         }
+        gameManager.areaAbilityList.Add(this);
     }
     void OnAbilityDisable()
     {
@@ -105,6 +118,7 @@ public class AreaAbility : MonoBehaviour
         if (other.tag == "Enemy")
         {
             enterEvent(other.GetComponent<Enemy>());
+            enemyCount++;
             if (lifeType == ELifeType.Count)
             {
                 if (--life == 0)
@@ -116,10 +130,22 @@ public class AreaAbility : MonoBehaviour
     }
     private void OnTriggerStay2D(Collider2D other)
     {
-        if (other.tag == "Enemy") stayEvent(other.GetComponent<Enemy>());
+        if (other.tag == "Enemy")
+        {
+            if (!targetList.Contains(other.gameObject)) targetList.Add(other.gameObject);
+            if (counter < enemyCount)
+            {
+                stayEvent(other.GetComponent<Enemy>());
+                counter++;
+            }
+        }
     }
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.tag == "Enemy") exitEvent(other.GetComponent<Enemy>());
+        if (other.tag == "Enemy")
+        {
+            exitEvent(other.GetComponent<Enemy>());
+            enemyCount--;
+        }
     }
 }
