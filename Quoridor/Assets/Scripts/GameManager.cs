@@ -6,14 +6,27 @@ using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 #endif
 using UnityEngine;
+using static Player;
 
 public class EnemyValues
 {
     private Vector3 mPosition; // position
+    private int mMoveCtrl; // moveCtrl
 
     public int hp; // 유닛 hp
     public int maxHp; // 유닛 최대 hp
-    public int moveCtrl; // 실시간 행동력 체크
+    public int moveCtrl {
+        get
+        {
+            return mMoveCtrl;
+        }
+
+        set 
+        {
+            GameObject correctEnemy = EnemyManager.GetEnemyObject(mPosition);
+            correctEnemy.GetComponent<Enemy>().moveCtrl[1] = value;
+        } 
+    }
     public int maxMoveCtrl; // 유닛이 가질 수 있는 최대 행동력
     public int uniqueNum; // 어떤 유닛을 생성할지 정하는 번호
     public int index; // 생성 순서, EnemyBox 내 Index
@@ -76,6 +89,11 @@ public class GameManager : MonoBehaviour
     public PlayerCharacters playerCharacters;
 
     public GameObject autoTrap;
+
+    public bool canEnemyTurn = false;
+
+    public List<AreaAbility> areaAbilityList = new List<AreaAbility>();
+    public int tempTurn;
 
     void Awake()
     {
@@ -146,61 +164,55 @@ public class GameManager : MonoBehaviour
     }
     void Update()
     {
-        // if (Input.GetKeyDown(KeyCode.Z)) //디버그용. 적 1명 데미지1
-        // {
-        //     EnemyManager em = GetComponent<EnemyManager>();
-        //     for (int i = 0; i < 1; i++)
-        //     {
-        //         Debug.Log("이름" + em.GetEnemyObject(i).name);
-        //         em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
-        //     }
-        // }
-        // if (Input.GetKeyDown(KeyCode.X)) //디버그용. 적 2명 데미지1
-        // {
-        //     EnemyManager em = GetComponent<EnemyManager>();
-        //     for (int i = 0; i < 2; i++)
-        //     {
-        //         Debug.Log("이름" + em.GetEnemyObject(i).name);
-        //         em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
-        //     }
-        // }
-        // if (Input.GetKeyDown(KeyCode.C)) //디버그용. 적 3명 데미지1
-        // {
-        //     EnemyManager em = GetComponent<EnemyManager>();
-        //     for (int i = 0; i < 3; i++)
-        //     {
-        //         Debug.Log("이름" + em.GetEnemyObject(i).name);
-        //         em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
-        //     }
-        // }
-        // if (Input.GetKeyDown(KeyCode.V)) //디버그용. 적 4명 데미지1
-        // {
-        //     EnemyManager em = GetComponent<EnemyManager>();
-        //     for (int i = 0; i < 4; i++)
-        //     {
-        //         Debug.Log("이름" + em.GetEnemyObject(i).name);
-        //         em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
-        //     }
-        // }
-        // if (Input.GetKeyDown(KeyCode.B)) //디버그용. 적 5명 데미지1
-        // {
-        //     EnemyManager em = GetComponent<EnemyManager>();
-        //     for (int i = 0; i < 5; i++)
-        //     {
-        //         Debug.Log("이름" + em.GetEnemyObject(i).name);
-        //         em.GetEnemyObject(i).GetComponent<Enemy>().AttackedEnemy(1);
-        //     }
-        // }
-        if (Input.GetKeyDown(KeyCode.B)) //디버그용. 적 5명 데미지1
+        if (playerControlStatus == EPlayerControlStatus.None)
+        {
+            if (player.GetComponent<Player>().touchState == ETouchState.Began)
+            {
+                Vector2 clickPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                RaycastHit2D hit = Physics2D.Raycast(player.GetComponent<Player>().touchPosition, Vector3.forward, 15f, LayerMask.GetMask("Token"));
+
+                if (hit.collider != null && hit.collider.gameObject.tag == "Enemy")
+                {
+                    hit.collider.gameObject.GetComponent<Enemy>().EnemyActionInfo();
+                }
+                else
+                {
+                    uiManager.PassiveEnemyInfoUI();
+                }
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.B))
         {
             EnemyManager em = GetComponent<EnemyManager>();
             em.GetEnemyObject(0).transform.position += new Vector3(0, -1, 0);
             Debug.Log(enemyValueList[0].position);
         }
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            for (int i = 0; i < enemyValueList.Count; i++)
+            {
+                enemyValueList[i].position = ChangeCoord(new Vector2Int(0, 4 - i));
+            }
+        }
 
         if (Turn % 2 == 0 && Input.GetKey(KeyCode.Space)) //[디버그용] space 키를 통해 적턴 넘기기
         {
             Turn++;
+        }
+        if (Turn % 2 != Player.playerOrder)
+        {
+            if (tempTurn != Turn)
+            {
+                canEnemyTurn = false;
+                tempTurn = Turn;
+            }
+            bool tempBool = true;
+            for (int i = 0; i < areaAbilityList.Count; i++)
+            {
+                tempBool = tempBool && (areaAbilityList[i].counter == 0);
+            }
+            canEnemyTurn = tempBool;
         }
 
         if (Input.GetKeyDown(KeyCode.D)) DebugMap();

@@ -29,18 +29,22 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public ECharacteristic characteristic = ECharacteristic.Forward;
     public EValue value = EValue.Normal;
     public bool ShieldTrue = false; // 방패병 한정 변수
+    public Vector2 moveBeforePos;
 
+    public bool hasStayEvent = false;
+
+    private bool isPlayer = true;
 
     //--------------- Move 시작 ---------------//
     // 모든 enemy 객체 동시에 움직임 실시
-    public void EnemyMove(List<Path> path)
+    public void EnemyMove(List<Path> path, bool isPlayer)
     {
         // enemy가 Move 상태일 때 유닛의 특징에 따라 움직이는 범위 조정
         if (state == EState.Move)
         {
             if (characteristic == ECharacteristic.Forward)
             {
-                GetShortRoad(path);
+                GetShortRoad(path, isPlayer);
             }
             else if (characteristic == ECharacteristic.BackWard)
             {
@@ -56,15 +60,16 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public GameManager gameManager;
 
     // A* 알고리즘
-    public void GetShortRoad(List<Path> path)
+    public void GetShortRoad(List<Path> path, bool isPlayer)
     {
-        Vector2 playerPos = GameObject.FindWithTag("Player").transform.position / GameManager.gridSize;
+        this.isPlayer = isPlayer;
+        Vector2 playerPos = (isPlayer) ? GameObject.FindWithTag("Player").transform.position / GameManager.gridSize : GameObject.FindWithTag("PlayerDummy").transform.position / GameManager.gridSize;
         if (!AttackCanEnemy())
         {
             Vector2 unitPos = transform.position / GameManager.gridSize;
             Vector2 fixPos = new Vector2(0, 0);
             unitPos = new Vector2Int(Mathf.FloorToInt(unitPos.x) + 4, Mathf.FloorToInt(unitPos.y) + 4);
-
+            EnemyValues currentEnemyValue = EnemyManager.GetEnemyValues(transform.position);
             int count;
             for (count = 1; count < path.Count; count++)
             {
@@ -75,32 +80,36 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                     Vector2 currentMovePoint = unitPos + moveablePoints[moveCount];
                     if (pathPoint == currentMovePoint && currentMovePoint != playerPos)
                     {
-                        fixPos = currentMovePoint;
+                        currentEnemyValue.position = new Vector3((currentMovePoint.x - 4) * GameManager.gridSize, (currentMovePoint.y - 4) * GameManager.gridSize, 0); // 틱마다 움직이는 함수
                         break;
                     }
                 }
-                if (moveCount == moveablePoints.Length)
+                if (moveCount == moveablePoints.Length) // 더이상 이동할 수 있는 공간이 없을 경우
                 {
+                    if (count != 1)
+                    {
+                        moveBeforePos = new Vector2(path[count - 2].x, path[count - 2].y); // 갱신되기 이전 좌표까지 이동 아마 path[0] 이 부분이 적 초기 좌표임
+                    }
                     break;
                 }
             }
 
-            if (count != 1)
-            {
-                Debug.Log("Enemy Values Count : " + GameManager.enemyValueList.Count);
-                for (int posCount = 0; posCount < GameManager.enemyValueList.Count; posCount++)
-                {
-                    Debug.Log("Enemy Move Start");
-                    if (GameManager.enemyValueList[posCount].position == transform.position)
-                    {
-                        Debug.Log("Enemy Move Check");
-                        //transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
-                        // 클래스 position 변경 시 자동으로 위치 이동 변경
-                        GameManager.enemyValueList[posCount].position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
-                        break;
-                    }
-                }
-            }
+            //if (count != 1) // 다 돌았는데 처음부터 갈 곳이 없을 경우
+            //{
+            //    Debug.Log("Enemy Values Count : " + GameManager.enemyValueList.Count);
+            //    for (int posCount = 0; posCount < GameManager.enemyValueList.Count; posCount++)
+            //    {
+            //        Debug.Log("Enemy Move Start");
+            //        if (GameManager.enemyValueList[posCount].position == transform.position)
+            //        {
+            //            Debug.Log("Enemy Move Check");
+            //            //transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+            //            // 클래스 position 변경 시 자동으로 위치 이동 변경
+            //            GameManager.enemyValueList[posCount].position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+            //            break;
+            //        }
+            //    }
+            //}
 
 
             if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
@@ -140,6 +149,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     // Attack 받았을 때 실행하는 함수
     public bool AttackedEnemy(int playerAtk)
     {
+        Debug.Log(GetComponent<SpriteRenderer>().color);
         int originHP = hp;
         hp -= playerAtk;
 
@@ -229,15 +239,22 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     {
         if (AttackCanEnemy() && state == EState.Attack)
         {
-            Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
+            Vector2 playerPos = (isPlayer) ? GameObject.FindGameObjectWithTag("Player").transform.position : GameObject.FindGameObjectWithTag("PlayerDummy").transform.position;
             RaycastHit2D hitWall = Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, GameManager.gridSize * Math.Abs((playerPos - (Vector2)transform.position).magnitude), LayerMask.GetMask("Wall")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Wall").FirstOrDefault();
-            RaycastHit2D hit = Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Player").FirstOrDefault(); ; // enemy 위치에서 player까지 ray쏘기
+            RaycastHit2D hit =
+                (isPlayer) ? Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "Player").FirstOrDefault() :
+                Physics2D.RaycastAll(transform.position, playerPos - (Vector2)transform.position, 15f, LayerMask.GetMask("Token")).OrderBy(h => h.distance).Where(h => h.transform.tag == "PlayerDummy").FirstOrDefault(); // enemy 위치에서 player까지 ray쏘기
 
             if (!hitWall)
             {
-                if (hit.transform.tag == "Player") // 닿은 ray가 Player 태그를 가지고 있다면
+                if (hit.transform.tag == "Player" && isPlayer) // 닿은 ray가 Player 태그를 가지고 있다면
                 {
                     hit.transform.GetComponent<Player>().Die();
+                }
+
+                if (hit.transform.tag == "PlayerDummy" && !isPlayer)
+                {
+                    Destroy(hit.transform.gameObject);
                 }
             }
         }
@@ -252,13 +269,12 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         if (debuffs[EDebuff.CantAttack] > 0) return false;
         int attackCount;
         Vector2 currentAttackPoint;
-        Vector2 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position / GameManager.gridSize;
+        Vector2 playerPos = (isPlayer) ? GameObject.FindGameObjectWithTag("Player").transform.position / GameManager.gridSize : GameObject.FindGameObjectWithTag("PlayerDummy").transform.position / GameManager.gridSize; ;
         playerPos = new Vector2Int(Mathf.FloorToInt(playerPos.x), Mathf.FloorToInt(playerPos.y));
         Vector2 enemyPos = transform.position / GameManager.gridSize;
         enemyPos = new Vector2Int(Mathf.FloorToInt(enemyPos.x), Mathf.FloorToInt(enemyPos.y));
 
-
-        Vector2 playerPosT = GameObject.FindGameObjectWithTag("Player").transform.position;
+        Vector2 playerPosT = (isPlayer) ? GameObject.FindGameObjectWithTag("Player").transform.position : GameObject.FindGameObjectWithTag("PlayerDummy").transform.position;
         RaycastHit2D hitWall = Physics2D.Raycast(transform.position, playerPosT - (Vector2)transform.position, GameManager.gridSize * Math.Abs((playerPosT - (Vector2)transform.position).magnitude), LayerMask.GetMask("Wall"));
 
         if (!hitWall)
@@ -285,6 +301,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     public void Start()
     {
+        moveBeforePos = transform.position / GameManager.gridSize; // 초기 문제 생각
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         uiManager = GameObject.Find("GameManager").GetComponent<UiManager>();
         Material tmpObj = Instantiate(fadeObj, transform.position, Quaternion.identity, transform).GetComponent<SpriteRenderer>().material;
@@ -300,6 +317,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         shakeSequence.Append(tmpObj.DOFade(1f, 1).SetEase(Ease.Linear));
         shakeSequence.Append(tmpObj.DOFade(0, 1).SetEase(Ease.Linear));
         //shakeSequence.Append(tmpObj.DOFade(1f, 1).SetEase(Ease.Linear));
+
     }
 
     public void Update()
@@ -313,6 +331,12 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         {
             Debug.Log($"{transform.name} : (CantAttack, {debuffs[EDebuff.CantAttack]}), (CantMove, {debuffs[EDebuff.CantMove]}), (Sleep, {debuffs[EDebuff.Sleep]})");
         }
+    }
+
+    // EnterEvent 콜백함수 불러 올때 실행하는 함수
+    public void MoveSlide()
+    {
+        
     }
 
     IEnumerator ShakeTokenAction()
@@ -332,6 +356,11 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             highlightSPR.DOFade(0, fadeTime);
             yield return new WaitForSeconds(fadeTime);
         }
+    }
+
+    public void EnemyActionInfo()
+    {
+        uiManager.ActiveEnemyInfoUI(transform.position, moveablePoints, attackablePoints, GetComponent<SpriteRenderer>().color);
     }
     // 매 턴마다 실행되는 함수 (사용처 : 디버프 턴 감소용) - 동현
     public void UpdateTurn()
