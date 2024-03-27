@@ -769,7 +769,7 @@ public class PlayerAbility : MonoBehaviour
                 if (dist > Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position) && thisScript.targetEnemy.transform.position != enemysPos.position)
                 {
                     dist = Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position);
-                    enemyObj = thisScript.enemyManager.GetEnemyObject(enemysPos.position);
+                    enemyObj = EnemyManager.GetEnemyObject(enemysPos.position);
                     enemyValue = enemysPos;
                 }
             }
@@ -833,7 +833,7 @@ public class PlayerAbility : MonoBehaviour
             for (int i = 0; i < exploablePosition.Count; i++)
             {
                 Vector3 explosionPos = thisScript.targetEnemy.transform.position + ((Vector3)exploablePosition[i] * GameManager.gridSize);
-                GameObject enemyObj = thisScript.enemyManager.GetEnemyObject(explosionPos);
+                GameObject enemyObj = EnemyManager.GetEnemyObject(explosionPos);
                 if (enemyObj) // 만약 폭발 지점에 적이 존재했을 경우
                 {
                     enemyObj.transform.GetComponent<Enemy>().AttackedEnemy(1);
@@ -880,7 +880,7 @@ public class PlayerAbility : MonoBehaviour
 
 
             // 실행 코드
-            GameObject enemyBackTarget = thisScript.enemyManager.GetEnemyObject(thisScript.targetEnemy.transform.position + new Vector3(0, 1.3f, 0));
+            GameObject enemyBackTarget = EnemyManager.GetEnemyObject(thisScript.targetEnemy.transform.position + new Vector3(0, 1.3f, 0));
             if (!enemyBackTarget) // 처치된 적 뒤에 아무런 유닛도 없을 경우
             {
                 return false;
@@ -2013,14 +2013,14 @@ public class PlayerAbility : MonoBehaviour
             {
                 if (result[1])
                 {
-                    thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
+                    EnemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
                     return false;
                 }
                 if (thisScript.targetEnemy.name.Contains("EnemyShieldSoldier"))
                 {
                     if (!Physics2D.RaycastAll(thisScript.targetEnemy.transform.position, Vector2.up, GameManager.gridSize, LayerMask.GetMask("Wall")).Any(h => h.transform.name.Contains("PlayerWall")))
                     {
-                        thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
+                        EnemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
                         return false;
                     }
                 }
@@ -2084,7 +2084,7 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             // 피격받은 적 오브젝트 행동력 3 감소
-            thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).moveCtrl -= 3;
+            EnemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).moveCtrl -= 3;
             thisScript.targetEnemy.GetComponent<Enemy>().moveCtrl[1] -= 3;
             return false;
         }

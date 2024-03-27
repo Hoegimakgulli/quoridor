@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8153990614069101066}
   - component: {fileID: 1664343263}
   - component: {fileID: 1874758035}
+  - component: {fileID: 2629204232659240651}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -55,6 +56,9 @@ MonoBehaviour:
   uiManager: {fileID: 0}
   playerCharacters: {fileID: 6786839763304644929, guid: 3e6891d2695acba42bc360431bc03880, type: 3}
   autoTrap: {fileID: 3087686276284275909, guid: 0ef4fc4c3112d2e42bbdadb07c5baaea, type: 3}
+  canEnemyTurn: 0
+  areaAbilityList: []
+  tempTurn: 0
 --- !u!114 &6551029922462568091
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -154,3 +158,17 @@ MonoBehaviour:
   popDuring: 0.2
   playerAbility: {fileID: 0}
   gameManager: {fileID: 0}
+--- !u!114 &2629204232659240651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6551029922462568088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7942839227d1e554c8dec4f9cb98cf7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiMoveSpeed: 0.2
+  uiWaitMoveTime: 0.1

@@ -57,7 +57,7 @@ public class EnemyValues
     public EnemyValues(int hp, int moveCtrl, int uniqueNum, int index, Vector3 position)
     {
         this.hp = hp;
-        this.moveCtrl = moveCtrl;
+        mMoveCtrl = moveCtrl;
         this.uniqueNum = uniqueNum;
         this.index = index;
         mPosition = position;
