@@ -45,7 +45,7 @@ public class AblityTrap : MonoBehaviour
             Enemy enemyPushTrap = collision.transform.GetComponent<Enemy>();
             // 밟은 적 행동력 감소
             enemyPushTrap.moveCtrl[1] -= 3;
-            EnemyManager.GetEnemyValues(transform.position).moveCtrl -= 3;
+            enemyManager.GetEnemyValues(transform.position).moveCtrl -= 3;
             collision.transform.GetComponent<Enemy>().AttackedEnemy(1); // 자동 덫에 밟은 적은 데미지 제공
         }
     }
