@@ -78,11 +78,6 @@ public class GameManager : MonoBehaviour
 
     public GameObject autoTrap;
 
-    public bool canEnemyTurn = false;
-
-    public List<AreaAbility> areaAbilityList = new List<AreaAbility>();
-    public int tempTurn;
-
     void Awake()
     {
         Turn = 1; // 턴 초기화
@@ -187,20 +182,6 @@ public class GameManager : MonoBehaviour
         if (Turn % 2 == 0 && Input.GetKey(KeyCode.Space)) //[디버그용] space 키를 통해 적턴 넘기기
         {
             Turn++;
-        }
-        if (Turn % 2 != Player.playerOrder)
-        {
-            if (tempTurn != Turn)
-            {
-                canEnemyTurn = false;
-                tempTurn = Turn;
-            }
-            bool tempBool = true;
-            for (int i = 0; i < areaAbilityList.Count; i++)
-            {
-                tempBool = tempBool && (areaAbilityList[i].counter == 0);
-            }
-            canEnemyTurn = tempBool;
         }
 
         if (Input.GetKeyDown(KeyCode.D)) DebugMap();

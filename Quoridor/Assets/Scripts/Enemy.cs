@@ -30,8 +30,6 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public EValue value = EValue.Normal;
     public bool ShieldTrue = false; // 방패병 한정 변수
 
-    public bool hasStayEvent = false;
-
     private bool isPlayer = true;
 
     //--------------- Move 시작 ---------------//

@@ -396,7 +396,6 @@ public class EnemyManager : MonoBehaviour
     {
         //yield return new WaitForSeconds(0.01f);
         //MoveCtrlUpdate();
-        yield return new WaitUntil(() => gameManager.canEnemyTurn);
         yield return StartCoroutine(MoveCtrlUpdateCoroutine());
         UiManager uiManager = GetComponent<UiManager>();
         //while (uiManager.)
