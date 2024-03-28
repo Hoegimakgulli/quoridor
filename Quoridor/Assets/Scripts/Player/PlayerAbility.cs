@@ -369,7 +369,7 @@ public class PlayerAbility : MonoBehaviour
         player.abilityCount = abilities.Count(ability => ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive);
         needSave = true;
     }
-    public AreaAbility SetAreaAbility(AreaAbility.ELifeType lifeType, int life, Vector2Int targetPos, List<Vector2Int> areaPositionList, bool canPenetrate, EnterEvent enterEvent, StayEvent stayEvent, ExitEvent exitEvent)
+    public AreaAbility SetAreaAbility(AreaAbility.ELifeType lifeType, int life, Vector2Int targetPos, List<Vector2Int> areaPositionList, bool canPenetrate, EnterEvent enterEvent, ExitEvent exitEvent)
     {
         GameObject areaAbilityObject = Instantiate(abilityPrefabs.AreaAbilityPrefab, GameManager.ChangeCoord(targetPos), Quaternion.identity);
         AreaAbility areaAbility = areaAbilityObject.GetComponent<AreaAbility>();
@@ -378,7 +378,6 @@ public class PlayerAbility : MonoBehaviour
         areaAbility.areaPositionList = areaPositionList;
         areaAbility.canPenetrate = canPenetrate;
         areaAbility.enterEvent = enterEvent;
-        areaAbility.stayEvent = stayEvent;
         areaAbility.exitEvent = exitEvent;
         areaAbility.SetUp();
         return areaAbility;
@@ -971,14 +970,13 @@ public class PlayerAbility : MonoBehaviour
         public EAbilityType abilityType { get { return mAbilityType; } }
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
-        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.debuffs[Enemy.EDebuff.CantAttack] = 1; }; } }
-        public StayEvent stayEvent { get { return (Enemy enemy) => { enemy.debuffs[Enemy.EDebuff.CantAttack] = 1; }; } }
+        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.debuffs[Enemy.EDebuff.CantAttack] = 99; }; } }
         public ExitEvent exitEvent { get { return (Enemy enemy) => { enemy.debuffs[Enemy.EDebuff.CantAttack] = 0; }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
             // mAreaAbilityList.Add(new AreaAbility(2, targetPos));
-            thisScript.SetAreaAbility(AreaAbility.ELifeType.Turn, 2, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            thisScript.SetAreaAbility(AreaAbility.ELifeType.Turn, 2, targetPos, attackScale, canPenetrate[1], enterEvent, exitEvent);
             canEvent = false;
             mCount--;
             tempTurn = GameManager.Turn;
@@ -1038,15 +1036,24 @@ public class PlayerAbility : MonoBehaviour
         public EAbilityType abilityType { get { return mAbilityType; } }
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
-        public EnterEvent enterEvent { get { return (Enemy enemy) => { EnemyManager.GetEnemyValues(enemy.transform.position).moveCtrl -= 2; }; } }
-        public StayEvent stayEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); }; } }
-        public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
+        public EnterEvent enterEvent
+        {
+            get
+            {
+                return (Enemy enemy) =>
+                {
+                    EnemyManager.GetEnemyValues(enemy.transform.position).moveCtrl -= 2;
+                    enemy.debuffs[Enemy.EDebuff.Poison] = mValue;
+                };
+            }
+        }
+        public ExitEvent exitEvent { get { return (Enemy enemy) => { enemy.debuffs[Enemy.EDebuff.Poison] = 0; }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
             mValue = 1 + thisScript.additionalAbilityStat.throwingDamage;
             // mAreaAbilityList.Add(new AreaAbility(2, targetPos));
-            thisScript.SetAreaAbility(AreaAbility.ELifeType.Turn, 2, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            thisScript.SetAreaAbility(AreaAbility.ELifeType.Turn, 2, targetPos, attackScale, canPenetrate[1], enterEvent, exitEvent);
             canEvent = false;
             mCount--;
             tempTurn = GameManager.Turn;
@@ -1105,14 +1112,13 @@ public class PlayerAbility : MonoBehaviour
         public EAbilityType abilityType { get { return mAbilityType; } }
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
-        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); ; }; } }
-        public StayEvent stayEvent { get { return (Enemy enemy) => { }; } }
+        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); }; } }
         public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
             mValue = 2 + thisScript.additionalAbilityStat.throwingDamage;
-            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, exitEvent);
             mCount--;
             canEvent = false;
             tempTurn = GameManager.Turn;
@@ -1355,7 +1361,6 @@ public class PlayerAbility : MonoBehaviour
                 };
             }
         }
-        public StayEvent stayEvent { get { return (Enemy enemy) => { }; } }
         public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
         {
@@ -1363,7 +1368,7 @@ public class PlayerAbility : MonoBehaviour
             if (moveCount >= 5)
             {
                 // Instantiate(thisScript.gameManager.autoTrap, playerBeforePos.position, Quaternion.identity); // 덫 설치용
-                thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, GameManager.ChangeCoord(playerBeforePos), new List<Vector2Int>() { Vector2Int.zero }, true, enterEvent, stayEvent, exitEvent);
+                thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, GameManager.ChangeCoord(playerBeforePos), new List<Vector2Int>() { Vector2Int.zero }, true, enterEvent, exitEvent);
                 moveCount = 1; // player 움직인 누적 횟수 초기화
             }
             else
@@ -1417,13 +1422,12 @@ public class PlayerAbility : MonoBehaviour
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); ; }; } }
-        public StayEvent stayEvent { get { return (Enemy enemy) => { }; } }
         public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
         {
             // Debug.Log($"{targetPos}");
             mValue = 2 + thisScript.additionalAbilityStat.placeDamage;
-            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, exitEvent);
             mCount--;
             canEvent = false;
             return false;
@@ -1481,13 +1485,12 @@ public class PlayerAbility : MonoBehaviour
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); ; }; } }
-        public StayEvent stayEvent { get { return (Enemy enemy) => { }; } }
         public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
             mValue = 1 + thisScript.additionalAbilityStat.placeDamage; // 초기 데미지 1 + 데미지 증가 능력을 골랐을 때 더해줌
-            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, exitEvent);
             mCount--;
             canEvent = false;
             return false;
@@ -1668,12 +1671,11 @@ public class PlayerAbility : MonoBehaviour
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public EnterEvent enterEvent { get { return (Enemy enemy) => { }; } }
-        public StayEvent stayEvent { get { return (Enemy enemy) => { }; } }
         public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
-            thisScript.SetAreaAbility(AreaAbility.ELifeType.Dummy, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            thisScript.SetAreaAbility(AreaAbility.ELifeType.Dummy, 1, targetPos, attackScale, canPenetrate[1], enterEvent, exitEvent);
             mCount--;
             canEvent = false;
             return false;
@@ -1724,14 +1726,13 @@ public class PlayerAbility : MonoBehaviour
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); }; } }
-        public StayEvent stayEvent { get { return (Enemy enemy) => { }; } }
         public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
             canEvent = false;
 
-            AreaAbility areaAbility = thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            AreaAbility areaAbility = thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, exitEvent);
             BoxCollider2D[] boxColliders = areaAbility.transform.GetComponents<BoxCollider2D>().Where(boxCollider => boxCollider.enabled).ToArray();
             int[] randomIndex = new int[5];
             if (boxColliders.Length >= 5)
@@ -1788,14 +1789,13 @@ public class PlayerAbility : MonoBehaviour
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); }; } }
-        public StayEvent stayEvent { get { return (Enemy enemy) => { }; } }
         public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
             canEvent = false;
 
-            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, exitEvent);
 
 
             return false;
@@ -1837,14 +1837,13 @@ public class PlayerAbility : MonoBehaviour
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); }; } }
-        public StayEvent stayEvent { get { return (Enemy enemy) => { }; } }
         public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
             canEvent = false;
 
-            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, exitEvent);
 
             return false;
         }

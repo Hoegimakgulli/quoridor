@@ -72,7 +72,7 @@ public class EnemyManager : MonoBehaviour
         }
 
         // 적 턴일때 (이동 및 공격확인)
-        if (GameManager.Turn % 2 == 0 && enemyTurnAnchor)
+        if (GameManager.Turn % 2 == 0 && enemyTurnAnchor && gameManager.canEnemyTurn)
         {
             //enemyWarningSignAnchor = true;
             enemyTurnAnchor = false;
@@ -396,11 +396,9 @@ public class EnemyManager : MonoBehaviour
     {
         //yield return new WaitForSeconds(0.01f);
         //MoveCtrlUpdate();
-        gameManager.canEnemyTurn = false;
-        yield return new WaitUntil(() => gameManager.canEnemyTurn);
+
         yield return StartCoroutine(MoveCtrlUpdateCoroutine());
         UiManager uiManager = GetComponent<UiManager>();
-        gameManager.canEnemyTurn = false;
         //while (uiManager.)
         //enemyTurnAnchor = true;
     }

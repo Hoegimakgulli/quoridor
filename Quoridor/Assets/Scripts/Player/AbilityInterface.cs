@@ -28,7 +28,6 @@ public interface IActiveAbility  // 액티브 능력 인터페이스
 public interface IAreaAbility // 지속&배치형 능력 인터페이스
 {
     EnterEvent enterEvent { get; } // Enter 이벤트
-    StayEvent stayEvent { get; }   // Stay 이벤트
     ExitEvent exitEvent { get; }   // Exit 이벤트
 }
 // public class AreaAbility // 지속형 능력 class

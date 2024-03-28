@@ -21,8 +21,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     // 0 - 전진해 player를 공격, 1 - 뒤 포지션을 잡으면서 플레이어 공격, 2 - 자기 구역을 사수하면서 플레이어를 공격 
     // 추후 유닛 특성 상속받을 때 사용 현재 미사용.
     public enum ECharacteristic { Forward, BackWard, Hold };
-    public enum EDebuff { CantAttack, CantMove, Sleep } // 디버프 관련 enum 추가 - 동현
-    public Dictionary<EDebuff, int> debuffs = new Dictionary<EDebuff, int>() { { EDebuff.CantAttack, 0 }, { EDebuff.CantMove, 0 }, { EDebuff.Sleep, 0 } }; // 디버프를 저장하는 딕셔너리 추가 - 동현
+    public enum EDebuff { CantAttack, CantMove, Sleep, Poison } // 디버프 관련 enum 추가 - 동현
+    public Dictionary<EDebuff, int> debuffs = new Dictionary<EDebuff, int>() { { EDebuff.CantAttack, 0 }, { EDebuff.CantMove, 0 }, { EDebuff.Sleep, 0 }, { EDebuff.Poison, 0 } }; // 디버프를 저장하는 딕셔너리 추가 - 동현
     //------------------------------------------//
 
     public EState state = EState.Idle;
@@ -266,6 +266,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     public bool AttackCanEnemy()
     {
+        Debug.Log("Enemy Attack!");
         if (debuffs[EDebuff.CantAttack] > 0) return false;
         int attackCount;
         Vector2 currentAttackPoint;
@@ -329,7 +330,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         }
         if (Input.GetKeyDown(KeyCode.Backspace))
         {
-            Debug.Log($"{transform.name} : (CantAttack, {debuffs[EDebuff.CantAttack]}), (CantMove, {debuffs[EDebuff.CantMove]}), (Sleep, {debuffs[EDebuff.Sleep]})");
+            Debug.Log($"{transform.name} : (CantAttack, {debuffs[EDebuff.CantAttack]}), (CantMove, {debuffs[EDebuff.CantMove]}), (Sleep, {debuffs[EDebuff.Sleep]}), (Poison, {debuffs[EDebuff.Poison]})");
         }
     }
 
@@ -368,5 +369,6 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         debuffs[EDebuff.CantAttack] = Mathf.Max(0, debuffs[EDebuff.CantAttack] - 1);
         debuffs[EDebuff.CantMove] = Mathf.Max(0, debuffs[EDebuff.CantMove] - 1);
         if (debuffs[EDebuff.Sleep] > 0 && debuffs[EDebuff.CantMove] == 0) debuffs[EDebuff.CantMove] = 1;
+        if (debuffs[EDebuff.Poison] > 0) AttackedEnemy(debuffs[EDebuff.Poison]);
     }
 }
