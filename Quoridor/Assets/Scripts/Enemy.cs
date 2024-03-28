@@ -346,6 +346,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     // EnterEvent 콜백함수 불러 올때 실행하는 함수
     public IEnumerator MoveSlide()
     {
+        int moveCount = 0;
         EnemyValues currentMe = EnemyManager.GetEnemyValues(transform.position);
         while (slipperyJellyStart) // 만약 탈출했을 경우 slipperyJellyStart 시작
         {
@@ -364,8 +365,9 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                 {
                     moveBeforePos = transform.position;
                     currentMe.position = (Vector2)transform.position + moveDir;
+                    moveCount++;
                     yield return new WaitForSeconds(0.1f);
-                    if (!slipperyJellyStart)
+                    if(moveCount >= 3)
                     {
                         yield break;
                     }
