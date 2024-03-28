@@ -1043,6 +1043,7 @@ public class PlayerAbility : MonoBehaviour
                 return (Enemy enemy) =>
                 {
                     EnemyManager.GetEnemyValues(enemy.transform.position).moveCtrl -= 2;
+                    enemy.AttackedEnemy(mValue);
                     enemy.debuffs[Enemy.EDebuff.Poison] = mValue;
                 };
             }
