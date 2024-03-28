@@ -30,7 +30,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public EValue value = EValue.Normal;
     public bool ShieldTrue = false; // 방패병 한정 변수
 
-    public bool hasStayEvent = false;
+    // public bool hasStayEvent = false;
 
     private bool isPlayer = true;
 
@@ -326,6 +326,12 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         {
             Debug.Log($"{transform.name} : (CantAttack, {debuffs[EDebuff.CantAttack]}), (CantMove, {debuffs[EDebuff.CantMove]}), (Sleep, {debuffs[EDebuff.Sleep]})");
         }
+    }
+
+    // EnterEvent 콜백함수 불러 올때 실행하는 함수
+    public void MoveSlide()
+    {
+
     }
 
     IEnumerator ShakeTokenAction()

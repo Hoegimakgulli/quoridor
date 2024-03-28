@@ -14,7 +14,23 @@ public class EnemyValues
 
     public int hp; // 유닛 hp
     public int maxHp; // 유닛 최대 hp
-    public int moveCtrl; // 실시간 행동력 체크
+    public int moveCtrl
+    {
+        get
+        {
+            return mMoveCtrl;
+        }
+
+        set
+        {
+            // Debug.Log($"SetPreMoveCtrl : {index}: {value}");
+            value = Mathf.Max(value, 0);
+            // Debug.Log($"SetMoveCtrl : {index}: {value}");
+            Enemy correctEnemy = EnemyManager.GetEnemy(mPosition);
+            correctEnemy.moveCtrl[1] = value;
+            mMoveCtrl = value;
+        }
+    }
     public int maxMoveCtrl; // 유닛이 가질 수 있는 최대 행동력
     public int uniqueNum; // 어떤 유닛을 생성할지 정하는 번호
     public int index; // 생성 순서, EnemyBox 내 Index
@@ -45,7 +61,7 @@ public class EnemyValues
     public EnemyValues(int hp, int moveCtrl, int uniqueNum, int index, Vector3 position)
     {
         this.hp = hp;
-        this.moveCtrl = moveCtrl;
+        mMoveCtrl = moveCtrl;
         this.uniqueNum = uniqueNum;
         this.index = index;
         mPosition = position;
@@ -167,8 +183,7 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.B))
         {
-            EnemyManager em = GetComponent<EnemyManager>();
-            em.GetEnemyObject(0).transform.position += new Vector3(0, -1, 0);
+            EnemyManager.GetEnemyObject(0).transform.position += new Vector3(0, -1, 0);
             Debug.Log(enemyValueList[0].position);
         }
         if (Input.GetKeyDown(KeyCode.F))
@@ -182,6 +197,20 @@ public class GameManager : MonoBehaviour
         if (Turn % 2 == 0 && Input.GetKey(KeyCode.Space)) //[디버그용] space 키를 통해 적턴 넘기기
         {
             Turn++;
+        }
+        if (Turn % 2 != Player.playerOrder)
+        {
+            if (tempTurn != Turn)
+            {
+                canEnemyTurn = false;
+                tempTurn = Turn;
+            }
+            bool tempBool = true;
+            for (int i = 0; i < areaAbilityList.Count; i++)
+            {
+                tempBool = tempBool && areaAbilityList[i].canDone;
+            }
+            canEnemyTurn = tempBool;
         }
 
         if (Input.GetKeyDown(KeyCode.D)) DebugMap();

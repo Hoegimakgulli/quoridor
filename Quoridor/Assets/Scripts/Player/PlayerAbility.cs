@@ -122,21 +122,11 @@ public class PlayerAbility : MonoBehaviour
                 abilityButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(index * 120f + 70f, 0); //버튼 위치 설정
                 int abilityIndex = abilities.IndexOf(ability);
                 abilityButton.transform.GetChild(0).GetComponent<Text>().text = abilitiesID[abilityIndex].ToString(); //버튼의 텍스트를 버튼의 고유 아이디로
-                abilityButton.interactable = ability.canEvent; //버튼의 활성화 여부를 능력의 사용가능 여부와 동일하게
-                abilityButton.onClick.RemoveAllListeners(); //버튼의 추가 이벤트를 초기화 (버튼의 순서가 바뀌었을 수 있으므로)
-                if (ability.abilityType == EAbilityType.InstantActive) abilityButton.onClick.AddListener(() => ability.Event()); //즉발 능력일 경우, 누르는 즉시 이벤트가 작동되도록 리스너를 달아줌
-                else abilityButton.onClick.AddListener(() => TargetEvent(abilitiesID[abilityIndex])); //타겟팅 능력일 경우, 타겟 이벤트라는 함수를 실행하도록 리스너연결
-                abilityButton.GetComponent<DisposableButton>().activeCondition = (ability as IActiveAbility).activeCondition; //능력 사용 버튼에 전제조건 넣어줌
-                abilityButton.GetComponent<DisposableButton>().isAlreadyUsed = !ability.canEvent; //플레이어 능력이 이미 사용됐다면 그것도 적용시켜줌
+                abilityButton.GetComponent<DisposableButton>().activeAbility = ability as IActiveAbility;
                 index++;
             }
         }
         shouldSetUpAbilityUI = false;
-    }
-    public void TargetEvent(int abilityID)
-    {
-        player.usingAbilityID = abilityID; //플레이어한테 사용중인 능력을 알려줌.
-        gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Ability; //플레이어 상태 변경
     }
     public void ResetEvent(EResetTime resetTime)
     {
@@ -769,7 +759,7 @@ public class PlayerAbility : MonoBehaviour
                 if (dist > Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position) && thisScript.targetEnemy.transform.position != enemysPos.position)
                 {
                     dist = Vector2.Distance(thisScript.targetEnemy.transform.position, enemysPos.position);
-                    enemyObj = thisScript.enemyManager.GetEnemyObject(enemysPos.position);
+                    enemyObj = EnemyManager.GetEnemyObject(enemysPos.position);
                     enemyValue = enemysPos;
                 }
             }
@@ -833,7 +823,7 @@ public class PlayerAbility : MonoBehaviour
             for (int i = 0; i < exploablePosition.Count; i++)
             {
                 Vector3 explosionPos = thisScript.targetEnemy.transform.position + ((Vector3)exploablePosition[i] * GameManager.gridSize);
-                GameObject enemyObj = thisScript.enemyManager.GetEnemyObject(explosionPos);
+                GameObject enemyObj = EnemyManager.GetEnemyObject(explosionPos);
                 if (enemyObj) // 만약 폭발 지점에 적이 존재했을 경우
                 {
                     enemyObj.transform.GetComponent<Enemy>().AttackedEnemy(1);
@@ -880,7 +870,7 @@ public class PlayerAbility : MonoBehaviour
 
 
             // 실행 코드
-            GameObject enemyBackTarget = thisScript.enemyManager.GetEnemyObject(thisScript.targetEnemy.transform.position + new Vector3(0, 1.3f, 0));
+            GameObject enemyBackTarget = EnemyManager.GetEnemyObject(thisScript.targetEnemy.transform.position + new Vector3(0, 1.3f, 0));
             if (!enemyBackTarget) // 처치된 적 뒤에 아무런 유닛도 없을 경우
             {
                 return false;
@@ -1048,7 +1038,7 @@ public class PlayerAbility : MonoBehaviour
         public EAbilityType abilityType { get { return mAbilityType; } }
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
-        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.moveCtrl[1] = Mathf.Max(enemy.moveCtrl[1] - 2, 0); }; } }
+        public EnterEvent enterEvent { get { return (Enemy enemy) => { EnemyManager.GetEnemyValues(enemy.transform.position).moveCtrl -= 2; }; } }
         public StayEvent stayEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); }; } }
         public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
         public bool Event()
@@ -1359,8 +1349,8 @@ public class PlayerAbility : MonoBehaviour
             {
                 return (Enemy enemy) =>
                 {
-                    enemy.moveCtrl[1] -= 3;
-                    // thisScript.enemyManager.GetEnemyValues(enemy.transform.position).moveCtrl -= 3;
+                    // enemy.moveCtrl[1] -= 3;
+                    EnemyManager.GetEnemyValues(enemy.transform.position).moveCtrl -= 3;
                     enemy.AttackedEnemy(1);
                 };
             }
@@ -1713,7 +1703,8 @@ public class PlayerAbility : MonoBehaviour
         private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
         private List<Vector2Int> mAttackRange = new List<Vector2Int>();
         private List<Vector2Int> mAttackScale = new List<Vector2Int>(){
-            new Vector2Int(0, 0), new Vector2Int(1, 0), new Vector2Int(-1, 0),  new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
+            new Vector2Int(0, 0), new Vector2Int(1, 0), new Vector2Int(-1, 0),  new Vector2Int(0, 1), new Vector2Int(0, -1),
+            new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
         };
         private bool[] bCanPenetrate = new bool[2] { true, true };
         private Vector2Int mTargetPos;
@@ -2013,14 +2004,14 @@ public class PlayerAbility : MonoBehaviour
             {
                 if (result[1])
                 {
-                    thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
+                    EnemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
                     return false;
                 }
                 if (thisScript.targetEnemy.name.Contains("EnemyShieldSoldier"))
                 {
                     if (!Physics2D.RaycastAll(thisScript.targetEnemy.transform.position, Vector2.up, GameManager.gridSize, LayerMask.GetMask("Wall")).Any(h => h.transform.name.Contains("PlayerWall")))
                     {
-                        thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
+                        EnemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).position = newPosition;
                         return false;
                     }
                 }
@@ -2058,10 +2049,14 @@ public class PlayerAbility : MonoBehaviour
         {
             if (GameManager.Turn == 1)
             {
-                foreach (GameObject enemyObject in GameObject.FindGameObjectsWithTag("Enemy"))
+                // foreach (GameObject enemyObject in GameObject.FindGameObjectsWithTag("Enemy"))
+                // {
+                //     Enemy enemy = enemyObject.GetComponent<Enemy>();
+                //     enemy.moveCtrl[1] = Mathf.Max(enemy.moveCtrl[1] - 3, 0);
+                // }
+                foreach (EnemyValues enemyValues in GameManager.enemyValueList)
                 {
-                    Enemy enemy = enemyObject.GetComponent<Enemy>();
-                    enemy.moveCtrl[1] = Mathf.Max(enemy.moveCtrl[1] - 3, 0);
+                    enemyValues.moveCtrl -= 3;
                 }
             }
         }
@@ -2084,8 +2079,8 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             // 피격받은 적 오브젝트 행동력 3 감소
-            thisScript.enemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).moveCtrl -= 3;
-            thisScript.targetEnemy.GetComponent<Enemy>().moveCtrl[1] -= 3;
+            EnemyManager.GetEnemyValues(thisScript.targetEnemy.transform.position).moveCtrl -= 3;
+            // thisScript.targetEnemy.GetComponent<Enemy>().moveCtrl[1] -= 3;
             return false;
         }
 
@@ -2128,7 +2123,7 @@ public class PlayerAbility : MonoBehaviour
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
-            thisScript.enemyManager.GetEnemy(GameManager.ChangeCoord(targetPos)).debuffs[Enemy.EDebuff.CantMove] = 2;
+            EnemyManager.GetEnemy(GameManager.ChangeCoord(targetPos)).debuffs[Enemy.EDebuff.CantMove] = 2;
             canEvent = false;
             return false;
         }
@@ -2189,7 +2184,7 @@ public class PlayerAbility : MonoBehaviour
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
-            Enemy targetEnemy = thisScript.enemyManager.GetEnemy(GameManager.enemyValueList.OrderBy(enemyValue => (enemyValue.position - GameManager.ChangeCoord(GameManager.playerGridPosition)).magnitude).ToList()[0].position);
+            Enemy targetEnemy = EnemyManager.GetEnemy(GameManager.enemyValueList.OrderBy(enemyValue => (enemyValue.position - GameManager.ChangeCoord(GameManager.playerGridPosition)).magnitude).ToList()[0].position);
             Tuple<Enemy, Vector2Int> closestEnemy = null;
             foreach (var attackablePoint in targetEnemy.attackablePoints)
             {
@@ -2199,10 +2194,10 @@ public class PlayerAbility : MonoBehaviour
                 {
                     if (result[2])
                     {
-                        if (closestEnemy == null) closestEnemy = new Tuple<Enemy, Vector2Int>(thisScript.enemyManager.GetEnemy(targetEnemy.transform.position + GameManager.ChangeCoord(attackablePoint)), attackablePoint);
+                        if (closestEnemy == null) closestEnemy = new Tuple<Enemy, Vector2Int>(EnemyManager.GetEnemy(targetEnemy.transform.position + GameManager.ChangeCoord(attackablePoint)), attackablePoint);
                         else if (attackablePoint.magnitude < closestEnemy.Item2.magnitude)
                         {
-                            closestEnemy = new Tuple<Enemy, Vector2Int>(thisScript.enemyManager.GetEnemy(targetEnemy.transform.position + GameManager.ChangeCoord(attackablePoint)), attackablePoint);
+                            closestEnemy = new Tuple<Enemy, Vector2Int>(EnemyManager.GetEnemy(targetEnemy.transform.position + GameManager.ChangeCoord(attackablePoint)), attackablePoint);
                         }
                     }
                 }
@@ -2339,7 +2334,7 @@ public class PlayerAbility : MonoBehaviour
         {
             foreach (var attackPosition in attackRange)
             {
-                if (thisScript.enemyManager.GetEnemy(out Enemy enemy, GameManager.ChangeCoord(GameManager.playerGridPosition + attackPosition), false) != null)
+                if (EnemyManager.GetEnemy(out Enemy enemy, GameManager.ChangeCoord(GameManager.playerGridPosition + attackPosition), false) != null)
                 {
                     enemy.AttackedEnemy(enemy.hp);
                 }
