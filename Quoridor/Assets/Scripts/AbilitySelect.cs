@@ -75,6 +75,7 @@ public class AbilitySelect : MonoBehaviour
     // AbilitySelectPanel안에 들어 있는 오브젝트들 현 비활성화 되어있음
     public GameObject[] slotUi = new GameObject[3];
     public GameObject selectButton;
+    public Button SelectUiButton;
     public float popDuring = 1f;
 
     public PlayerAbility playerAbility;
@@ -85,7 +86,9 @@ public class AbilitySelect : MonoBehaviour
         playerAbility = GameObject.FindWithTag("Player").GetComponent<PlayerAbility>();
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         int count = 0;
-        foreach (Transform slotItem in GameObject.Find("AbilitySelectPanel").transform.GetChild(0).transform)
+        GameObject AS = GameObject.Find("AbilitySelectPanel");
+        SelectUiButton = AS.transform.GetChild(2).GetChild(0).GetComponent<Button>();
+        foreach (Transform slotItem in AS.transform.GetChild(0).transform)
         {
             slotUi[count] = slotItem.gameObject;
             count++;
@@ -98,7 +101,6 @@ public class AbilitySelect : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.K))
         {
-            CanShowAbilityCheck();
             AbilitySelectStart();
         }
     }
@@ -200,8 +202,10 @@ public class AbilitySelect : MonoBehaviour
         for(int i = 0; i < 3; i++)
         {
             int iii = i;
-            slotUi[i].GetComponent<Button>().onClick.AddListener(SelectButtonTrigger);
+            slotUi[i].GetComponent<Button>().onClick.AddListener(SelectSkillHighlighting);
         }
+
+        SelectUiButton.onClick.AddListener(SelectButtonTrigger);
     }
 
     public void TalkStart()
@@ -391,6 +395,7 @@ public class AbilitySelect : MonoBehaviour
 
     public void AbilitySelectStart()
     {
+        CanShowAbilityCheck();
         AbilitySlot currentSlot = null;
         if (slots.ContainsKey(gameManager.currentStage))
         {
@@ -520,8 +525,6 @@ public class AbilitySelect : MonoBehaviour
                 playerAbility.AddAbility(tmpSkillNumBox[itemCount]); // 선택한 능력 추가
                 skills[tmpSkillNumBox[itemCount]].isGet = true; // 얻은 스킬은 얻었다는 표시를 남겨줌
                 tmpSkillNumBox.Clear(); // 담아뒀던 임시 능력 번호는 초기화
-
-
             }
         }
     }

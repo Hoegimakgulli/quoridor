@@ -205,7 +205,7 @@ public class PlayerAbility : MonoBehaviour
     }
     public void AddAbility(int id)
     {
-        //GameObject.Find("임시 캔버스").transform.GetChild(0).GetChild(0).GetComponent<Text>().text = GameObject.Find("임시 캔버스").transform.GetChild(0).GetChild(0).GetComponent<Text>().text + "  " + id;
+        GameObject.Find("임시 캔버스").transform.GetChild(0).GetChild(0).GetComponent<Text>().text = GameObject.Find("임시 캔버스").transform.GetChild(0).GetChild(0).GetComponent<Text>().text + "  " + id;
         if (abilitiesID.Contains(id))
         {
             Debug.LogError("이미 보유중인 능력");
