@@ -205,7 +205,7 @@ public class PlayerAbility : MonoBehaviour
     }
     public void AddAbility(int id)
     {
-        GameObject.Find("임시 캔버스").transform.GetChild(0).GetChild(0).GetComponent<Text>().text = GameObject.Find("임시 캔버스").transform.GetChild(0).GetChild(0).GetComponent<Text>().text + "  " + id;
+        //GameObject.Find("임시 캔버스").transform.GetChild(0).GetChild(0).GetComponent<Text>().text = GameObject.Find("임시 캔버스").transform.GetChild(0).GetChild(0).GetComponent<Text>().text + "  " + id;
         if (abilitiesID.Contains(id))
         {
             Debug.LogError("이미 보유중인 능력");
@@ -1483,11 +1483,11 @@ public class PlayerAbility : MonoBehaviour
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.slipperyJellyStart = true; }; } }
         public StayEvent stayEvent { get { return (Enemy enemy) => { ;  }; } }
-        public ExitEvent exitEvent { get { return (Enemy enemy) => { enemy.slipperyJellyStart = false; }; } }
+        public ExitEvent exitEvent { get { return (Enemy enemy) => { enemy.slipperyJellyStart = false; enemy.AttackedEnemy(mValue);  }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
-            mValue = 2 + thisScript.additionalAbilityStat.placeDamage; // 초기 데미지 1 + 데미지 증가 능력을 골랐을 때 더해줌
+            mValue = 1 + thisScript.additionalAbilityStat.placeDamage; // 초기 데미지 1 + 데미지 증가 능력을 골랐을 때 더해줌
             thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 2, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
             mCount--;
             canEvent = false;

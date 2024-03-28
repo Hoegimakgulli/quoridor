@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 using DG.Tweening;
 
 public class CharacterData
@@ -23,9 +25,10 @@ public class CharacterData
 
 public class CharacterSelect : MonoBehaviour
 {
-    private Dictionary<int, CharacterData> charactors = new Dictionary<int, CharacterData>();
+    private Dictionary<int, CharacterData> characters = new Dictionary<int, CharacterData>();
 
     private GameObject characterPanel;
+    private GameObject[] characterUis = new GameObject[5];
     private RectTransform[] charactersUI = new RectTransform[5];
     public float uiMoveSpeed = 0.2f;
     public float uiWaitMoveTime = 0.1f;
@@ -33,14 +36,16 @@ public class CharacterSelect : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        CharacterDataSetting();
         int count = 0;
         characterPanel = GameObject.Find("CharacterSelectPanel");
         foreach (Transform child in characterPanel.transform.GetChild(2).transform)
         {
+            characterUis[count] = child.gameObject;
             charactersUI[count] = child.GetComponent<RectTransform>();
             count++;
         }
+        CharacterDataSetting();
+        Initialized();
     }
 
     // Update is called once per frame
@@ -52,9 +57,24 @@ public class CharacterSelect : MonoBehaviour
         }    
     }
 
+    public void Initialized()
+    {
+        for (int characterCount = 0; characterCount < 5; characterCount++)
+        {
+            if (characters.ContainsKey(characterCount))
+            {
+                characterUis[characterCount].transform.GetChild(1).GetChild(0).GetComponent<TMP_Text>().text = characters[characterCount].name;
+            }
+
+            int temp = characterCount;
+            characterUis[temp].transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => CharacaterSelectChilck(temp));
+            characterUis[temp].transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() => CharacaterSelectChilck(temp));
+        }
+    }
+
     void CharacterDataSetting()
     {
-        charactors.Add(0, 
+        characters.Add(0, 
             new CharacterData
             ("병사",
 
@@ -66,7 +86,7 @@ public class CharacterSelect : MonoBehaviour
 
             "보호막 : 적 기물의 공격에 피격되었을 때 이를 무효로 하고 후방 2칸으로 이동한다. 해당 능력은 1회만 발동한다."));
 
-        charactors.Add(1, 
+        characters.Add(1, 
             new CharacterData
             ("안젤리카",
             
@@ -80,7 +100,7 @@ public class CharacterSelect : MonoBehaviour
 
             "재장전 : 공격으로 적 기물을 처치했을 경우 최대 1회 더 공격할 수 있다."));
 
-        charactors.Add(2, 
+        characters.Add(2, 
             new CharacterData
             ("아이작",
 
@@ -96,7 +116,7 @@ public class CharacterSelect : MonoBehaviour
             "넉백 : 공격을 맞은 적 기물이 처치되지 않을 경우 플레이어 기물에게 멀어지는 방향으로 1칸 후퇴 이동" +
             "벽에 막히거나 맵 끝에서는 발동되지 않는다."));
 
-        charactors.Add(3, 
+        characters.Add(3, 
             new CharacterData
             ("호아킨",
 
@@ -125,6 +145,17 @@ public class CharacterSelect : MonoBehaviour
         }
 
         StartCoroutine(CharacterSelectStart(0));
+    }
+
+    void CharacterUiSetting()
+    {
+
+    }
+
+    // character Detail 정리 후 딕셔너리 적용해서 입히기
+    void CharacaterSelectChilck(int count)
+    {
+        
     }
 
     IEnumerator CharacterSelectStart(int count)

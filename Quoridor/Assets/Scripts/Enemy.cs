@@ -364,6 +364,10 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                     moveBeforePos = transform.position;
                     currentMe.position = (Vector2)transform.position + moveDir;
                     yield return new WaitForSeconds(0.1f);
+                    if (!slipperyJellyStart)
+                    {
+                        yield break;
+                    }
                 }
                 else
                 {
