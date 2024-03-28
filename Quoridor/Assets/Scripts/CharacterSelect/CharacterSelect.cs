@@ -67,8 +67,8 @@ public class CharacterSelect : MonoBehaviour
             }
 
             int temp = characterCount;
-            characterUis[temp].transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => CharacaterSelectChilck(temp));
-            characterUis[temp].transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() => CharacaterSelectChilck(temp));
+            characterUis[characterCount].transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => CharacaterSelectChilck(temp));
+            characterUis[characterCount].transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() => CharacaterSelectChilck(temp));
         }
     }
 
@@ -153,9 +153,9 @@ public class CharacterSelect : MonoBehaviour
     }
 
     // character Detail 정리 후 딕셔너리 적용해서 입히기
-    void CharacaterSelectChilck(int count)
+    public void CharacaterSelectChilck(int count)
     {
-        
+        Debug.Log("TEST");
     }
 
     IEnumerator CharacterSelectStart(int count)

@@ -6,6 +6,7 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine.UI;
 using Unity.VisualScripting;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 public class AbilityDescription
 {
@@ -107,6 +108,7 @@ public class AbilitySelect : MonoBehaviour
         AbilityStart(); // skills 딕셔너리에 값 대입
         SlotStart();    // slots 딕셔너리에 값 대입
         TalkStart();    // talks 딕셔너리에 값 대입
+        ButtonSetting();
         AlreadyHaveAbility();
         ShareAbility();
         CanShowAbilityShare();
@@ -191,6 +193,15 @@ public class AbilitySelect : MonoBehaviour
         slots.Add(7, new AbilitySlot(0.2f, 1.8f, 8, 90, 2, 68, 30, 0, 50, 40, 10, 0));
         slots.Add(8, new AbilitySlot(30, 40, 30, 0, 45, 35, 20, 0, 45, 35, 20, 0));
         slots.Add(9, new AbilitySlot(2, 18, 80, 0, 2, 80, 18, 0, 2, 80, 18, 0));
+    }
+
+    public void ButtonSetting()
+    {
+        for(int i = 0; i < 3; i++)
+        {
+            int iii = i;
+            slotUi[i].GetComponent<Button>().onClick.AddListener(SelectButtonTrigger);
+        }
     }
 
     public void TalkStart()
@@ -479,10 +490,6 @@ public class AbilitySelect : MonoBehaviour
     public void SelectButtonTrigger() // Select 버튼을 클릭했을 때
     {
         int itemCount = 0;
-        AbilitySelect AS = GameObject.Find("GameManager").GetComponent<AbilitySelect>();
-        playerAbility = GameObject.FindWithTag("Player").GetComponent<PlayerAbility>();
-
-        selectButton = AS.selectButton;
 
         if (!selectButton)
         {
@@ -491,7 +498,7 @@ public class AbilitySelect : MonoBehaviour
 
         else
         {
-            foreach (GameObject Item in AS.slotUi)
+            foreach (GameObject Item in slotUi)
             {
                 if (selectButton == Item)
                 {
@@ -509,10 +516,10 @@ public class AbilitySelect : MonoBehaviour
             {
                 // 능력 선택한 이후 애니메이션 추가 예정
                 SelectSkillUiDePop();
-                Debug.Log(AS.tmpSkillNumBox[itemCount]);
-                playerAbility.AddAbility(AS.tmpSkillNumBox[itemCount]); // 선택한 능력 추가
-                AS.skills[AS.tmpSkillNumBox[itemCount]].isGet = true; // 얻은 스킬은 얻었다는 표시를 남겨줌
-                AS.tmpSkillNumBox.Clear(); // 담아뒀던 임시 능력 번호는 초기화
+                Debug.Log(tmpSkillNumBox[itemCount]);
+                playerAbility.AddAbility(tmpSkillNumBox[itemCount]); // 선택한 능력 추가
+                skills[tmpSkillNumBox[itemCount]].isGet = true; // 얻은 스킬은 얻었다는 표시를 남겨줌
+                tmpSkillNumBox.Clear(); // 담아뒀던 임시 능력 번호는 초기화
 
 
             }
