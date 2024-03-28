@@ -32,7 +32,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public Vector2 moveBeforePos;
     public bool slipperyJellyStart = false;
 
-    public bool hasStayEvent = false;
+    // public bool hasStayEvent = false;
 
     private bool isPlayer = true;
 
