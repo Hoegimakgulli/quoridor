@@ -64,7 +64,11 @@ public class EnemyStage : MonoBehaviour
         // 모든 적 유닛이 사망했을때
         if (totalEnemyCount == 0)
         {
-            Instantiate(stageUI);
+            GameObject stageUIObject = Instantiate(stageUI);
+            if (gameManager.currentStage >= 10)           // 게임 클리어
+            {
+                stageUI.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = "게임 클리어!!!";
+            }
             totalEnemyCount = -1;
         }
     }

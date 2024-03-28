@@ -31,7 +31,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public bool ShieldTrue = false; // 방패병 한정 변수
     public Vector2 moveBeforePos;
 
-    public bool hasStayEvent = false;
+    // public bool hasStayEvent = false;
 
     private bool isPlayer = true;
 
@@ -336,7 +336,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     // EnterEvent 콜백함수 불러 올때 실행하는 함수
     public void MoveSlide()
     {
-        
+
     }
 
     IEnumerator ShakeTokenAction()
