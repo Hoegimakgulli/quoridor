@@ -458,9 +458,9 @@ public class EnemyManager : MonoBehaviour
                 currentEnemyState.state = Enemy.EState.Move;
 
                 // 능력 29번 부분
-                if (GameObject.FindWithTag("PlayerDummy"))
+                if (GameObject.FindWithTag("PlayerDump"))
                 {
-                    PathFinding(currenEnemy, GameObject.FindWithTag("PlayerDummy"));
+                    PathFinding(currenEnemy, GameObject.FindWithTag("PlayerDump"));
                     List<Path> playerDumpPathList = FinalPathList;
                     PathFinding(currenEnemy, player);
                     List<Path> playerPathList = FinalPathList;

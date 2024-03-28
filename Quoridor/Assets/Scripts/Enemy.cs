@@ -30,6 +30,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public EValue value = EValue.Normal;
     public bool ShieldTrue = false; // 방패병 한정 변수
 
+    public bool hasStayEvent = false;
+
     private bool isPlayer = true;
 
     //--------------- Move 시작 ---------------//
@@ -142,6 +144,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     // Attack 받았을 때 실행하는 함수
     public bool AttackedEnemy(int playerAtk)
     {
+        Debug.Log("아야");
         Debug.Log(GetComponent<SpriteRenderer>().color);
         int originHP = hp;
         hp -= playerAtk;
