@@ -30,6 +30,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public EValue value = EValue.Normal;
     public bool ShieldTrue = false; // 방패병 한정 변수
     public Vector2 moveBeforePos;
+    public bool slipperyJellyStart = false;
 
     // public bool hasStayEvent = false;
 
@@ -44,7 +45,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         {
             if (characteristic == ECharacteristic.Forward)
             {
-                GetShortRoad(path, isPlayer);
+                StartCoroutine(CheckStartSlipper(path, isPlayer));
+                //GetShortRoad(path, isPlayer);
             }
             else if (characteristic == ECharacteristic.BackWard)
             {
@@ -84,11 +86,14 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                         break;
                     }
                 }
-                if (moveCount == moveablePoints.Length) // 더이상 이동할 수 있는 공간이 없을 경우
+                if (moveCount == moveablePoints.Length || slipperyJellyStart) // 더이상 이동할 수 있는 공간이 없을 경우 or 미끌젤리에 돌입했을 경우
                 {
-                    if (count != 1)
+                    Debug.Log("능력 발동 확인" + slipperyJellyStart);
+                    if (slipperyJellyStart)
                     {
-                        moveBeforePos = new Vector2(path[count - 2].x, path[count - 2].y); // 갱신되기 이전 좌표까지 이동 아마 path[0] 이 부분이 적 초기 좌표임
+                        Debug.Log("Start No.24");
+                        moveBeforePos = new Vector2((path[count - 1].x - 4) * GameManager.gridSize, (path[count - 1].y - 4) * GameManager.gridSize); // 갱신되기 이전 좌표까지 이동 아마 path[0] 이 부분이 적 초기 좌표임
+                        MoveSlide();
                     }
                     break;
                 }
@@ -262,6 +267,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         {
             state = EState.Idle;
         }
+
+        Debug.Log(slipperyJellyStart);
     }
 
     public bool AttackCanEnemy()
@@ -299,9 +306,11 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     public GameObject highlightObj; //이규빈 작성함. 적 기물 하이라이트를 위한 오브젝트
     private SpriteRenderer highlightSPR;
     public bool useShake = true;
+    public Player player;
 
     public void Start()
     {
+        player = GameObject.FindWithTag("Player").GetComponent<Player>();
         moveBeforePos = transform.position / GameManager.gridSize; // 초기 문제 생각
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         uiManager = GameObject.Find("GameManager").GetComponent<UiManager>();
@@ -335,9 +344,42 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     }
 
     // EnterEvent 콜백함수 불러 올때 실행하는 함수
-    public void MoveSlide()
+    public IEnumerator MoveSlide()
     {
+        EnemyValues currentMe = EnemyManager.GetEnemyValues(transform.position);
+        while (slipperyJellyStart) // 만약 탈출했을 경우 slipperyJellyStart 시작
+        {
+            Vector2 moveDir = new Vector2(transform.position.x, transform.position.y) - moveBeforePos;
+            bool[] result = player.CheckRay(transform.position, moveDir);
+            Debug.Log("case 1 : " + result[0] + " case 2 : " + result[1] + " case 3 : " + result[2]);
 
+            if (result[0])
+            {
+                slipperyJellyStart = false;
+            }
+
+            if (result[1])
+            {
+                if (!result[2])
+                {
+                    moveBeforePos = transform.position;
+                    currentMe.position = (Vector2)transform.position + moveDir;
+                    yield return new WaitForSeconds(0.1f);
+                    if (!slipperyJellyStart)
+                    {
+                        yield break;
+                    }
+                }
+                else
+                {
+                    slipperyJellyStart = false;
+                }
+            }
+            else
+            {
+                slipperyJellyStart = false;
+            }
+        }
     }
 
     IEnumerator ShakeTokenAction()
@@ -345,6 +387,66 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         shakeSequence.Restart();
         yield return new WaitForSeconds(shakeSequence.Duration());
         useShake = true;
+    }
+
+    IEnumerator CheckStartSlipper(List<Path> path, bool isPlayer)
+    {
+        this.isPlayer = isPlayer;
+        Vector2 playerPos = (isPlayer) ? GameObject.FindWithTag("Player").transform.position / GameManager.gridSize : GameObject.FindWithTag("PlayerDummy").transform.position / GameManager.gridSize;
+        if (!AttackCanEnemy())
+        {
+            Vector2 unitPos = transform.position / GameManager.gridSize;
+            Vector2 fixPos = new Vector2(0, 0);
+            unitPos = new Vector2Int(Mathf.FloorToInt(unitPos.x) + 4, Mathf.FloorToInt(unitPos.y) + 4);
+            EnemyValues currentEnemyValue = EnemyManager.GetEnemyValues(transform.position);
+            int count;
+            for (count = 1; count < path.Count; count++)
+            {
+                Vector2 pathPoint = new Vector2(path[count].x, path[count].y);
+                int moveCount;
+                for (moveCount = 0; moveCount < moveablePoints.Length; ++moveCount)
+                {
+                    Vector2 currentMovePoint = unitPos + moveablePoints[moveCount];
+                    if (pathPoint == currentMovePoint && currentMovePoint != playerPos)
+                    {
+                        currentEnemyValue.position = new Vector3((currentMovePoint.x - 4) * GameManager.gridSize, (currentMovePoint.y - 4) * GameManager.gridSize, 0); // 틱마다 움직이는 함수
+                        break;
+                    }
+                }
+                yield return new WaitForSeconds(0.1f);
+                if (moveCount == moveablePoints.Length || slipperyJellyStart) // 더이상 이동할 수 있는 공간이 없을 경우 or 미끌젤리에 돌입했을 경우
+                {
+                    Debug.Log("능력 발동 확인" + slipperyJellyStart);
+                    if (slipperyJellyStart)
+                    {
+                        Debug.Log("Start No.24");
+                        moveBeforePos = new Vector2((path[count - 1].x - 4) * GameManager.gridSize, (path[count - 1].y - 4) * GameManager.gridSize); // 갱신되기 이전 좌표까지 이동 아마 path[0] 이 부분이 적 초기 좌표임
+                        StartCoroutine(MoveSlide());
+                        yield break;
+                    }
+                    break;
+                }
+            }
+
+            if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
+            {
+                int currentShieldPos = (int)(fixPos.x + (fixPos.y * 9)); // mapgraph 형식으로 다듬기
+                if (currentShieldPos + 9 < 81 && gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] == 1) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
+                {
+                    gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 0; // 초기화 1
+                    gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 0; // 초기화 2
+                    ShieldTrue = true;
+                }
+            }
+
+            state = EState.Attack;
+            AttackPlayer();
+        }
+        else
+        {
+            state = EState.Attack;
+            AttackPlayer();
+        }
     }
 
     // 이규빈 작성 함수
