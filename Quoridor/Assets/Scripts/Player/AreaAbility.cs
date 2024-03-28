@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -117,6 +117,7 @@ public class AreaAbility : MonoBehaviour
     {
         if (other.tag == "Enemy")
         {
+            Debug.Log("Start Ontrriger");
             enterEvent(other.GetComponent<Enemy>());
             enemyCount++;
             if (lifeType == ELifeType.Count)

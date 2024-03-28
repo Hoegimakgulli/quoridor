@@ -25,6 +25,7 @@ public class EnemyValues
         {
             GameObject correctEnemy = EnemyManager.GetEnemyObject(mPosition);
             correctEnemy.GetComponent<Enemy>().moveCtrl[1] = value;
+            mMoveCtrl = value;
         } 
     }
     public int maxMoveCtrl; // 유닛이 가질 수 있는 최대 행동력

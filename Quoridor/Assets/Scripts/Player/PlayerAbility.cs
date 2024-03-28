@@ -1470,7 +1470,8 @@ public class PlayerAbility : MonoBehaviour
             new Vector2Int(-1, -1), new Vector2Int(-1, -2), new Vector2Int(-2, -1),new Vector2Int(-2, -2)
         };
         private List<Vector2Int> mAttackScale = new List<Vector2Int>(){ // 능력이 퍼짐 거리인데 추후 벽에 막힘에 따라 범위가 설정되어야 하므로 0,0 초기값 설정
-            new Vector2Int(0, 0)
+            new Vector2Int(0, 0), new Vector2Int(-1, 0), new Vector2Int(-1, 1), new Vector2Int(0, 1), new Vector2Int(1, 1),
+            new Vector2Int(1, 0), new Vector2Int(1, -1), new Vector2Int(0, -1), new Vector2Int(-1, -1)
         };
         private bool[] bCanPenetrate = new bool[2] { true, false }; // 엑티브 능력 중 설치 지속에 해당하는 배열을 가진건 알겠는데 각각 뭘 뜻하는지 잘 모르겠음
         private Vector2Int mTargetPos;
@@ -1490,14 +1491,14 @@ public class PlayerAbility : MonoBehaviour
         public EAbilityType abilityType { get { return mAbilityType; } }
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
-        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.AttackedEnemy(mValue); ; }; } }
-        public StayEvent stayEvent { get { return (Enemy enemy) => { }; } }
-        public ExitEvent exitEvent { get { return (Enemy enemy) => { }; } }
+        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.slipperyJellyStart = true; }; } }
+        public StayEvent stayEvent { get { return (Enemy enemy) => { ;  }; } }
+        public ExitEvent exitEvent { get { return (Enemy enemy) => { enemy.slipperyJellyStart = false; }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
-            mValue = 1 + thisScript.additionalAbilityStat.placeDamage; // 초기 데미지 1 + 데미지 증가 능력을 골랐을 때 더해줌
-            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
+            mValue = 2 + thisScript.additionalAbilityStat.placeDamage; // 초기 데미지 1 + 데미지 증가 능력을 골랐을 때 더해줌
+            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 2, targetPos, attackScale, canPenetrate[1], enterEvent, stayEvent, exitEvent);
             mCount--;
             canEvent = false;
             return false;
