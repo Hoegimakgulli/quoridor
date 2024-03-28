@@ -940,7 +940,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.TargetActive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = true;
-        private int mCount = 2;
+        private int mCount = 1;
         private int mValue = 1;
         private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
         private List<Vector2Int> mAttackRange = new List<Vector2Int>(){
@@ -1391,7 +1391,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.TargetActive;
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = true;
-        private int mCount = 1;
+        private int mCount = 2;
         private int mValue = 3;
         private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
         private List<Vector2Int> mAttackRange = new List<Vector2Int>(){
@@ -1427,7 +1427,7 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             // Debug.Log($"{targetPos}");
-            mValue = 2 + thisScript.additionalAbilityStat.placeDamage;
+            mValue = 3 + thisScript.additionalAbilityStat.placeDamage;
             thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, exitEvent);
             mCount--;
             canEvent = false;
@@ -1438,7 +1438,7 @@ public class PlayerAbility : MonoBehaviour
             if (GameManager.Turn == 1)
             {
                 canEvent = true;
-                mCount = 1 + thisScript.additionalAbilityStat.placeCount;
+                mCount = 2 + thisScript.additionalAbilityStat.placeCount;
             }
             if (mCount > 0)
             {
@@ -1453,7 +1453,7 @@ public class PlayerAbility : MonoBehaviour
         private EAbilityType mAbilityType = EAbilityType.TargetActive; // 클릭 후 조준 후 바로 시작
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart; // 적 턴이 시작했을 때 리셋
         private bool mbEvent = true; // 초기 이벤트 설정 true
-        private int mCount = 1; // 능력 사용 횟수
+        private int mCount = 2; // 능력 사용 횟수
         private int mValue = 1; // 변수? 아마 적이 밟을 수 있는 최대 횟수를 저장해둔 것으로 추측
         private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None; // 능력 사용 조건(Player 기준) 제약 없음
         private List<Vector2Int> mAttackRange = new List<Vector2Int>(){ // 능력 사용 가능 범위
@@ -1487,7 +1487,7 @@ public class PlayerAbility : MonoBehaviour
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.slipperyJellyStart = true; enemy.AttackedEnemy(mValue); }; } }
-        public ExitEvent exitEvent { get { return (Enemy enemy) => { ; }; } }
+        public ExitEvent exitEvent { get { return (Enemy enemy) => {; }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
@@ -1502,7 +1502,7 @@ public class PlayerAbility : MonoBehaviour
             if (GameManager.Turn == 1) // 스테이지가 변경되었을 때 1회 실행
             {
                 canEvent = true;
-                mCount = 1 + thisScript.additionalAbilityStat.placeCount; // 초기 사용 가능 횟수 1회에서 placeCount를 더해 횟수 조정
+                mCount = 2 + thisScript.additionalAbilityStat.placeCount; // 초기 사용 가능 횟수 1회에서 placeCount를 더해 횟수 조정
             }
             if (mCount > 0) // 미끌젤리 사용 횟수가 남아있을 경우
             {

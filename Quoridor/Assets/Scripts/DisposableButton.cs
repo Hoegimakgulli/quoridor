@@ -36,6 +36,7 @@ public class DisposableButton : MonoBehaviour
                     break;
             }
         }
+        else button.interactable = false;
         if (gameManager.playerControlStatus == GameManager.EPlayerControlStatus.Ability && text.text == player.usingAbilityID.ToString())
         {
             button.interactable = false;
