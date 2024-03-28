@@ -27,7 +27,6 @@ public class AreaAbility : MonoBehaviour
     GameManager gameManager;
     EnemyManager enemyManager;
     Player player;
-    List<BoxCollider2D> boxColliderList = new List<BoxCollider2D>();
     List<GameObject> areaObjectList = new List<GameObject>();
 
     public List<GameObject> targetStayList = new List<GameObject>();
@@ -49,19 +48,16 @@ public class AreaAbility : MonoBehaviour
             bool[] result = player.CheckRay(transform.position, areaPositionList[i]);
             if (result[0])
             {
-                // boxColliderList[i].enabled = false;
                 areaObjectList[i].SetActive(false);
             }
             if (result[1] || canPenetrate)
             {
-                // boxColliderList[i].enabled = true;
                 areaObjectList[i].SetActive(true);
                 GameObject targetObject = EnemyManager.GetEnemyObject(transform.position + GameManager.ChangeCoord(areaPositionList[i]), false);
                 if (targetObject != null) Event(targetObject);
             }
             else
             {
-                // boxColliderList[i].enabled = false;
                 areaObjectList[i].SetActive(false);
             }
         }
@@ -84,11 +80,6 @@ public class AreaAbility : MonoBehaviour
             {
                 targetStayList.Clear();
                 canDone = false;
-                // Debug.Log("Cleared");
-                // foreach (var go in targetList)
-                // {
-                //     Debug.Log(go.name);
-                // }
             }
         }
     }
@@ -96,11 +87,6 @@ public class AreaAbility : MonoBehaviour
     {
         for (int i = 0; i < areaPositionList.Count; i++)
         {
-            BoxCollider2D boxCollider = transform.AddComponent<BoxCollider2D>();
-            boxCollider.isTrigger = true;
-            boxCollider.offset = areaPositionList[i];
-            boxColliderList.Add(boxCollider);
-
             // 임시 //
             areaObjectList.Add(Instantiate(sprite, this.transform));
             areaObjectList[i].transform.localPosition = (Vector2)areaPositionList[i];
@@ -148,38 +134,4 @@ public class AreaAbility : MonoBehaviour
             if (exitObject[i] != null) exitEvent(exitObject[i].GetComponent<Enemy>());
         }
     }
-    // private void OnTriggerEnter2D(Collider2D other)
-    // {
-    //     if (other.tag == "Enemy")
-    //     {
-    //         enterEvent(other.GetComponent<Enemy>());
-    //         if (lifeType == ELifeType.Count)
-    //         {
-    //             if (--life == 0)
-    //             {
-    //                 OnAbilityDisable();
-    //             }
-    //         }
-    //     }
-    // }
-    // private void OnTriggerStay2D(Collider2D other)
-    // {
-    //     if (other.tag == "Enemy")
-    //     {
-    //         Debug.Log(other.name);
-    //         if (!targetList.Contains(other.gameObject))
-    //         {
-    //             Debug.Log(other.gameObject.name);
-    //             targetList.Add(other.gameObject);
-    //             stayEvent(other.GetComponent<Enemy>());
-    //         }
-    //     }
-    // }
-    // private void OnTriggerExit2D(Collider2D other)
-    // {
-    //     if (other.tag == "Enemy")
-    //     {
-    //         exitEvent(other.GetComponent<Enemy>());
-    //     }
-    // }
 }
