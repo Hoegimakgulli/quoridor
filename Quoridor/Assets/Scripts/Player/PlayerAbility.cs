@@ -1703,7 +1703,8 @@ public class PlayerAbility : MonoBehaviour
         private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
         private List<Vector2Int> mAttackRange = new List<Vector2Int>();
         private List<Vector2Int> mAttackScale = new List<Vector2Int>(){
-            new Vector2Int(0, 0), new Vector2Int(1, 0), new Vector2Int(-1, 0),  new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
+            new Vector2Int(0, 0), new Vector2Int(1, 0), new Vector2Int(-1, 0),  new Vector2Int(0, 1), new Vector2Int(0, -1),
+            new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
         };
         private bool[] bCanPenetrate = new bool[2] { true, true };
         private Vector2Int mTargetPos;

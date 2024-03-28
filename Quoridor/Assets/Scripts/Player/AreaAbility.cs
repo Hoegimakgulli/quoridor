@@ -118,6 +118,13 @@ public class AreaAbility : MonoBehaviour
         {
             targetList.Add(targetObject);
             enterEvent(target);
+            if (lifeType == ELifeType.Count)
+            {
+                if (--life == 0)
+                {
+                    OnAbilityDisable();
+                }
+            }
         }
         if (!targetStayList.Contains(targetObject))
         {
