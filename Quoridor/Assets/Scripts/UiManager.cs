@@ -203,8 +203,8 @@ public class UiManager : MonoBehaviour
         //적 상태창 버튼에 적 기물 하이라이팅 함수를 연결
         for (int i = 0; i < GameManager.enemyValueList.Count; i++)
         {
-            Debug.Log(enemyManager.GetEnemyObject(i));
-            if (enemyManager.GetEnemyObject(i) == currentEnemyObj)
+            Debug.Log(EnemyManager.GetEnemyObject(i));
+            if (EnemyManager.GetEnemyObject(i) == currentEnemyObj)
             {
                 currentEnemyState.GetComponent<Button>().onClick.AddListener(() => HighlightEnemy(i));
                 break;
@@ -266,7 +266,7 @@ public class UiManager : MonoBehaviour
     {
         freezeButton = true;
         if (hp < 0) hp = 0; //피격 후 hp가 0 아래로 내려가면 0으로 고정.
-        attackedEnemyList.Add(new attackedEnemyValues(i, originHP, hp, enemyManager.GetEnemyObject(i).GetComponent<Enemy>().maxHp)); //적 번호, 원래 HP, 바뀐 HP, max HP를 리스트에 저장
+        attackedEnemyList.Add(new attackedEnemyValues(i, originHP, hp, EnemyManager.GetEnemyObject(i).GetComponent<Enemy>().maxHp)); //적 번호, 원래 HP, 바뀐 HP, max HP를 리스트에 저장
         if (attackedEnemyList.Count == 1) //한 번의 공격에 한번씩만 실행되도록.
         {
             StartCoroutine(CountEnemyHpAnim());
@@ -289,7 +289,7 @@ public class UiManager : MonoBehaviour
             DOVirtual.Int(value.originalHP, value.goalHP, uiMoveTime * 3, ((x) => { enemyStates[value.enemyNum].GetChild(2).GetComponent<Text>().text = "체력 : " + x + " / " + value.maxHP; })).SetEase(Ease.OutCubic); //체력 줄어드는 애니메이션
         }
         yield return new WaitForSeconds(uiMoveTime * 3);
-        for(int i = attackedEnemyList.Count - 1; i >= 0; i--)
+        for (int i = attackedEnemyList.Count - 1; i >= 0; i--)
         {
             if (attackedEnemyList[i].goalHP > 0) //피격된 것 중 죽지 않은 것들은 리스트에서 제거 
             {
@@ -313,22 +313,22 @@ public class UiManager : MonoBehaviour
 
         List<GameObject> destroyObjects = new List<GameObject>(); //처리 후 삭제될 오브젝트를 담아두는 리스트
         List<int> destroyEnemyNum = new List<int>(); //처리 후 삭제될 적의 번호를 담아두는 리스트
-        foreach(attackedEnemyValues value in attackedEnemyList) //죽기 전 예열 foreach문
+        foreach (attackedEnemyValues value in attackedEnemyList) //죽기 전 예열 foreach문
         {
             enemyStates[value.enemyNum].GetChild(3).GetComponent<Image>().DOFade(1, uiMoveTime * 3); //죽은애들 상태창 빨개짐
             StartCoroutine(QuakeAnim(enemyStates[value.enemyNum], uiMoveTime * 3)); //죽은애들 상태창 흔들림
         }
-        yield return new WaitForSeconds (uiMoveTime * 3);
+        yield return new WaitForSeconds(uiMoveTime * 3);
         foreach (attackedEnemyValues value in attackedEnemyList) //터질때 실행되는 foreach문
         {
             enemyStates[value.enemyNum].GetComponent<RectTransform>().sizeDelta = Vector2.zero; //상태창 본체 크기 0으로
-            for(int i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)
             {
                 enemyStates[value.enemyNum].GetChild(i).gameObject.SetActive(false); //터지는 이펙트를 제외한 모든 자식을 비활성화
             }
             enemyStates[value.enemyNum].GetChild(5).gameObject.SetActive(true); //터지는 이펙트 활성화
             List<RectTransform> explosionParticleRT = new List<RectTransform>(); //이펙트 입자들 리스트
-            for(int i = 0; i < enemyStates[value.enemyNum].GetChild(5).childCount; i++)
+            for (int i = 0; i < enemyStates[value.enemyNum].GetChild(5).childCount; i++)
             {
                 explosionParticleRT.Add(enemyStates[value.enemyNum].GetChild(5).GetChild(i).GetComponent<RectTransform>());
             }
@@ -344,8 +344,8 @@ public class UiManager : MonoBehaviour
             destroyEnemyNum.Add(value.enemyNum);
             //enemyStates.RemoveAt(value.enemyNum); //상태창 리스트에서 죽은애 상태창을 제거
         }
-        for(int i = attackedEnemyList.Count - 1; i >= 0; i--)
-        {   
+        for (int i = attackedEnemyList.Count - 1; i >= 0; i--)
+        {
             for (int j = sortingList.Count - 1; j >= 0; j--) // SortingList에서 죽은애는 제거하고 죽은애보다 뒤에있는애는 앞으로 당겨줌.
             {
                 if (sortingList[j] > attackedEnemyList[i].enemyNum)
@@ -379,7 +379,7 @@ public class UiManager : MonoBehaviour
             StartCoroutine(SwapStatesAnim(0, false)); //순서대로 상태창 위치 바꾸는 애니메이션 실행
         }
         yield return new WaitForSeconds(uiMoveTime * 1.5f); //터지는 이펙트 입자가 사라지는 시간동안 대기
-        for(int i = destroyObjects.Count - 1; i >= 0; i--) //죽은애들 상태창 오브젝트 전부 삭제
+        for (int i = destroyObjects.Count - 1; i >= 0; i--) //죽은애들 상태창 오브젝트 전부 삭제
         {
             Destroy(destroyObjects[i]);
         }
@@ -433,7 +433,7 @@ public class UiManager : MonoBehaviour
     public void HighlightEnemy(int enemyNum)
     {
         StartCoroutine(FadeInOutLoop(enemyNum));
-        StartCoroutine(enemyManager.GetEnemyObject(enemyNum).GetComponent<Enemy>().FadeInOutLoop(uiMoveTime * 2));
+        StartCoroutine(EnemyManager.GetEnemyObject(enemyNum).GetComponent<Enemy>().FadeInOutLoop(uiMoveTime * 2));
     }
 
     //적 하이라이팅 페이드 인/아웃 루프 (몇번째로 소환된 적인지)
@@ -456,11 +456,11 @@ public class UiManager : MonoBehaviour
         float childInterver = (panelSize.x - (childPanelSize * 2)) / 3; //자식 Panel들 사이의 간격
 
         //Destroy(enemyActionInfoPanel); //기존의 것을 삭제
-        for(int i = enemyAttackablePoints.Count - 1; i>= 0; i--)
+        for (int i = enemyAttackablePoints.Count - 1; i >= 0; i--)
         {
             Destroy(enemyAttackablePoints[i].gameObject);
         }
-        for(int i = enemyMoveablePoints.Count - 1; i>= 0; i--)
+        for (int i = enemyMoveablePoints.Count - 1; i >= 0; i--)
         {
             Destroy(enemyMoveablePoints[i].gameObject);
         }
@@ -518,14 +518,14 @@ public class UiManager : MonoBehaviour
         int moveablePointsSize = 0; //이동가능 포인트의 최대 개수
         int attackablePointsSize = 0; //공격 가능 포인트의 최대 개수
 
-        for(int i = 0; i < GameManager.enemyValueList.Count; i++)
+        for (int i = 0; i < GameManager.enemyValueList.Count; i++)
         {
-            Enemy enemy = enemyManager.GetEnemy(i);
+            Enemy enemy = EnemyManager.GetEnemy(i);
 
             moveablePointsSize = enemy.moveablePoints.Length > moveablePointsSize ? enemy.moveablePoints.Length : moveablePointsSize;
             attackablePointsSize = enemy.attackablePoints.Length > attackablePointsSize ? enemy.attackablePoints.Length : attackablePointsSize;
         }
-        for(int i = 0; i <= moveablePointsSize; i++) //이동가능 포인트의 최대 개수 만큼만 moveablePoint를 생성
+        for (int i = 0; i <= moveablePointsSize; i++) //이동가능 포인트의 최대 개수 만큼만 moveablePoint를 생성
         {
             GameObject moveablePoint = new GameObject("Moveable Point " + i);
             Image moveablePointImage = moveablePoint.AddComponent<Image>();
@@ -565,7 +565,7 @@ public class UiManager : MonoBehaviour
         int minX = 0, minY = 0, maxX = 0, maxY = 0; //왼쪽, 아래쪽, 오른쪽, 위쪽으로 각각 최대 몇칸 필요한지 파악하기 위한 변수
 
         enemyMoveablePoints[0].anchoredPosition = Vector2.zero;
-        foreach(var enemyMoveablePoint in enemyMoveablePoints)
+        foreach (var enemyMoveablePoint in enemyMoveablePoints)
         {
             enemyMoveablePoint.gameObject.SetActive(false);
         }
@@ -582,7 +582,7 @@ public class UiManager : MonoBehaviour
         float horizontalMean = (maxX + minX) / 2.0f; //가로의 중간 위치
         float verticalMean = (maxY + minY) / 2.0f; //세로의 중간 위치
         float pointsMove = enemyMoveInfoPanel.GetComponent<RectTransform>().sizeDelta.x / maxLength; //point의 한칸 이동 거리
-        Vector2 pointSize = new Vector2(pointsMove/1.2f, pointsMove/1.2f);
+        Vector2 pointSize = new Vector2(pointsMove / 1.2f, pointsMove / 1.2f);
 
         enemyMoveInfoPanel.transform.GetChild(0).GetComponent<RectTransform>().anchoredPosition = new Vector2(-horizontalMean * pointsMove, -verticalMean * pointsMove);
 
@@ -597,7 +597,7 @@ public class UiManager : MonoBehaviour
             else if (moveablePoints[i].x < 0) x = (moveablePoints[i].x * 2 + 1) * pointsMove;
             if (moveablePoints[i].y > 0) y = (moveablePoints[i].y * 2 - 1) * pointsMove;
             else if (moveablePoints[i].y < 0) y = (moveablePoints[i].y * 2 + 1) * pointsMove;
-            enemyMoveablePoints[i + 1].anchoredPosition = new Vector2(moveablePoints[i].x*pointsMove, moveablePoints[i].y*pointsMove);
+            enemyMoveablePoints[i + 1].anchoredPosition = new Vector2(moveablePoints[i].x * pointsMove, moveablePoints[i].y * pointsMove);
             enemyMoveablePoints[i + 1].sizeDelta = pointSize;
         }
 
