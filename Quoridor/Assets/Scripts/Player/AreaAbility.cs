@@ -1,10 +1,10 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public delegate void EnterEvent(Enemy enemy);
-public delegate void StayEvent(Enemy enemy);
 public delegate void ExitEvent(Enemy enemy);
 
 public class AreaAbility : MonoBehaviour
@@ -17,7 +17,7 @@ public class AreaAbility : MonoBehaviour
     public bool canPenetrate;
 
     public EnterEvent enterEvent;
-    public StayEvent stayEvent;
+
     public ExitEvent exitEvent;
 
     public GameObject sprite;
@@ -26,11 +26,10 @@ public class AreaAbility : MonoBehaviour
     GameManager gameManager;
     EnemyManager enemyManager;
     Player player;
-    List<BoxCollider2D> boxColliderList = new List<BoxCollider2D>();
     List<GameObject> areaObjectList = new List<GameObject>();
 
-    public int enemyCount;
-    public int counter;
+    public List<GameObject> targetStayList = new List<GameObject>();
+    public bool canDone;
     // Start is called before the first frame update
     void Awake()
     {
@@ -39,29 +38,13 @@ public class AreaAbility : MonoBehaviour
         enemyManager = GameObject.Find("GameManager").GetComponent<EnemyManager>();
         gameManager = enemyManager.gameObject.GetComponent<GameManager>();
     }
+    void FixedUpdate()
+    {
 
+    }
     // Update is called once per frame
     void Update()
     {
-        for (int i = 0; i < areaPositionList.Count; i++)
-        {
-            bool[] result = player.CheckRay(transform.position, areaPositionList[i]);
-            if (result[0])
-            {
-                boxColliderList[i].enabled = false;
-                areaObjectList[i].SetActive(false);
-            }
-            if (result[1] || canPenetrate)
-            {
-                boxColliderList[i].enabled = true;
-                areaObjectList[i].SetActive(true);
-            }
-            else
-            {
-                boxColliderList[i].enabled = false;
-                areaObjectList[i].SetActive(false);
-            }
-        }
         if (tempTurn != GameManager.Turn)
         {
             tempTurn = GameManager.Turn;
@@ -75,21 +58,34 @@ public class AreaAbility : MonoBehaviour
                     }
                 }
             }
+            canDone = false;
+        }
+        targetStayList.Clear();
+        for (int i = 0; i < areaPositionList.Count; i++)
+        {
+            bool[] result = player.CheckRay(transform.position, areaPositionList[i]);
+            if (result[0])
+            {
+                areaObjectList[i].SetActive(false);
+            }
+            if (result[1] || canPenetrate)
+            {
+                areaObjectList[i].SetActive(true);
+                GameObject targetObject = EnemyManager.GetEnemyObject(transform.position + GameManager.ChangeCoord(areaPositionList[i]), false);
+                if (targetObject != null) Event(targetObject);
+            }
             else
             {
-                counter = 0;
+                areaObjectList[i].SetActive(false);
             }
         }
+        EventExit();
+        canDone = true;
     }
     public void SetUp()
     {
         for (int i = 0; i < areaPositionList.Count; i++)
         {
-            BoxCollider2D boxCollider = transform.AddComponent<BoxCollider2D>();
-            boxCollider.isTrigger = true;
-            boxCollider.offset = areaPositionList[i];
-            boxColliderList.Add(boxCollider);
-
             // 임시 //
             areaObjectList.Add(Instantiate(sprite, this.transform));
             areaObjectList[i].transform.localPosition = (Vector2)areaPositionList[i];
@@ -105,20 +101,22 @@ public class AreaAbility : MonoBehaviour
     {
         for (int i = 0; i < areaPositionList.Count; i++)
         {
-            if (boxColliderList[i].enabled)
+            if (areaObjectList[i].activeInHierarchy)
             {
-                Enemy enemy = enemyManager.GetEnemy(transform.position + GameManager.ChangeCoord(areaPositionList[i]), false);
+                Enemy enemy = EnemyManager.GetEnemy(transform.position + GameManager.ChangeCoord(areaPositionList[i]), false);
                 if (enemy != null) exitEvent(enemy);
             }
         }
         Destroy(this.gameObject);
     }
-    private void OnTriggerEnter2D(Collider2D other)
+    void Event(GameObject targetObject)
     {
-        if (other.tag == "Enemy")
+        if (targetObject.tag != "Enemy") return;
+        Enemy target = targetObject.GetComponent<Enemy>();
+        if (!targetList.Contains(targetObject))
         {
-            enterEvent(other.GetComponent<Enemy>());
-            enemyCount++;
+            targetList.Add(targetObject);
+            enterEvent(target);
             if (lifeType == ELifeType.Count)
             {
                 if (--life == 0)
@@ -127,25 +125,19 @@ public class AreaAbility : MonoBehaviour
                 }
             }
         }
-    }
-    private void OnTriggerStay2D(Collider2D other)
-    {
-        if (other.tag == "Enemy")
+        if (!targetStayList.Contains(targetObject))
         {
-            if (!targetList.Contains(other.gameObject)) targetList.Add(other.gameObject);
-            if (counter < enemyCount)
-            {
-                stayEvent(other.GetComponent<Enemy>());
-                counter++;
-            }
+            targetStayList.Add(targetObject);
         }
     }
-    private void OnTriggerExit2D(Collider2D other)
+    void EventExit()
     {
-        if (other.tag == "Enemy")
+        List<GameObject> exitObject = targetList.Except(targetStayList).ToList();
+        for (int i = 0; i < exitObject.Count; i++)
         {
-            exitEvent(other.GetComponent<Enemy>());
-            enemyCount--;
+            Debug.Log("Exit Event!!");
+            targetList.Remove(exitObject[i]);
+            if (exitObject[i] != null) exitEvent(exitObject[i].GetComponent<Enemy>());
         }
     }
 }

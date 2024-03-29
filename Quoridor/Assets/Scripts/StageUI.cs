@@ -24,7 +24,11 @@ public class StageUI : MonoBehaviour
         if (!gameManager.gameObject.GetComponent<UiManager>().freezeButton)
         {
             gameManager.currentStage++;
-
+            if (gameManager.currentStage > 10)
+            {
+                Application.Quit();
+                return;
+            }
             gameManager.Initialize();
             player.Initialize();
             enemyStage.EnemyInitialize();
