@@ -23,6 +23,7 @@ public class AreaAbility : MonoBehaviour
     public GameObject sprite;
 
     int tempTurn;
+    public int TempTurn { get { return tempTurn; } set { tempTurn = value; } }
     GameManager gameManager;
     EnemyManager enemyManager;
     Player player;
