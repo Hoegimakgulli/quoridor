@@ -1152,7 +1152,7 @@ public class PlayerAbility : MonoBehaviour
 
             // 실행 코드
             GameObject enemyBackTarget = EnemyManager.GetEnemyObject(thisScript.targetEnemy.transform.position + new Vector3(0, 1.3f, 0));
-            if (!enemyBackTarget) // 처치된 적 뒤에 아무런 유닛도 없을 경우
+            if (!enemyBackTarget || thisScript.targetEnemy.name.Contains("EnemyShieldSoldier")) // 처치된 적 뒤에 아무런 유닛도 없을 경우 || 만약 처치된 유닛이 방패병일 경우
             {
                 return false;
             }
