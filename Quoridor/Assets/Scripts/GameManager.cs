@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 
 #if UNITY_EDITOR
@@ -205,12 +206,7 @@ public class GameManager : MonoBehaviour
                 canEnemyTurn = false;
                 tempTurn = Turn;
             }
-            bool tempBool = true;
-            for (int i = 0; i < areaAbilityList.Count; i++)
-            {
-                tempBool = tempBool && areaAbilityList[i].canDone;
-            }
-            canEnemyTurn = tempBool;
+            canEnemyTurn = areaAbilityList.All(areaAbility => areaAbility.canDone);
         }
 
         if (Input.GetKeyDown(KeyCode.D)) DebugMap();

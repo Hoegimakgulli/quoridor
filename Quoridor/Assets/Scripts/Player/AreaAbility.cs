@@ -1,11 +1,10 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public delegate void EnterEvent(Enemy enemy);
-public delegate void StayEvent(Enemy enemy);
 public delegate void ExitEvent(Enemy enemy);
 
 public class AreaAbility : MonoBehaviour
@@ -18,12 +17,14 @@ public class AreaAbility : MonoBehaviour
     public bool canPenetrate;
 
     public EnterEvent enterEvent;
-    public StayEvent stayEvent;
+
     public ExitEvent exitEvent;
 
     public GameObject sprite;
 
     int tempTurn;
+    public int TempTurn { get { return tempTurn; } set { tempTurn = value; } }
+    GameManager gameManager;
     EnemyManager enemyManager;
     Player player;
     List<GameObject> areaObjectList = new List<GameObject>();
@@ -31,16 +32,36 @@ public class AreaAbility : MonoBehaviour
     public List<GameObject> targetStayList = new List<GameObject>();
     public bool canDone;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         tempTurn = GameManager.Turn;
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
         enemyManager = GameObject.Find("GameManager").GetComponent<EnemyManager>();
+        gameManager = enemyManager.gameObject.GetComponent<GameManager>();
     }
+    void FixedUpdate()
+    {
 
+    }
     // Update is called once per frame
     void Update()
     {
+        if (tempTurn != GameManager.Turn)
+        {
+            tempTurn = GameManager.Turn;
+            if (GameManager.Turn % 2 == Player.playerOrder)
+            {
+                if (lifeType == ELifeType.Turn)
+                {
+                    if (--life == 0)
+                    {
+                        OnAbilityDisable();
+                    }
+                }
+            }
+            canDone = false;
+        }
+        targetStayList.Clear();
         for (int i = 0; i < areaPositionList.Count; i++)
         {
             bool[] result = player.CheckRay(transform.position, areaPositionList[i]);
@@ -61,22 +82,6 @@ public class AreaAbility : MonoBehaviour
         }
         EventExit();
         canDone = true;
-        if (tempTurn != GameManager.Turn)
-        {
-            tempTurn = GameManager.Turn;
-            if (lifeType == ELifeType.Turn)
-            {
-                if (--life == 0)
-                {
-                    OnAbilityDisable();
-                }
-            }
-            else
-            {
-                targetStayList.Clear();
-                canDone = false;
-            }
-        }
     }
     public void SetUp()
     {
@@ -91,6 +96,7 @@ public class AreaAbility : MonoBehaviour
             transform.tag = "PlayerDummy";
             gameObject.layer = LayerMask.NameToLayer("Token");
         }
+        gameManager.areaAbilityList.Add(this);
     }
     void OnAbilityDisable()
     {
@@ -123,7 +129,6 @@ public class AreaAbility : MonoBehaviour
         if (!targetStayList.Contains(targetObject))
         {
             targetStayList.Add(targetObject);
-            stayEvent(target);
         }
     }
     void EventExit()
@@ -131,6 +136,7 @@ public class AreaAbility : MonoBehaviour
         List<GameObject> exitObject = targetList.Except(targetStayList).ToList();
         for (int i = 0; i < exitObject.Count; i++)
         {
+            Debug.Log("Exit Event!!");
             targetList.Remove(exitObject[i]);
             if (exitObject[i] != null) exitEvent(exitObject[i].GetComponent<Enemy>());
         }

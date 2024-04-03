@@ -53,8 +53,8 @@ public class Player : MonoBehaviour
     public bool shouldReset = true;
 
     public bool canAction = true;
-    public int moveCount = 0;
-    public int buildCount = 0;
+    public int moveCount = 1;
+    public int buildCount = 1;
     public bool canAttack = true;
     public int abilityCount = 0;
     protected bool canSignAbility = true;
@@ -211,8 +211,8 @@ public class Player : MonoBehaviour
         gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
         canAction = true;
         canAttack = true;
-        moveCount = 0;
-        buildCount = 0;
+        moveCount = 1;
+        buildCount = 1;
         ResetPreview();
         playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEnemyTurnStart);
         shouldReset = false;
@@ -252,6 +252,7 @@ public class Player : MonoBehaviour
                     transform.position = previewHit.transform.position; //플레이어 위치 이동
                     GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position); //플레이어 위치정보 저장
                     if (!canAction || moveCount > 0) moveCount--;
+                    if (canAction && buildCount > 0) buildCount--;
                     if (!isDisposableMove)
                     {
                         canAction = false; // 이동이나 벽 설치 불가
@@ -291,6 +292,7 @@ public class Player : MonoBehaviour
             tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
             wallCount++; // 설치한 벽 개수 +1
             if (!canAction || buildCount > 0) buildCount--;
+            if (canAction && moveCount > 0) moveCount--;
             canAction = false; // 이동이나 벽 설치 불가
 
             return true;
