@@ -72,6 +72,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             Vector2 fixPos = new Vector2(0, 0);
             unitPos = new Vector2Int(Mathf.FloorToInt(unitPos.x) + 4, Mathf.FloorToInt(unitPos.y) + 4);
             EnemyValues currentEnemyValue = EnemyManager.GetEnemyValues(transform.position);
+
             int count;
             for (count = 1; count < path.Count; count++)
             {
@@ -98,23 +99,24 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                     break;
                 }
             }
-
-            //if (count != 1) // 다 돌았는데 처음부터 갈 곳이 없을 경우
-            //{
-            //    Debug.Log("Enemy Values Count : " + GameManager.enemyValueList.Count);
-            //    for (int posCount = 0; posCount < GameManager.enemyValueList.Count; posCount++)
-            //    {
-            //        Debug.Log("Enemy Move Start");
-            //        if (GameManager.enemyValueList[posCount].position == transform.position)
-            //        {
-            //            Debug.Log("Enemy Move Check");
-            //            //transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
-            //            // 클래스 position 변경 시 자동으로 위치 이동 변경
-            //            GameManager.enemyValueList[posCount].position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
-            //            break;
-            //        }
-            //    }
-            //}
+            /*
+            if (count != 1)
+            {
+                Debug.Log("Enemy Values Count : " + GameManager.enemyValueList.Count);
+                for (int posCount = 0; posCount < GameManager.enemyValueList.Count; posCount++)
+                {
+                    Debug.Log("Enemy Move Start");
+                    if (GameManager.enemyValueList[posCount].position == transform.position)
+                    {
+                        Debug.Log("Enemy Move Check");
+                        //transform.position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+                        // 클래스 position 변경 시 자동으로 위치 이동 변경
+                        GameManager.enemyValueList[posCount].position = new Vector3((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize, 0);
+                        break;
+                    }
+                }
+            }
+            */
 
 
             if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
@@ -154,6 +156,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     // Attack 받았을 때 실행하는 함수
     public bool AttackedEnemy(int playerAtk)
     {
+        Debug.Log("아야");
         Debug.Log(GetComponent<SpriteRenderer>().color);
         int originHP = hp;
         hp -= playerAtk;

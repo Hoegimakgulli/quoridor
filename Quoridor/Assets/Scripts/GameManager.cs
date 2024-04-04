@@ -95,7 +95,6 @@ public class GameManager : MonoBehaviour
     public PlayerCharacters playerCharacters;
 
     public GameObject autoTrap;
-
     public bool canEnemyTurn = false;
 
     public List<AreaAbility> areaAbilityList = new List<AreaAbility>();

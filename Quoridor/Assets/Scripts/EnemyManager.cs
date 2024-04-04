@@ -510,7 +510,7 @@ public class EnemyManager : MonoBehaviour
     }
     public static GameObject GetEnemyObject(Vector3 position, bool shouldLog = true)
     {
-        foreach (Transform child in GameObject.FindWithTag("EnemyBox").transform)
+        foreach (Transform child in EnemyBox.transform)
         {
             // Debug.Log(child.position);
             if (child.position == position)
