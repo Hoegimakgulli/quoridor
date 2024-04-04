@@ -30,8 +30,9 @@ public class StageUI : MonoBehaviour
                 return;
             }
             gameManager.Initialize();
-            player.Initialize();
+
             enemyStage.EnemyInitialize();
+            player.Initialize();
 
             abilitySelect.AbilitySelectStart();
 

@@ -6,7 +6,6 @@ using DG.Tweening;
 using static UnityEngine.UI.Image;
 using Unity.VisualScripting;
 using JetBrains.Annotations;
-using TMPro.EditorUtilities;
 
 public class UiManager : MonoBehaviour
 {

@@ -2485,6 +2485,7 @@ public class PlayerAbility : MonoBehaviour
         }
         public void Reset()
         {
+            thisScript.player.isMoveBuildTogether = false;
         }
         public string Save() { return string.Empty; }
         public void Load(string data) { }

@@ -204,6 +204,7 @@ public class GameManager : MonoBehaviour
         {
             Turn++;
         }
+
         if (Turn % 2 != Player.playerOrder)
         {
             if (tempTurn != Turn)

@@ -70,7 +70,6 @@ public class EnemyManager : MonoBehaviour
         {
             testMove();
         }
-
         // 적 턴일때 (이동 및 공격확인)
         if (GameManager.Turn % 2 == 0 && enemyTurnAnchor && gameManager.canEnemyTurn)
         {

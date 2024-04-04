@@ -199,7 +199,7 @@ public class AbilitySelect : MonoBehaviour
 
     public void ButtonSetting()
     {
-        for(int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)
         {
             int iii = i;
             slotUi[i].GetComponent<Button>().onClick.AddListener(SelectSkillHighlighting);
@@ -288,7 +288,7 @@ public class AbilitySelect : MonoBehaviour
             }
             else
             {
-                foreach(int skillNum in item.Value.needAbilityMain)
+                foreach (int skillNum in item.Value.needAbilityMain)
                 {
                     if (!playerAbility.abilitiesID.Contains(skillNum))
                     {
@@ -308,7 +308,7 @@ public class AbilitySelect : MonoBehaviour
                     }
                 }
 
-                if(isPart && isPart)
+                if (isPart && isPart)
                 {
                     item.Value.canShow = true;
                 }
@@ -522,9 +522,10 @@ public class AbilitySelect : MonoBehaviour
                 // 능력 선택한 이후 애니메이션 추가 예정
                 SelectSkillUiDePop();
                 Debug.Log(tmpSkillNumBox[itemCount]);
-                playerAbility.AddAbility(tmpSkillNumBox[itemCount]); // 선택한 능력 추가
+                int tmpNum = tmpSkillNumBox[itemCount];
                 skills[tmpSkillNumBox[itemCount]].isGet = true; // 얻은 스킬은 얻었다는 표시를 남겨줌
                 tmpSkillNumBox.Clear(); // 담아뒀던 임시 능력 번호는 초기화
+                playerAbility.AddAbility(tmpNum); // 선택한 능력 추가
             }
         }
     }

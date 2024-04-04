@@ -133,7 +133,7 @@ public class Player : MonoBehaviour
         //playerUI = Instantiate(playerUI); // [디버그용]
         abilityUI = Instantiate(abilityUI); // [임시 능력 UI]
         playerAbility = GetComponent<PlayerAbility>();
-        playerAbility.LoadAbility();
+        // playerAbility.LoadAbility();
     }
     public void Initialize()
     {
@@ -223,7 +223,9 @@ public class Player : MonoBehaviour
         moveCount = 1;
         buildCount = 1;
         ResetPreview();
+        isMoveBuildTogether = true;
         playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEnemyTurnStart);
+
         shouldReset = false;
         playerTurnStartAnchor = true;
     }
