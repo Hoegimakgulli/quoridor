@@ -53,6 +53,7 @@ public class Player : MonoBehaviour
     public bool shouldReset = true;
 
     public bool canAction = true;
+    public bool isMoveBuildTogether = true;
     public int moveCount = 1;
     public int buildCount = 1;
     public bool canAttack = true;
@@ -74,9 +75,11 @@ public class Player : MonoBehaviour
 
     GameObject wallStorage;
     GameObject previewStorage;
-    PlayerActionUI playerActionUI;
+    public PlayerActionUI playerActionUI;
 
     PlayerAbility playerAbility;
+
+    bool playerTurnStartAnchor = true;
 
     void Awake()
     {
@@ -158,7 +161,13 @@ public class Player : MonoBehaviour
         GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position);
         if (GameManager.Turn % 2 == playerOrder) // 플레이어 차례인지 확인
         {
-            playerAbility.ResetEvent(PlayerAbility.EResetTime.OnPlayerTurnStart);
+            if (playerTurnStartAnchor)
+            {
+                playerAbility.ResetEvent(PlayerAbility.EResetTime.OnPlayerTurnStart);
+                tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
+
+                playerTurnStartAnchor = false;
+            }
             playerUI.SetActive(true); // [디버그용]
             {
                 Transform canvas = playerUI.transform.GetChild(0);
@@ -216,6 +225,7 @@ public class Player : MonoBehaviour
         ResetPreview();
         playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEnemyTurnStart);
         shouldReset = false;
+        playerTurnStartAnchor = true;
     }
     // 모바일 or 에디터 마우스 터치좌표 처리
     void TouchSetUp()
@@ -251,8 +261,12 @@ public class Player : MonoBehaviour
                 {
                     transform.position = previewHit.transform.position; //플레이어 위치 이동
                     GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position); //플레이어 위치정보 저장
-                    if (!canAction || moveCount > 0) moveCount--;
-                    if (canAction && buildCount > 0) buildCount--;
+                    moveCount--;
+                    if (isMoveBuildTogether)
+                    {
+                        buildCount--;
+                        isMoveBuildTogether = false;
+                    }
                     if (!isDisposableMove)
                     {
                         canAction = false; // 이동이나 벽 설치 불가
@@ -291,8 +305,12 @@ public class Player : MonoBehaviour
             GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position);
             tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
             wallCount++; // 설치한 벽 개수 +1
-            if (!canAction || buildCount > 0) buildCount--;
-            if (canAction && moveCount > 0) moveCount--;
+            buildCount--;
+            if (isMoveBuildTogether)
+            {
+                moveCount--;
+                isMoveBuildTogether = false;
+            }
             canAction = false; // 이동이나 벽 설치 불가
 
             return true;
@@ -399,7 +417,7 @@ public class Player : MonoBehaviour
             float[] touchPosFloor = { Mathf.Floor(touchGridPosition.x), Mathf.Floor(touchGridPosition.y) }; // 벽 좌표
             if (touchState == ETouchState.Began)
             {
-                tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
+                // tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
                 playerWallPreview.SetActive(false); // 비활성화
                 if (touchPosFloor[0] < -4 || touchPosFloor[0] > 3 || touchPosFloor[1] < -4 || touchPosFloor[1] > 3) // 벽 좌표가 땅 밖이라면
                 {
@@ -479,7 +497,7 @@ public class Player : MonoBehaviour
                     }
                 }
             }
-            // Debug.Log($"{wallInfo[0]}, {wallInfo[1]}");
+            Debug.Log($"{wallInfo[0]}, {wallInfo[1]}");
             if (!wallInfo.SequenceEqual(previousWallInfo)) // 벽 위치가 바뀐다면
             {
                 Debug.Log($"{wallInfo[0]}, {wallInfo[1]}, {wallInfo[2]}");
