@@ -12,6 +12,7 @@ using static Player;
 public class EnemyValues
 {
     private Vector3 mPosition; // position
+    private int mMoveCtrl; // moveCtrl
 
     public int hp; // 유닛 hp
     public int maxHp; // 유닛 최대 hp
@@ -94,6 +95,10 @@ public class GameManager : MonoBehaviour
     public PlayerCharacters playerCharacters;
 
     public GameObject autoTrap;
+    public bool canEnemyTurn = false;
+
+    public List<AreaAbility> areaAbilityList = new List<AreaAbility>();
+    public int tempTurn;
 
     void Awake()
     {

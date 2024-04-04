@@ -71,6 +71,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             Vector2 unitPos = transform.position / GameManager.gridSize;
             Vector2 fixPos = new Vector2(0, 0);
             unitPos = new Vector2Int(Mathf.FloorToInt(unitPos.x) + 4, Mathf.FloorToInt(unitPos.y) + 4);
+            EnemyValues currentEnemyValue = EnemyManager.GetEnemyValues(transform.position);
 
             int count;
             for (count = 1; count < path.Count; count++)
@@ -82,7 +83,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                     Vector2 currentMovePoint = unitPos + moveablePoints[moveCount];
                     if (pathPoint == currentMovePoint && currentMovePoint != playerPos)
                     {
-                        fixPos = currentMovePoint;
+                        currentEnemyValue.position = new Vector3((currentMovePoint.x - 4) * GameManager.gridSize, (currentMovePoint.y - 4) * GameManager.gridSize, 0); // 틱마다 움직이는 함수
                         break;
                     }
                 }
@@ -98,7 +99,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                     break;
                 }
             }
-
+            /*
             if (count != 1)
             {
                 Debug.Log("Enemy Values Count : " + GameManager.enemyValueList.Count);
@@ -115,6 +116,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                     }
                 }
             }
+            */
 
 
             if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
