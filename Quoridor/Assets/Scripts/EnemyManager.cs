@@ -70,7 +70,6 @@ public class EnemyManager : MonoBehaviour
         {
             testMove();
         }
-
         // 적 턴일때 (이동 및 공격확인)
         if (GameManager.Turn % 2 == 0 && enemyTurnAnchor && gameManager.canEnemyTurn)
         {
@@ -489,7 +488,7 @@ public class EnemyManager : MonoBehaviour
     }
     public static GameObject GetEnemyObject(Vector3 position, bool shouldLog = true)
     {
-        foreach (Transform child in GameObject.FindWithTag("EnemyBox").transform)
+        foreach (Transform child in EnemyBox.transform)
         {
             // Debug.Log(child.position);
             if (child.position == position)

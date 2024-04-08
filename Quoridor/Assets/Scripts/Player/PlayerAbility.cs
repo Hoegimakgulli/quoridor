@@ -354,7 +354,7 @@ public class PlayerAbility : MonoBehaviour
                 break;
         }
         if (isSuccess) abilitiesID.Add(id);
-        //player.abilityCount = abilities.Count(ability => ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive);
+        player.abilityCount = abilities.Count(ability => ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive);
         needSave = true;
         if (!string.IsNullOrEmpty(abilityData))
             abilities[abilities.Count - 1].Load(abilityData);
@@ -2469,19 +2469,23 @@ public class PlayerAbility : MonoBehaviour
 
 
         PlayerAbility thisScript;
-        public ConstructionManeuver(PlayerAbility playerAbility) { thisScript = playerAbility; }
+        public ConstructionManeuver(PlayerAbility playerAbility)
+        {
+            thisScript = playerAbility;
+            thisScript.player.isMoveBuildTogether = false;
+        }
 
         public EAbilityType abilityType { get { return mAbilityType; } }
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public bool Event()
         {
+            thisScript.player.isMoveBuildTogether = true;
             return false;
         }
         public void Reset()
         {
-            thisScript.player.buildCount++;
-            thisScript.player.moveCount++;
+            thisScript.player.isMoveBuildTogether = false;
         }
         public string Save() { return string.Empty; }
         public void Load(string data) { }
@@ -2518,6 +2522,7 @@ public class PlayerAbility : MonoBehaviour
             thisScript.player.moveCount++;
             mCount--;
             canEvent = false;
+            thisScript.player.playerActionUI.ActiveUI();
             return false;
         }
         public void Reset()
