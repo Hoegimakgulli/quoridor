@@ -426,16 +426,12 @@ public class EnemyManager : MonoBehaviour
         int originMoveCtrl;  //원래 행동력.
         for (count = 0; count < GameManager.enemyValueList.Count; count++)
         {
-            //Debug.Log("문제의 그녀석 부분" + GameManager.enemyValueList[originSortingList[count]].position);
             currentEnemyState = GetEnemy(GameManager.enemyValueList[originSortingList[count]].position);
             originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl;
 
             if (currentEnemyState.debuffs[Enemy.EDebuff.CantMove] == 0)
             {
-                //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
                 GameManager.enemyValueList[originSortingList[count]].moveCtrl += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
-                // currentEnemyState.moveCtrl[1] = GameManager.enemyValueList[originSortingList[count]].moveCtrl; // 기존 유닛에 들어오는 무브 컨트롤 수정
-                //Debug.Log("iter " + count + " : " + Enemy.enemyObjects[sortingList[count]] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
             }
 
             uiManager.SortEnemyStates(); //행동력에 따라 적 상태창 순서 정렬
@@ -450,7 +446,6 @@ public class EnemyManager : MonoBehaviour
             }
             if (currentEnemyState.moveCtrl[0] <= GameManager.enemyValueList[originSortingList[count]].moveCtrl)
             {
-                //GameObject currenEnemy = FindValuesObj(GameManager.enemyValueList[count].position);
                 bool isPlayer = true; // true == player, false == dump
                 GameObject currenEnemy = GetEnemyObject(GameManager.enemyValueList[originSortingList[count]].position);
                 ///////////////////요 윗부분 originalSortingList랑 그 안에 어쩌구 뭐 있었는데 테스트하느라 지웠다함!!! 문제생기면 여기일듯??ㅁㅁㅇㅁㄴㄻㄴㅇ훠ㅑㅁㅈ둬모ㅓ몬ㅇ 
@@ -482,23 +477,7 @@ public class EnemyManager : MonoBehaviour
                 GameManager.enemyValueList[originSortingList[count]].moveCtrl = originMoveCtrl - currentEnemyState.moveCtrl[0]; //적의 행동력 감소
                 currentEnemyState.moveCtrl[1] = GameManager.enemyValueList[originSortingList[count]].moveCtrl; // 현재 이동한 유닛 행동력 변경
                 yield return StartCoroutine(uiManager.ReloadState(originSortingList[count], GameManager.enemyValueList[originSortingList[count]].moveCtrl, count));
-
-                /*if (!turnCheck)
-                {
-                    turnCheck = true;
-                    GameManager.Turn++;
-                }*/
             }
-
-            /*else
-            {
-                if (!turnCheck)
-                {
-                    turnCheck = true;
-                    GameManager.Turn++;
-
-                }
-            }*/
             currentEnemyState.UpdateTurn(); // 매턴마다 시행 - 동현
         }
     }
