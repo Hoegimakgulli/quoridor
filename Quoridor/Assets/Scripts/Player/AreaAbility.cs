@@ -9,7 +9,7 @@ public delegate void ExitEvent(Enemy enemy);
 
 public class AreaAbility : MonoBehaviour
 {
-    public enum ELifeType { Turn, Count, Dummy }
+    public enum ELifeType { Turn, Count, Dummy, Slipper }
     public ELifeType lifeType;
     public int life;  // 지속 기간
     public List<GameObject> targetList = new List<GameObject>(); // 타깃 오브젝트
@@ -23,6 +23,7 @@ public class AreaAbility : MonoBehaviour
     public GameObject sprite;
 
     int tempTurn;
+    bool slipperOut = false;
     public int TempTurn { get { return tempTurn; } set { tempTurn = value; } }
     GameManager gameManager;
     EnemyManager enemyManager;
@@ -46,11 +47,16 @@ public class AreaAbility : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (tempTurn != GameManager.Turn)
+        if (tempTurn != GameManager.Turn) // 턴이 지나갈 때 기준으로 능력 삭제
         {
             tempTurn = GameManager.Turn;
             if (GameManager.Turn % 2 == Player.playerOrder)
             {
+                if (slipperOut)
+                {
+                    OnAbilityDisable();
+                }
+
                 if (lifeType == ELifeType.Turn)
                 {
                     if (--life == 0)
@@ -62,7 +68,7 @@ public class AreaAbility : MonoBehaviour
             canDone = false;
         }
         targetStayList.Clear();
-        for (int i = 0; i < areaPositionList.Count; i++)
+        for (int i = 0; i < areaPositionList.Count; i++) // 적이 들어왔을 때 실행하는 구문 설치된 방향과 기준점으로부터 레이를 쏴 적이 들어왔는지 인식
         {
             bool[] result = player.CheckRay(transform.position, areaPositionList[i]);
             if (result[0])
@@ -138,6 +144,10 @@ public class AreaAbility : MonoBehaviour
         {
             Debug.Log("Exit Event!!");
             targetList.Remove(exitObject[i]);
+            if(lifeType == ELifeType.Slipper)
+            {
+                slipperOut = true;
+            }
             if (exitObject[i] != null) exitEvent(exitObject[i].GetComponent<Enemy>());
         }
     }
