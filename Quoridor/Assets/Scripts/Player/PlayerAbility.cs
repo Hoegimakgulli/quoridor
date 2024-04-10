@@ -2031,13 +2031,13 @@ public class PlayerAbility : MonoBehaviour
         public EAbilityType abilityType { get { return mAbilityType; } }
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
-        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.slipperyJellyStart = true; enemy.AttackedEnemy(mValue); }; } }
-        public ExitEvent exitEvent { get { return (Enemy enemy) => {; }; } }
+        public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.slipperyJellyStart = true; }; } }
+        public ExitEvent exitEvent { get { return (Enemy enemy) => {enemy.slipperyJellyStart = false; enemy.AttackedEnemy(mValue); }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
             mValue = 1 + thisScript.additionalAbilityStat.placeDamage; // 초기 데미지 1 + 데미지 증가 능력을 골랐을 때 더해줌
-            thisScript.SetAreaAbility(AreaAbility.ELifeType.Count, 1, targetPos, attackScale, canPenetrate[1], enterEvent, exitEvent);
+            thisScript.SetAreaAbility(AreaAbility.ELifeType.Slipper, 1, targetPos, attackScale, canPenetrate[1], enterEvent, exitEvent);
             mCount--;
             canEvent = false;
             return false;
@@ -2485,6 +2485,7 @@ public class PlayerAbility : MonoBehaviour
         }
         public void Reset()
         {
+            thisScript.player.isMoveBuildTogether = false;
         }
         public string Save() { return string.Empty; }
         public void Load(string data) { }

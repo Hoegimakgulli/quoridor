@@ -370,6 +370,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                     currentMe.position = (Vector2)transform.position + moveDir;
                     moveCount++;
                     yield return new WaitForSeconds(0.1f);
+                    // MoveCount 관련해서 수정 필요
                     if (moveCount >= 3)
                     {
                         slipperyJellyStart = false;
