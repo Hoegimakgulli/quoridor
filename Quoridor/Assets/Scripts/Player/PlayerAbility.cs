@@ -2032,7 +2032,7 @@ public class PlayerAbility : MonoBehaviour
         public EResetTime resetTime { get { return mResetTime; } }
         public bool canEvent { get { return mbEvent; } set { mbEvent = value; } }
         public EnterEvent enterEvent { get { return (Enemy enemy) => { enemy.slipperyJellyStart = true; }; } }
-        public ExitEvent exitEvent { get { return (Enemy enemy) => {enemy.slipperyJellyStart = false; enemy.AttackedEnemy(mValue); }; } }
+        public ExitEvent exitEvent { get { return (Enemy enemy) => { enemy.slipperyJellyStart = false; enemy.AttackedEnemy(mValue); }; } }
         public bool Event()
         {
             Debug.Log($"{targetPos}");
@@ -2716,7 +2716,7 @@ public class PlayerAbility : MonoBehaviour
         private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
         private List<Vector2Int> mAttackRange = new List<Vector2Int>();
         private List<Vector2Int> mAttackScale = new List<Vector2Int>();
-        private bool[] bCanPenetrate = new bool[2] { true, true };
+        private bool[] bCanPenetrate = new bool[2] { true, false };
         private Vector2Int mTargetPos;
 
         PlayerAbility thisScript;
