@@ -28,21 +28,37 @@ public class CharacterSelect : MonoBehaviour
     private Dictionary<int, CharacterData> characters = new Dictionary<int, CharacterData>();
 
     private GameObject characterPanel;
+    private GameObject characterDetailPanel;
+    private GameObject[] characterDetails = new GameObject[5];
     private GameObject[] characterUis = new GameObject[5];
     private RectTransform[] charactersUI = new RectTransform[5];
+    private bool characterSelectDone = false;
+
     public float uiMoveSpeed = 0.2f;
     public float uiWaitMoveTime = 0.1f;
 
+    private void Awake()
+    {
+        characters.Clear();
+    }
     // Start is called before the first frame update
     void Start()
     {
         int count = 0;
         characterPanel = GameObject.Find("CharacterSelectPanel");
+        characterDetailPanel = GameObject.Find("CharacterDetaillPanel");
+        // 캐릭터 선택하는 화면의 정보를 담아둠
         foreach (Transform child in characterPanel.transform.GetChild(2).transform)
         {
             characterUis[count] = child.gameObject;
             charactersUI[count] = child.GetComponent<RectTransform>();
             count++;
+        }
+
+        // 디테일 판에 있는 오브젝트들 정보를 배열에 담기
+        for (int detailCount = 0; detailCount < 5; detailCount++)
+        {
+            characterDetails[detailCount] = characterDetailPanel.transform.GetChild(detailCount).gameObject;
         }
         CharacterDataSetting();
         Initialized();
@@ -70,10 +86,16 @@ public class CharacterSelect : MonoBehaviour
             characterUis[characterCount].transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => CharacaterSelectChilck(temp));
             characterUis[characterCount].transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() => CharacaterSelectChilck(temp));
         }
+        
+        // detail select 버튼
+        characterDetailPanel.transform.GetChild(5).GetChild(0).GetComponent<Button>().onClick.AddListener(() => CharacterFixSelectChilck());
+        // detail back 버튼
+        characterDetailPanel.transform.GetChild(6).GetChild(0).GetComponent<Button>().onClick.AddListener(() => BackButtonClick());
     }
 
     void CharacterDataSetting()
     {
+        // name, story, move, attack, skill 순서대로 딕셔너리에 넣어줌
         characters.Add(0, 
             new CharacterData
             ("병사",
@@ -131,6 +153,24 @@ public class CharacterSelect : MonoBehaviour
             "회피 기동 : 공격 이후 상하좌우 1칸을 선택하여 이동할 수 있다."));
     }
 
+    void CharacterDetilPanelContrl()
+    {
+        foreach (Transform child in characterDetailPanel.transform)
+        {
+            if (!child.gameObject.activeSelf)
+            {
+                child.gameObject.SetActive(true);
+                child.GetComponent<RectTransform>().DOScale(new Vector3(1, 1, 1), uiWaitMoveTime).SetEase(Ease.Linear);
+            }
+            else
+            {
+                child.GetComponent<RectTransform>().DOScale(new Vector3(0, 0, 0), 0);
+                child.gameObject.SetActive(false);
+            }
+        }
+        characterSelectDone = false;
+    }
+
     void CharacterPanelContrl()
     {
         if (characterPanel.transform.GetChild(0).gameObject.activeSelf)
@@ -147,15 +187,39 @@ public class CharacterSelect : MonoBehaviour
         StartCoroutine(CharacterSelectStart(0));
     }
 
-    void CharacterUiSetting()
+    // 캐릭터 디테일 정보들을 미리 판에 적어두는 함수 count는 캐릭터 선택창에서 왼쪽부터 오른쪽으로 0 ~ n 까지 존재
+    void CharacterUiSetting(int count)
     {
+        // 이름 저장
+        characterDetails[0].transform.GetChild(1).GetComponent<TMP_Text>().text = characters[count].name;
 
+        // 스토리 저장
+        //characterDetails[1].transform.
+        // 움직임 텍스트 저장
+        characterDetails[2].transform.GetChild(1).GetChild(0).GetComponent<TMP_Text>().text = characters[count].move;
+        // 공격 텍스트 저장
+        characterDetails[3].transform.GetChild(1).GetChild(0).GetComponent<TMP_Text>().text = characters[count].attack;
+        // 능력 텍스트 저장
+        characterDetails[4].transform.GetChild(0).GetChild(0).GetComponent<TMP_Text>().text = characters[count].skill;
     }
 
     // character Detail 정리 후 딕셔너리 적용해서 입히기
     public void CharacaterSelectChilck(int count)
     {
-        Debug.Log("TEST");
+        CharacterUiSetting(count);
+        characterSelectDone = true;
+        CharacterPanelContrl();
+    }
+
+    // 캐릭터 확정 select 버튼을 눌러서 인게임 데이터 설정하는 함수
+    public void CharacterFixSelectChilck()
+    {
+        CharacterDetilPanelContrl();
+    }
+
+    public void BackButtonClick()
+    {
+
     }
 
     IEnumerator CharacterSelectStart(int count)
@@ -165,6 +229,11 @@ public class CharacterSelect : MonoBehaviour
         if(count < 4)
         {
             StartCoroutine(CharacterSelectStart(++count));
+        }
+
+        else if(characterSelectDone && count == 4)
+        {
+            CharacterDetilPanelContrl();
         }
     }
 }
