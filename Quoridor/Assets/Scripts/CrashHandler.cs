@@ -23,7 +23,14 @@ public class CrashHandler : MonoBehaviour
         {
             System.IO.Directory.CreateDirectory(filePath);
         }
-        System.IO.File.WriteAllLines(filePath + fileName, logs);
+        try
+        {
+            System.IO.File.WriteAllLines(filePath + fileName, logs);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError(e);
+        }
     }
     void HandleLog(string logString, string stackTrace, LogType type)
     {
@@ -49,5 +56,36 @@ public class CrashHandler : MonoBehaviour
     {
         filePath = Application.persistentDataPath + "/logs/";
         fileName = "log-" + System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + $"{GetComponent<GameManager>().currentStage}" + ".log";
+        logs.Clear();
+#if UNITY_ANDROID
+        // 기기 모델명 가져오기
+        string deviceModel = CallAndroidFunction<string>("GetDeviceModel");
+        logs.Add("Device Model: " + deviceModel);
+
+        // 안드로이드 버전 가져오기
+        string androidVersion = CallAndroidFunction<string>("GetAndroidVersion");
+        logs.Add("Android Version: " + androidVersion);
+#endif
+    }
+
+    // Android Java 클래스명
+    private const string androidClassName = "com.HoegidongMakguli.Quoridor.DeviceInfo";
+
+    // Android Java 함수 호출하는 메서드
+    private T CallAndroidFunction<T>(string functionName)
+    {
+        AndroidJavaClass androidClass = new AndroidJavaClass(androidClassName);
+        try
+        {
+            T result = androidClass.CallStatic<T>(functionName);
+            androidClass.Dispose();
+            return result;
+        }
+        catch (AndroidJavaException e)
+        {
+            Debug.LogError("Android Java Exception: " + e.Message);
+            androidClass.Dispose();
+            return default(T);
+        }
     }
 }
