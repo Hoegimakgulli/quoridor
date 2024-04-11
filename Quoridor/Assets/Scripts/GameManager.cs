@@ -166,6 +166,7 @@ public class GameManager : MonoBehaviour
                 mapGraph[i, row * 9 + (col + 1)] = 1;
             }
         }
+        GetComponent<CrashHandler>().Init();
     }
     void Update()
     {
