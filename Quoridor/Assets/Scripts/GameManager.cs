@@ -141,6 +141,10 @@ public class GameManager : MonoBehaviour
     {
         enemyPositions.Clear();
         enemyObjects.Clear();
+        for (int i = 0; i < areaAbilityList.Count; i++)
+        {
+            DestroyImmediate(areaAbilityList[i].gameObject);
+        }
         playerGridPosition = new Vector2Int(0, -4);
         playerControlStatus = EPlayerControlStatus.None;
         Turn = 1; // 턴 초기화

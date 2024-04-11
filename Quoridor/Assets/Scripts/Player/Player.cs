@@ -284,7 +284,11 @@ public class Player : MonoBehaviour
             else //다른 곳 클릭 시 다시 선택으로
             {
                 gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
-                if (isDisposableMove) isDisposableMove = false;
+                if (isDisposableMove)
+                {
+                    moveCount--;
+                    isDisposableMove = false;
+                }
                 playerActionUI.ActiveUI();
                 ResetPreview();
             }

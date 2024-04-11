@@ -64,9 +64,14 @@ public class SendMail : MonoBehaviour
         }
         fileNames.Reverse();
 
-        for (int i = 0; i < fileNames.Count; i++)
+        for (int i = 0; i < 5; i++)
         {
-            if (i >= 5) break;
+            if (i >= fileNames.Count)
+            {
+                panel.transform.GetChild(i).gameObject.SetActive(false);
+                continue;
+            }
+            panel.transform.GetChild(i).gameObject.SetActive(true);
             panel.transform.GetChild(i).GetChild(0).GetComponent<Text>().text = fileNames[i];
         }
     }
