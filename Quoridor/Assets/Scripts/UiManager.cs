@@ -220,7 +220,7 @@ public class UiManager : MonoBehaviour
         }
     }
 
-    //적 상태창을 행동력 순서로 정렬
+    //Sorting List를 적 행동력 순서대로 변경
     public void SortEnemyStates()
     {
         for (int i = 1; i < GameManager.enemyValueList.Count; i++)
@@ -274,7 +274,7 @@ public class UiManager : MonoBehaviour
     //적 체력 내려가는 애니메이션 (몇번째 enemy인지, 처음 체력, 맞은 후 체력)
     public IEnumerator CountEnemyHpAnim()
     {
-        yield return new WaitForSeconds(0.05f);
+        yield return new WaitForSeconds(0.05f); //공격받은 모든 적이 attackedEnemyList에 들어올때까지 잠깐 기다림
 
         for (int i = 0; i < attackedEnemyList.Count; i++)
         {
@@ -394,7 +394,7 @@ public class UiManager : MonoBehaviour
     }
 
 
-    //행동력에 따라 적들 상태창 스왑 (몇번째 enemy인지, 마지막 적의 움직임인지)
+    //SortingList에 따라 적들 상태창 스왑 (몇번째 enemy인지, 마지막 적의 움직임인지)
     public IEnumerator SwapStatesAnim(int enemyNum, bool isFinalMove)
     {
         float firstPosition = enemyStates[0].rect.height * -0.7f;
@@ -531,6 +531,7 @@ public class UiManager : MonoBehaviour
             moveablePoint.transform.SetParent(moveablePointsParent.transform);
             moveablePointImage.color = i == 0 ? Color.gray : enemyMoveableColor[1];
             enemyMoveablePoints.Add(moveablePoint.GetComponent<RectTransform>());
+            moveablePoint.GetComponent<RectTransform>().transform.localScale = Vector3.one;
         }
         for (int i = 0; i <= attackablePointsSize; i++) //공격가능 포인트의 최대 개수 만큼만 attackablePoint를 생성
         {
@@ -539,6 +540,7 @@ public class UiManager : MonoBehaviour
             attackablePoint.transform.SetParent(attackablePointsParent.transform);
             attackablePointImage.color = i == 0 ? Color.gray : enemyAttackableColor[1];
             enemyAttackablePoints.Add(attackablePoint.GetComponent<RectTransform>());
+            attackablePoint.GetComponent<RectTransform>().transform.localScale = Vector3.one;
         }
         enemyActionInfoPanel.gameObject.SetActive(false);
 
