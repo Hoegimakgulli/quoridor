@@ -1,13 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEditor;
 
 #if UNITY_EDITOR
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.SceneManagement;
+
 #endif
 using UnityEngine;
-using static Player;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+// using static Player;
+using HM.Utils;
 
 public class EnemyValues
 {
@@ -100,8 +106,18 @@ public class GameManager : MonoBehaviour
     public List<AreaAbility> areaAbilityList = new List<AreaAbility>();
     public int tempTurn;
 
+    // public static GameManager Instance;
+    // GameManager() { }
     void Awake()
     {
+        // if (GameManager.Instance != null)
+        // {
+        // DestroyImmediate(this.gameObject);
+        // return;
+        // }
+        // Instance = this;
+        // DontDestroyOnLoad(this.gameObject);
+        currentStage = StageManager.currentStage;
         Turn = 1; // 턴 초기화
         playerGridPosition = new Vector2Int(0, -4); // 플레이어 위치 초기화
         for (int i = 0; i < mapGraph.GetLength(0); i++) // 맵 그래프 초기화
@@ -129,6 +145,8 @@ public class GameManager : MonoBehaviour
         player = Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], ChangeCoord(playerGridPosition), Quaternion.identity);
         playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
         uiManager = GetComponent<UiManager>();
+        Debug.Log("GameManager Awake");
+
     }
     private void Start()
     {
@@ -136,6 +154,7 @@ public class GameManager : MonoBehaviour
 #if UNITY_ANDROID
         Application.targetFrameRate = 60;
 #endif
+        Debug.Log("GameManager Start");
     }
     public void Initialize()
     {
@@ -176,7 +195,7 @@ public class GameManager : MonoBehaviour
     {
         if (playerControlStatus == EPlayerControlStatus.None)
         {
-            if (player.GetComponent<Player>().touchState == ETouchState.Began)
+            if (player.GetComponent<Player>().touchState == TouchUtil.ETouchState.Began)
             {
                 Vector2 clickPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 RaycastHit2D hit = Physics2D.Raycast(player.GetComponent<Player>().touchPosition, Vector3.forward, 15f, LayerMask.GetMask("Token"));
@@ -221,6 +240,7 @@ public class GameManager : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.D)) DebugMap();
+        if (Input.GetKeyDown(KeyCode.R)) SceneManager.LoadScene(0);
     }
     //DFS 알고리즘을 이용한 벽에 갇혀있는지 체크
     public bool CheckStuck()

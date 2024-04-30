@@ -8,13 +8,13 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using HM.Utils;
 
 public class Player : MonoBehaviour
 {
     protected GameManager gameManager;
 
-    public enum ETouchState { None, Began, Moved, Ended }; //모바일과 에디터 모두 가능하게 터치 & 마우스 처리
-    public ETouchState touchState = ETouchState.None;
+    public TouchUtil.ETouchState touchState = TouchUtil.ETouchState.None;
     public Vector2 touchPosition;
 
     [SerializeField]
@@ -153,11 +153,11 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        TouchSetUp();
+        TouchUtil.TouchSetUp(ref touchState, ref touchPosition);
         // Debug.Log(touchState.ToString());
         playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEveryTick);
-        if (playerAbility.NeedSave)
-            playerAbility.SaveAbility();
+        // if (playerAbility.NeedSave)
+        // playerAbility.SaveAbility();
         GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position);
         if (GameManager.Turn % 2 == playerOrder) // 플레이어 차례인지 확인
         {
@@ -229,32 +229,11 @@ public class Player : MonoBehaviour
         shouldReset = false;
         playerTurnStartAnchor = true;
     }
-    // 모바일 or 에디터 마우스 터치좌표 처리
-    void TouchSetUp()
-    {
-#if UNITY_EDITOR
-        if (Input.GetMouseButtonDown(0)) { if (EventSystem.current.IsPointerOverGameObject() == false) { touchState = ETouchState.Began; } }
-        else if (Input.GetMouseButton(0)) { if (EventSystem.current.IsPointerOverGameObject() == false) { touchState = ETouchState.Moved; } }
-        else if (Input.GetMouseButtonUp(0)) { if (EventSystem.current.IsPointerOverGameObject() == false) { touchState = ETouchState.Ended; } }
-        else touchState = ETouchState.None;
-        touchPosition = Input.mousePosition;
 
-#else
-        if(Input.touchCount > 0) {
-        
-            Touch touch = Input.GetTouch(0);
-            if (EventSystem.current.IsPointerOverGameObject(touch.fingerId) == true) return;
-            if (touch.phase == TouchPhase.Began)  touchState = ETouchState.Began;
-            else if (touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary) touchState = ETouchState.Moved;
-            else if (touch.phase == TouchPhase.Ended) if (touchState != ETouchState.None) touchState = ETouchState.Ended;
-            touchPosition = touch.position;
-        }else touchState = ETouchState.None;
-#endif
-    }
     void MovePlayer()
     {
         SetPreviewPlayer();
-        if (touchState == ETouchState.Began) //화면 클릭시
+        if (touchState == TouchUtil.ETouchState.Began) //화면 클릭시
         {
             RaycastHit2D previewHit = Physics2D.Raycast(touchPosition, transform.forward, 15f, LayerMask.GetMask("Preview"));
             if (previewHit)
@@ -297,7 +276,7 @@ public class Player : MonoBehaviour
     void BuildWall()
     {
         if (wallCount >= maxWallCount) return;
-        if (touchState == ETouchState.Began || touchState == ETouchState.Moved)
+        if (touchState == TouchUtil.ETouchState.Began || touchState == TouchUtil.ETouchState.Moved)
             SetPreviewWall();
     }
     public bool BuildComplete()
@@ -328,7 +307,7 @@ public class Player : MonoBehaviour
         bool? isDead = null;
         SetPreviewAttack();
         SetAttackHighlight();
-        if (touchState == ETouchState.Ended) //화면 클릭시
+        if (touchState == TouchUtil.ETouchState.Ended) //화면 클릭시
         {
             RaycastHit2D previewHit = Physics2D.Raycast(touchPosition, transform.forward, 15f, LayerMask.GetMask("Preview"));
             if (previewHit)
@@ -388,7 +367,7 @@ public class Player : MonoBehaviour
             SetPreviewAbility(activeAbility.attackRange, activeAbility.attackScale, activeAbility.canPenetrate[0]);
             SetAbilityHighlight(activeAbility.attackScale, activeAbility.canPenetrate[1]);
         }
-        if (touchState == ETouchState.Ended) //화면 클릭시
+        if (touchState == TouchUtil.ETouchState.Ended) //화면 클릭시
         {
             if (previewHit)
             {
@@ -421,7 +400,7 @@ public class Player : MonoBehaviour
             // Debug.Log(Mathf.Floor((touchPosition / GameManager.gridSize).x));
             Vector2 touchGridPosition = touchPosition / GameManager.gridSize;
             float[] touchPosFloor = { Mathf.Floor(touchGridPosition.x), Mathf.Floor(touchGridPosition.y) }; // 벽 좌표
-            if (touchState == ETouchState.Began)
+            if (touchState == TouchUtil.ETouchState.Began)
             {
                 // tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
                 playerWallPreview.SetActive(false); // 비활성화
@@ -452,11 +431,11 @@ public class Player : MonoBehaviour
                 else // 그 외일땐
                 {
                     playerWallPreview.SetActive(false); //비활성화
-                    touchState = ETouchState.Began;
+                    touchState = TouchUtil.ETouchState.Began;
                 }
                 // Debug.Log(wallStartPos);
             }
-            else if (touchState == ETouchState.Moved)
+            else if (touchState == TouchUtil.ETouchState.Moved)
             {
                 if (wallStartPos == new Vector2(-50, -50)) return;
                 Vector2 wallVector = touchGridPosition - wallStartPos;

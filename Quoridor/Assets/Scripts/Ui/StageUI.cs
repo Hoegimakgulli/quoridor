@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class StageUI : MonoBehaviour
 {
@@ -23,6 +24,11 @@ public class StageUI : MonoBehaviour
     {
         if (!gameManager.gameObject.GetComponent<UiManager>().freezeButton)
         {
+            StageManager.currentStage++;
+            SceneManager.LoadScene(1);
+            return;
+            // Lecacy code
+            /*
             gameManager.currentStage++;
             if (gameManager.currentStage > 10)
             {
@@ -37,6 +43,7 @@ public class StageUI : MonoBehaviour
             abilitySelect.AbilitySelectStart();
 
             Destroy(this.gameObject);
+            */
         }
     }
 }

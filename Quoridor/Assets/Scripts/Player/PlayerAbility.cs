@@ -356,8 +356,8 @@ public class PlayerAbility : MonoBehaviour
         if (isSuccess) abilitiesID.Add(id);
         player.abilityCount = abilities.Count(ability => ability.abilityType == EAbilityType.InstantActive || ability.abilityType == EAbilityType.TargetActive);
         needSave = true;
-        if (!string.IsNullOrEmpty(abilityData))
-            abilities[abilities.Count - 1].Load(abilityData);
+        // if (!string.IsNullOrEmpty(abilityData))
+        // abilities[abilities.Count - 1].Load(abilityData);
     }
     public void RemoveAbility(int id)
     {
@@ -386,6 +386,7 @@ public class PlayerAbility : MonoBehaviour
         areaAbility.SetUp();
         return areaAbility;
     }
+    /*
     public void SaveAbility()
     {
         string filePath = Application.persistentDataPath + "/ability.json";
@@ -444,7 +445,7 @@ public class PlayerAbility : MonoBehaviour
         public List<Vector3> Vector3Data;
         public List<Vector2> Vector2Data;
         public List<Vector2Int> Vector2IntData;
-    }
+    }*/
     class AtkUp1 : IAbility // 1.공격력 증가 +1
     {
         private EAbilityType mAbilityType = EAbilityType.ValuePassive;
@@ -452,11 +453,6 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = false;
         // private int mCount = 1;
         private int mValue = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 1 }
-        };
 
         PlayerAbility thisScript;
         public AtkUp1(PlayerAbility playerAbility)
@@ -477,30 +473,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 1; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class AtkUp2 : IAbility // 2.공격력 증가 +2
     {
@@ -509,11 +481,6 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = false;
         // private int mCount = 1;
         private int mValue = 2;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 2 }
-        };
 
         PlayerAbility thisScript;
         public AtkUp2(PlayerAbility playerAbility)
@@ -535,30 +502,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 2; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class WallUp1 : IAbility // 3.벽 소지 +1
     {
@@ -567,11 +510,6 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = false;
         // private int mCount = 1;
         private int mValue = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 3 }
-        };
 
         PlayerAbility thisScript;
         public WallUp1(PlayerAbility playerAbility)
@@ -593,30 +531,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 3; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class WallUp2 : IAbility // 4.벽 소지 +2
     {
@@ -625,11 +539,6 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = false;
         // private int mCount = 1;
         private int mValue = 2;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 1 }
-        };
 
         PlayerAbility thisScript;
         public WallUp2(PlayerAbility playerAbility)
@@ -651,30 +560,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 4; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class WallUp3 : IAbility // 5.벽 소지 +3
     {
@@ -683,11 +568,7 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = false;
         // private int mCount = 1;
         private int mValue = 3;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 5 }
-        };
+
         PlayerAbility thisScript;
         public WallUp3(PlayerAbility playerAbility)
         {
@@ -708,30 +589,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 5; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class Shield : IAbility // 6.보호막
     {
@@ -739,11 +596,6 @@ public class PlayerAbility : MonoBehaviour
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(2) { 6, 1 }
-        };
 
         PlayerAbility thisScript;
         public Shield(PlayerAbility playerAbility) { thisScript = playerAbility; }
@@ -795,34 +647,6 @@ public class PlayerAbility : MonoBehaviour
                 thisScript.RemoveAbility(6);
             }
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 6; // ability ID
-            mAbilityData.intData[1] = mCount;
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-            int loadedCount = intData[1];
-
-            mbEvent = loadedEvent;
-            mCount = loadedCount;
-        }
     }
     class ToughSurvival : IAbility // 7.질긴 생존
     {
@@ -831,12 +655,6 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = false;
         private int mCount = 2;
         private bool mbDidEvent = false;
-
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(2) { false, false },
-            intData = new List<int>(2) { 7, 2 }
-        };
 
         PlayerAbility thisScript;
         public ToughSurvival(PlayerAbility playerAbility) { thisScript = playerAbility; }
@@ -874,36 +692,6 @@ public class PlayerAbility : MonoBehaviour
                 canEvent = true;
             }
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.boolData[1] = mbDidEvent;
-            mAbilityData.intData[0] = 7; // ability ID
-            mAbilityData.intData[1] = mCount;
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            int loadedCount = intData[1];
-            bool loadedEvent = boolData[0];
-            bool loadedDidEvent = boolData[1];
-
-            mCount = loadedCount;
-            mbDidEvent = loadedDidEvent;
-            mbEvent = loadedEvent;
-        }
     }
     class Reload : IAbility // 8.재장전
     {
@@ -911,11 +699,6 @@ public class PlayerAbility : MonoBehaviour
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         // private int mCount = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 8 }
-        };
 
         PlayerAbility thisScript;
         public Reload(PlayerAbility playerAbility) { thisScript = playerAbility; }
@@ -933,30 +716,6 @@ public class PlayerAbility : MonoBehaviour
         {
             canEvent = true;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 8; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class ChainLightning : IAbility // 9.체인라이트닝
     {
@@ -964,11 +723,6 @@ public class PlayerAbility : MonoBehaviour
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 1 }
-        };
 
         PlayerAbility thisScript;
         public ChainLightning(PlayerAbility playerAbility) { thisScript = playerAbility; }
@@ -1002,30 +756,6 @@ public class PlayerAbility : MonoBehaviour
         {
             canEvent = true;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 9; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class ChaineExplosion : IAbility // 10.연쇄폭발
     {
@@ -1033,11 +763,6 @@ public class PlayerAbility : MonoBehaviour
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 10 }
-        };
 
         PlayerAbility thisScript;
         private List<Vector2> exploablePosition = new List<Vector2>();
@@ -1091,30 +816,6 @@ public class PlayerAbility : MonoBehaviour
             canEvent = true;
             exploablePosition.Clear();
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 10; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class PenetrateAttack : IAbility // 11.관통 공격
     {
@@ -1122,11 +823,6 @@ public class PlayerAbility : MonoBehaviour
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 11 }
-        };
 
         PlayerAbility thisScript;
         public PenetrateAttack(PlayerAbility playerAbility) { thisScript = playerAbility; }
@@ -1167,30 +863,6 @@ public class PlayerAbility : MonoBehaviour
         {
             canEvent = true;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 11; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class PrecisionAttack : IAbility, IActiveAbility // 12.정밀 공격
     {
@@ -1199,11 +871,7 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = true;
         private int mCount = 2;
         private int mValue = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(2) { false, false },
-            intData = new List<int>(2) { 12, 2 }
-        };
+
         private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.Attack;
         private List<Vector2Int> mAttackRange = new List<Vector2Int>();
         private List<Vector2Int> mAttackScale = new List<Vector2Int>();
@@ -1241,35 +909,6 @@ public class PlayerAbility : MonoBehaviour
             if (mCount > 0) canEvent = true;
             Debug.Log(canEvent);
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.boolData[1] = bUsed;
-            mAbilityData.intData[0] = 12; // ability ID
-            mAbilityData.intData[1] = mCount;
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            int loadedCount = intData[1];
-            bool loadedEvent = boolData[0];
-            bool loadedUsed = boolData[1];
-
-            mbEvent = loadedEvent;
-            bUsed = loadedUsed;
-        }
     }
     class SmokeGrenade : IAbility, IActiveAbility, IAreaAbility // 13.연막탄
     {
@@ -1278,12 +917,7 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = true;
         private int mCount = 1;
         private int mValue = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { true },
-            intData = new List<int>(3) { 13, 1, -1 },//ID, mCount, life
-            Vector2IntData = new List<Vector2Int>(1) { new Vector2Int(100, 100) }// x, y
-        };
+
         private DisposableButton.ActiveCondition mActiveCondition = DisposableButton.ActiveCondition.None;
         private List<Vector2Int> mAttackRange = new List<Vector2Int>(){
             new Vector2Int(1, 0), new Vector2Int(2, 0), new Vector2Int(-1, 0), new Vector2Int(-2, 0), new Vector2Int(0, 1), new Vector2Int(0, 2), new Vector2Int(0, -1), new Vector2Int(0, -2), new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1),new Vector2Int(-1, -1)
@@ -1323,7 +957,7 @@ public class PlayerAbility : MonoBehaviour
             canEvent = false;
             mCount--;
             tempTurn = GameManager.Turn;
-            mAbilityData.Vector2IntData[0] = targetPos;
+            // mAbilityData.Vector2IntData[0] = targetPos;
             return false;
         }
         public void Reset()
@@ -1340,43 +974,6 @@ public class PlayerAbility : MonoBehaviour
             if (mCount > 0)
             {
                 canEvent = true;
-            }
-        }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 13; // ability ID
-            mAbilityData.intData[1] = mCount;
-            mAbilityData.intData[2] = mAreaAbility.life;
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-            data.Add("Vector2IntData", mAbilityData.Vector2IntData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-            List<Vector2Int> Vector2IntData = JsonConvert.DeserializeObject<List<Vector2Int>>(root["Vector2IntData"].ToString());
-
-            int loadedID = intData[0];
-            int loadedCount = intData[1];
-            int loadedLife = intData[2];
-            bool loadedEvent = boolData[0];
-            Vector2Int loadedPos = Vector2IntData[0];
-            mbEvent = loadedEvent;
-
-            if (loadedEvent && loadedPos.x < 100) // 범위 능력이 각 enemy에게 적용된 여부 등을 저장하지 못하는 상태
-            {                                     // 추후 수정 필요
-                Debug.Log($"{loadedID}: [{loadedPos.x}, {loadedPos.y}]");
-                // 
-                //thisScript.SetAreaAbility(AreaAbility.ELifeType.Turn, loadedLife, loadedPos, attackScale, canPenetrate[1], enterEvent, exitEvent);
             }
         }
     }
@@ -1455,8 +1052,6 @@ public class PlayerAbility : MonoBehaviour
                 canEvent = true;
             }
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class Grenade : IAbility, IActiveAbility, IAreaAbility // 15.수류탄
     {
@@ -1520,8 +1115,6 @@ public class PlayerAbility : MonoBehaviour
                 canEvent = true;
             }
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class ThrowingDamageUp1 : IAbility // 16.투척 데미지 증가1
     {
@@ -1530,11 +1123,6 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = false;
         // private int mCount = 1;
         private int mValue = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 16 }
-        };
 
         PlayerAbility thisScript;
         public ThrowingDamageUp1(PlayerAbility playerAbility)
@@ -1556,30 +1144,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 16; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class ThrowingDamageUp2 : IAbility // 17.투척 데미지 증가2
     {
@@ -1588,11 +1152,6 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = false;
         // private int mCount = 1;
         private int mValue = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 17 }
-        };
 
         PlayerAbility thisScript;
         public ThrowingDamageUp2(PlayerAbility playerAbility)
@@ -1614,30 +1173,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 17; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class ThrowingRangeUp1 : IAbility // 18.투척 사거리 확장1
     {
@@ -1646,11 +1181,6 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = false;
         // private int mCount = 1;
         // private int mValue = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 18 }
-        };
         private List<Vector2Int> mRange = new List<Vector2Int>() {
             new Vector2Int(2, 1), new Vector2Int(2, -1), new Vector2Int(-2, 1), new Vector2Int(-2, -1), new Vector2Int(1, 2), new Vector2Int(1, -2), new Vector2Int(-1, 2), new Vector2Int(-1, -2) };
 
@@ -1674,30 +1204,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 18; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class ThrowingRangeUp2 : IAbility // 19.투척 사거리 확장2
     {
@@ -1706,11 +1212,6 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = false;
         // private int mCount = 1;
         // private int mValue = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 19 }
-        };
         private List<Vector2Int> mRange = new List<Vector2Int>() {
             new Vector2Int(2, 2), new Vector2Int(2, -2), new Vector2Int(-2, 2), new Vector2Int(-2, -2) };
 
@@ -1734,30 +1235,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 19; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class ThrowingCountUp1 : IAbility // 20.투척 개수 증가1
     {
@@ -1766,11 +1243,6 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = false;
         // private int mCount = 1;
         private int mValue = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 20 }
-        };
         PlayerAbility thisScript;
         public ThrowingCountUp1(PlayerAbility playerAbility)
         {
@@ -1791,30 +1263,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 20; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class ThrowingCountUp2 : IAbility // 21.투척 개수 증가2
     {
@@ -1823,11 +1271,7 @@ public class PlayerAbility : MonoBehaviour
         private bool mbEvent = false;
         // private int mCount = 1;
         private int mValue = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(1) { 21 }
-        };
+
 
         PlayerAbility thisScript;
         public ThrowingCountUp2(PlayerAbility playerAbility)
@@ -1849,30 +1293,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save()
-        {
-            string result = string.Empty;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-
-            mAbilityData.boolData[0] = mbEvent;
-            mAbilityData.intData[0] = 21; // ability ID
-            data.Add("intData", mAbilityData.intData);
-            data.Add("boolData", mAbilityData.boolData);
-
-            result = JsonConvert.SerializeObject(data);
-            return result;
-        }
-        public void Load(string data)
-        {
-            var root = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            List<int> intData = JsonConvert.DeserializeObject<List<int>>(root["intData"].ToString());
-            List<bool> boolData = JsonConvert.DeserializeObject<List<bool>>(root["boolData"].ToString());
-
-            int loadedID = intData[0];
-            bool loadedEvent = boolData[0];
-
-            mbEvent = loadedEvent;
-        }
     }
     class AutoTrapSetting : IAbility, IAreaAbility // 22.자동 덫 설치
     {
@@ -1880,11 +1300,7 @@ public class PlayerAbility : MonoBehaviour
         private EResetTime mResetTime = EResetTime.OnEnemyTurnStart;
         private bool mbEvent = false;
         private int mCount = 1;
-        private AbilityData mAbilityData = new AbilityData()
-        {
-            boolData = new List<bool>(1) { false },
-            intData = new List<int>(2) { 22, 1 } //ID, moveCount
-        };
+
 
         private int moveCount = 1; // 1인 이유는 이 MovePassive자체가 1번 움직이고 실행되는 코드이기 때문에 미리 1을 더해둠
         private Vector3 playerBeforePos;
@@ -1928,8 +1344,6 @@ public class PlayerAbility : MonoBehaviour
         {
             canEvent = true;
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class KnifeMine : IAbility, IActiveAbility, IAreaAbility // 23. 칼날 지뢰
     {
@@ -1990,8 +1404,6 @@ public class PlayerAbility : MonoBehaviour
                 canEvent = true;
             }
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class SlipperyJelly : IAbility, IActiveAbility, IAreaAbility // 24. 미끌 젤리
     {
@@ -2054,8 +1466,6 @@ public class PlayerAbility : MonoBehaviour
                 canEvent = true;
             }
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class PlaceDamageUp1 : IAbility // 25.설치 데미지 증가1
     {
@@ -2085,8 +1495,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class PlaceDamageUp2 : IAbility // 26.설치 데미지 증가2
     {
@@ -2116,8 +1524,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class PlaceCountUp1 : IAbility // 27.설치 개수 증가1
     {
@@ -2147,8 +1553,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class PlaceCountUp2 : IAbility // 28.설치 개수 증가2
     {
@@ -2178,8 +1582,6 @@ public class PlayerAbility : MonoBehaviour
         {
             return;
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class PlaceDummy : IAbility, IActiveAbility, IAreaAbility // 29. 더미 설치
     {
@@ -2239,8 +1641,6 @@ public class PlayerAbility : MonoBehaviour
                 canEvent = true;
             }
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class ArtilleryFire : IAbility, IActiveAbility, IAreaAbility // 30.포병 화력
     {
@@ -2303,8 +1703,6 @@ public class PlayerAbility : MonoBehaviour
         {
             if (GameManager.Turn == 1) canEvent = true;
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class RequestSniping : IAbility, IActiveAbility, IAreaAbility // 31.저격 요청
     {
@@ -2351,8 +1749,6 @@ public class PlayerAbility : MonoBehaviour
         {
             if (GameManager.Turn == 1) canEvent = true;
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class PrecisionBomb : IAbility, IActiveAbility, IAreaAbility // 32.정밀 폭격
     {
@@ -2398,8 +1794,6 @@ public class PlayerAbility : MonoBehaviour
         {
             if (GameManager.Turn == 1) canEvent = true;
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class EvasiveManeuver : IAbility // 33.회피 기동
     {
@@ -2457,8 +1851,6 @@ public class PlayerAbility : MonoBehaviour
             }
 
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class ConstructionManeuver : IAbility // 34.건설 기동
     {
@@ -2487,8 +1879,6 @@ public class PlayerAbility : MonoBehaviour
         {
             thisScript.player.isMoveBuildTogether = false;
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class FastManeuver : IAbility, IActiveAbility // 35.빠른 기동
     {
@@ -2531,8 +1921,6 @@ public class PlayerAbility : MonoBehaviour
             if (mCount > 0) canEvent = true;
             Debug.Log(canEvent);
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class KnockBack : IAbility // 36.넉백
     {
@@ -2575,8 +1963,6 @@ public class PlayerAbility : MonoBehaviour
         {
             canEvent = true;
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class Pressure : IAbility // 37.위압감
     {
@@ -2611,8 +1997,6 @@ public class PlayerAbility : MonoBehaviour
                 }
             }
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class AnkleAttack : IAbility // 38.발목 공격
     {
@@ -2639,8 +2023,6 @@ public class PlayerAbility : MonoBehaviour
         {
             canEvent = true;
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class Imprison : IAbility, IActiveAbility // 39.수감
     {
@@ -2703,8 +2085,6 @@ public class PlayerAbility : MonoBehaviour
                 if (tempPosition != GameManager.playerGridPosition) shouldSetRange = true;
             }
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class MindControl : IAbility, IActiveAbility // 40.정신 조종
     {
@@ -2766,8 +2146,6 @@ public class PlayerAbility : MonoBehaviour
             if (mCount > 0) canEvent = true;
             Debug.Log(canEvent);
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class ReRoll : IAbility // 41.리롤
     {
@@ -2795,8 +2173,6 @@ public class PlayerAbility : MonoBehaviour
         public void Reset()
         {
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class PoisonousCocktail : IAbility, IActiveAbility // 42.약독주
     {
@@ -2848,8 +2224,6 @@ public class PlayerAbility : MonoBehaviour
                 }
             }
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class Conciliation : IAbility, IActiveAbility // 43.회유
     {
@@ -2897,8 +2271,6 @@ public class PlayerAbility : MonoBehaviour
         public void Reset()
         {
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
     class SleepingSand : IAbility, IActiveAbility // 44.수면 모래
     {
@@ -2942,7 +2314,5 @@ public class PlayerAbility : MonoBehaviour
         public void Reset()
         {
         }
-        public string Save() { return string.Empty; }
-        public void Load(string data) { }
     }
 }
