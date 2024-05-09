@@ -33,21 +33,15 @@ public class EnemyManager : MonoBehaviour
 {
     public List<GameObject> enemyPrefabs; // 모든 유닛들 통합으로 관리
 
-    // public static int gameManager.currentStage = 0;
     public GameObject enemyBoxPrefab; // 경고 표기 담아두는 박스
     static GameObject EnemyBox;
     public GameObject enemyUiCanvas;
 
     private bool enemyTurnAnchor = true;
-    //private bool enemyWarningSignAnchor = true;
-
-    //public GameObject EnemyStatePanel;
 
     private void Awake()
     {
         SetEnemyBox();
-        //GameObject enemyUi = Instantiate(enemyUiCanvas);
-        //Instantiate(EnemyStatePanel, enemyUi.transform);
         Debug.Log("ui Spawned");
         gameManager = transform.gameObject.GetComponent<GameManager>();
         GameManager.enemyValueList.Clear();
@@ -73,26 +67,10 @@ public class EnemyManager : MonoBehaviour
         // 적 턴일때 (이동 및 공격확인)
         if (GameManager.Turn % 2 == 0 && enemyTurnAnchor && gameManager.canEnemyTurn)
         {
-            //enemyWarningSignAnchor = true;
             enemyTurnAnchor = false;
-            // 오브젝트 카운트 초기화
-            /*      
-            for (int count = 0; count < GameManager.enemyObjects.Count; count++)
-            {
-                GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
-            }*/
 
             StartCoroutine(StartEnemyTurn());
         }
-
-        // 플레이어 턴일때 (적 움직임 경고)
-        /*
-        if(GameManager.Turn % 2 == 1 && enemyWarningSignAnchor)
-        {
-            enemyWarningSignAnchor = false;
-           WarningEnemy();
-        }
-        */
     }
 
     public List<Path> FinalPathList;
@@ -262,65 +240,7 @@ public class EnemyManager : MonoBehaviour
         return false;
     }
 
-    /*
-    void OnDrawGizmos()
-    {
-        if (FinalPathList.Count != 0) for (int i = 0; i < FinalPathList.Count - 1; i++)
-                Gizmos.DrawLine(new Vector2(FinalPathList[i].x, FinalPathList[i].y), new Vector2(FinalPathList[i + 1].x, FinalPathList[i + 1].y));
-    }
-    */
     static public bool turnCheck = false;
-    //void MoveCtrlUpdate()
-    //{
-    //    Enemy currentEnemyState;
-    //    int count;
-    //    for (count = 0; count < GameManager.enemyObjects.Count; count++)
-    //    {
-    //        currentEnemyState = GameManager.enemyObjects[count].GetComponent<Enemy>();
-
-    //        //Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
-    //        currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
-    //        Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
-
-    //        //currentEnemyState.moveCtrl[1] += 10; // test 용 추가
-
-    //        if (currentEnemyState.moveCtrl[0] <= currentEnemyState.moveCtrl[1])
-    //        {
-    //            GameObject currenEnemy = GameManager.enemyObjects[count];
-    //            GameObject player = GameObject.FindWithTag("Player");
-    //            currentEnemyState.state = Enemy.EState.Move;
-    //            PathFinding(currenEnemy, player);
-    //            currentEnemyState.EnemyMove(FinalPathList);
-    //            currentEnemyState.moveCtrl[1] = 0; // 현재 행동력 초기화
-    //            /*
-    //            foreach(Transform child in GameObject.FindWithTag("WarningBox").transform)
-    //            {
-    //                if(child.GetComponent<Text>().text == GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text)
-    //                {
-    //                    child
-    //                }
-    //            }
-    //            GameManager.enemyObjects[count].transform.GetChild(0).GetComponent<TextMesh>().text = "";
-    //            */
-    //            if (!turnCheck)
-    //            {
-    //                turnCheck = true;
-    //                GameManager.Turn++;
-    //            }
-    //        }
-
-    //        else
-    //        {
-    //            if (!turnCheck)
-    //            {
-    //                turnCheck = true;
-    //                GameManager.Turn++;
-
-    //            }
-    //        }
-    //    }
-    //}
-
     void testMove()
     {
         Enemy currentEnemyState;
@@ -334,54 +254,6 @@ public class EnemyManager : MonoBehaviour
             Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
         }
     }
-
-    /*
-    public GameObject enemyWarningPrefab;
-    public void WarningEnemy()
-    {
-        int count;
-        int index = 1;
-        GameObject player = GameObject.FindWithTag("Player");
-        Vector2 playerPos = player.transform.position / GameManager.gridSize;
-
-        for (count = 0; count < GameManager.enemyObjects.Count; count++)
-        {
-            Enemy currentEnemy = GameManager.enemyObjects[count].GetComponent<Enemy>();
-            GameObject currentEnemyObj = GameManager.enemyObjects[count];
-            if (currentEnemy.moveCtrl[1] + currentEnemy.moveCtrl[2] >= 10)
-            {
-                currentEnemyObj.transform.GetChild(0).GetComponent<TextMesh>().text = "" + index;
-                PathFinding(currentEnemyObj, player);
-
-                Vector2 unitPos = currentEnemyObj.transform.position / GameManager.gridSize;
-                Vector2 fixPos = new Vector2(0, 0);
-                unitPos = new Vector2Int(Mathf.FloorToInt(unitPos.x) + 4, Mathf.FloorToInt(unitPos.y) + 4);
-
-                for (int pathCount = 1; pathCount < FinalPathList.Count; pathCount++)
-                {
-                    Vector2 pathPoint = new Vector2(FinalPathList[pathCount].x, FinalPathList[pathCount].y);
-                    int moveCount;
-                    for (moveCount = 0; moveCount < currentEnemy.moveablePoints.Length; ++moveCount)
-                    {
-                        Vector2 currentMovePoint = unitPos + currentEnemy.moveablePoints[moveCount];
-                        if (pathPoint == currentMovePoint && currentMovePoint != playerPos)
-                        {
-                            fixPos = currentMovePoint;
-                            break;
-                        }
-                    }
-                    if (moveCount == currentEnemy.moveablePoints.Length)
-                    {
-                        break;
-                    }
-                }
-             
-                GameObject sign = Instantiate(enemyWarningPrefab, new Vector2((fixPos.x - 4) * GameManager.gridSize, (fixPos.y - 4) * GameManager.gridSize), Quaternion.identity, GameObject.FindWithTag("WarningBox").transform);
-                sign.transform.GetChild(0).GetComponent<TextMesh>().text = "" + index;
-                index++;
-            }
-        }
-    }*/
 
     void CheckEnemyInfo()
     {

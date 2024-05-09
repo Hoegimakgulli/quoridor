@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using HM.Utils;
@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 public class StageManager : MonoBehaviour
 {
-    public static int currentStage = 0; // 현재 스테이지
+    public static int currentStage = 1; // 현재 스테이지
     public static List<int> clearedStageID = new List<int>(); // 클리어한 스테이지 ID
 
     TouchUtil.ETouchState touchState = TouchUtil.ETouchState.None; // 터치 상태

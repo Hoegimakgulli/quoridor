@@ -38,6 +38,7 @@ public class Player : MonoBehaviour
     GameObject historyIndexPrefab; // history 형식으로 저장되는 글 양식
 
     public const int playerOrder = 1; // 플레이어 차례
+    public int playerIndex; // 다수의 플레이어가 있을 경우 나누는 순서
 
     // player Status //
     public int atk;
@@ -137,7 +138,7 @@ public class Player : MonoBehaviour
     }
     public void Initialize()
     {
-        transform.position = GameManager.gridSize * new Vector3(0, -4, 0);
+        //transform.position = GameManager.gridSize * new Vector3(0, -4, 0);
         wallCount = 0;
 
         for (int i = 0; i < wallStorage.transform.childCount; i++)
@@ -159,7 +160,7 @@ public class Player : MonoBehaviour
         // if (playerAbility.NeedSave)
         // playerAbility.SaveAbility();
         GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position);
-        if (GameManager.Turn % 2 == playerOrder) // 플레이어 차례인지 확인
+        if (GameManager.Turn % 2 == playerOrder && (GameManager.Turn / 2) % gameManager.playerCount == playerIndex) // 플레이어 차례인지 확인
         {
             if (playerTurnStartAnchor)
             {
