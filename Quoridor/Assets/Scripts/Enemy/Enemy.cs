@@ -5,6 +5,8 @@ using UnityEngine;
 using DG.Tweening;
 using System;
 using DG.Tweening.Core.Easing;
+using HM.Containers;
+using HM.Physics;
 
 public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 {
@@ -335,7 +337,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         while (slipperyJellyStart) // 만약 탈출했을 경우 slipperyJellyStart 시작
         {
             Vector2 moveDir = new Vector2(transform.position.x, transform.position.y) - moveBeforePos;
-            bool[] result = player.CheckRay(transform.position, moveDir);
+            bool[] result = HMPhysics.CheckRay(transform.position, moveDir);
             Debug.Log("case 1 : " + result[0] + " case 2 : " + result[1] + " case 3 : " + result[2]);
 
             if (result[0])

@@ -14,6 +14,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Data.Common;
 using Unity.Mathematics;
+using HM.Containers;
+using HM.Physics;
 #if UNITY_EDITOR
 namespace UnityEditor
 {
@@ -607,11 +609,11 @@ public class PlayerAbility : MonoBehaviour
         {
             Vector2Int newGridPosition = GameManager.playerGridPosition + new Vector2Int(0, -2);
 
-            bool[] result = thisScript.player.CheckRay(thisScript.transform.position, new Vector2(0, -2));
+            bool[] result = HMPhysics.CheckRay(thisScript.transform.position, new Vector2(0, -2));
 
             if (result[0] || !result[1] || result[2])
             {
-                result = thisScript.player.CheckRay(thisScript.transform.position, new Vector2(0, -1));
+                result = HMPhysics.CheckRay(thisScript.transform.position, new Vector2(0, -1));
 
                 if (result[0] || !result[1] || result[2])
                 {
@@ -786,7 +788,7 @@ public class PlayerAbility : MonoBehaviour
 
             for (int i = 0; i < exploablePosition.Count; i++)
             {
-                result = thisScript.player.CheckRay(thisScript.targetEnemy.transform.position, exploablePosition[i]);
+                result = HMPhysics.CheckRay(thisScript.targetEnemy.transform.position, exploablePosition[i]);
 
                 if (result[0]) // 외부벽에 막혀있는 판정일 경우 리스트에서 제외
                 {
@@ -1938,7 +1940,7 @@ public class PlayerAbility : MonoBehaviour
         public bool Event()
         {
             Vector3 newPosition = thisScript.targetEnemy.transform.position + GameManager.ChangeCoord(new Vector2Int(0, 1));
-            bool[] result = thisScript.player.CheckRay(thisScript.targetEnemy.transform.position, Vector2.up);
+            bool[] result = HMPhysics.CheckRay(thisScript.targetEnemy.transform.position, Vector2.up);
             if (!result[0] && !result[2])
             {
                 if (result[1])
@@ -2119,7 +2121,7 @@ public class PlayerAbility : MonoBehaviour
             Tuple<Enemy, Vector2Int> closestEnemy = null;
             foreach (var attackablePoint in targetEnemy.attackablePoints)
             {
-                bool[] result = thisScript.player.CheckRay(targetEnemy.transform.position, attackablePoint);
+                bool[] result = HMPhysics.CheckRay(targetEnemy.transform.position, attackablePoint);
                 if (result[0]) continue;
                 if (result[1] || canPenetrate[1])
                 {
