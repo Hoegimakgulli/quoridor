@@ -650,7 +650,10 @@ public class UiManager : MonoBehaviour
         {
             EnemyManager.turnCheck = false;
             GameManager.Turn++;
-            gameManager.playerActionUI.PassiveUI();
+            for(int count = 0; count < gameManager.playerActionUis.Count; count++)
+            {
+                gameManager.playerActionUis[count].PassiveUI();
+            }
             turnEndButton.SetActive(false);
         }
     }

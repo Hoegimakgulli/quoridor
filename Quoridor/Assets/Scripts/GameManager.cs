@@ -94,6 +94,9 @@ public class GameManager : MonoBehaviour
 
     public int currentStage;
 
+    public int playerCount;
+    public List<GameObject> players;
+    public List<PlayerActionUI> playerActionUis;
     public GameObject player;
     public PlayerActionUI playerActionUI;
     public UiManager uiManager;
@@ -110,13 +113,6 @@ public class GameManager : MonoBehaviour
     // GameManager() { }
     void Awake()
     {
-        // if (GameManager.Instance != null)
-        // {
-        // DestroyImmediate(this.gameObject);
-        // return;
-        // }
-        // Instance = this;
-        // DontDestroyOnLoad(this.gameObject);
         currentStage = StageManager.currentStage;
         Turn = 1; // 턴 초기화
         playerGridPosition = new Vector2Int(0, -4); // 플레이어 위치 초기화
@@ -142,8 +138,9 @@ public class GameManager : MonoBehaviour
             }
         }
         // DebugMap();
-        player = Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], ChangeCoord(playerGridPosition), Quaternion.identity);
-        playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
+        PlayerSpawn();
+        //player = Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], ChangeCoord(playerGridPosition), Quaternion.identity);
+        //playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
         uiManager = GetComponent<UiManager>();
         Debug.Log("GameManager Awake");
 
@@ -195,10 +192,10 @@ public class GameManager : MonoBehaviour
     {
         if (playerControlStatus == EPlayerControlStatus.None)
         {
-            if (player.GetComponent<Player>().touchState == TouchUtil.ETouchState.Began)
+            if (players[(Turn / 2) % playerCount].GetComponent<Player>().touchState == TouchUtil.ETouchState.Began)
             {
                 Vector2 clickPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                RaycastHit2D hit = Physics2D.Raycast(player.GetComponent<Player>().touchPosition, Vector3.forward, 15f, LayerMask.GetMask("Token"));
+                RaycastHit2D hit = Physics2D.Raycast(players[(Turn / 2) % playerCount].GetComponent<Player>().touchPosition, Vector3.forward, 15f, LayerMask.GetMask("Token"));
 
                 if (hit.collider != null && hit.collider.gameObject.tag == "Enemy")
                 {
@@ -297,10 +294,30 @@ public class GameManager : MonoBehaviour
         Debug.Log(log);
     }
 
+    public void PlayerSpawn()
+    {
+        RaycastHit2D hit;
+        Vector2 playerPos;
+        for(int count = 0; count < playerCount; count++)
+        {
+            // 좌표 뽑아오기
+            do
+            {
+                playerPos = new Vector2Int(Random.Range(-4, 5), -4);
+                hit = Physics2D.Raycast(playerPos * gridSize, Vector3.forward, 15f, LayerMask.GetMask("Token"));
+            } while (hit);
+
+            players.Add(Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], playerPos * gridSize, Quaternion.identity));
+            players[count].GetComponent<Player>().playerIndex = count;
+            playerActionUis.Add(players[count].transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>());
+        }
+    }
+
     //적턴이 끝나고 플레이어 턴이 시작될 때 실행될 것들
     public void PlayerTurnSet()
     {
-        playerActionUI.ActiveUI();
+        // 현재 턴에서 enemy턴을 제외한 전체 player갯수중 하나 player가 사망시 예외처리 적용해야함
+        playerActionUis[(Turn / 2) % playerCount].ActiveUI();
         uiManager.turnEndButton.SetActive(true);
     }
     public static Vector3 ChangeCoord(Vector2Int originVector) { return ((Vector3)(Vector2)originVector * gridSize); }
