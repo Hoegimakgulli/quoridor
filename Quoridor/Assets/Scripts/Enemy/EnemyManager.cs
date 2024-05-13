@@ -282,6 +282,30 @@ public class EnemyManager : MonoBehaviour
         gameManager.PlayerTurnSet(); //플레이어 턴이 시작됨을 알림
     }
 
+    void EnemyMoveStart()
+    {
+        GameObject moveEnemyObj = GetEnemyObject(GameManager.enemyValueList[(GameManager.Turn / 2) % GameManager.enemyValueList.Count].position);
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        List<Path> shortPath = new List<Path>();
+
+        bool isPlayer = GameObject.FindWithTag("PlayerDummy") ? false : true;
+        PathFinding(moveEnemyObj, GameObject.FindWithTag("PlayerDummy") ? GameObject.FindWithTag("PlayerDummy") : players[0]);
+        shortPath = FinalPathList;
+        for (int count = 0; count < players.Length; count++)
+        {
+            PathFinding(moveEnemyObj, players[count]);
+
+            // 모든 player랑 비교해서 가장 가까운 player 위치로 이동함
+            if (shortPath.Count > FinalPathList.Count)
+            {
+                isPlayer = true;
+                shortPath = FinalPathList;
+            }
+        }
+
+        GetEnemy(moveEnemyObj.transform.position).EnemyMove(shortPath, isPlayer);
+    }
+
     //적 움직임 상태창 애니메이션에 맞춰 순차적으로 움직이도록 수정 (이규빈)
     IEnumerator MoveCtrlUpdateCoroutine()
     {
