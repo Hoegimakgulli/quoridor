@@ -1,74 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEditor;
 
 #if UNITY_EDITOR
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.SceneManagement;
+
 #endif
 using UnityEngine;
-using static Player;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+// using static Player;
+using HM.Utils;
+using HM.Containers;
 
-public class EnemyValues
-{
-    private Vector3 mPosition; // position
-    private int mMoveCtrl; // moveCtrl
-
-    public int hp; // 유닛 hp
-    public int maxHp; // 유닛 최대 hp
-    public int moveCtrl
-    {
-        get
-        {
-            return mMoveCtrl;
-        }
-
-        set
-        {
-            // Debug.Log($"SetPreMoveCtrl : {index}: {value}");
-            value = Mathf.Max(value, 0);
-            // Debug.Log($"SetMoveCtrl : {index}: {value}");
-            Enemy correctEnemy = EnemyManager.GetEnemy(mPosition);
-            correctEnemy.moveCtrl[1] = value;
-            mMoveCtrl = value;
-        }
-    }
-    public int maxMoveCtrl; // 유닛이 가질 수 있는 최대 행동력
-    public int uniqueNum; // 어떤 유닛을 생성할지 정하는 번호
-    public int index; // 생성 순서, EnemyBox 내 Index
-    public Vector3 position // position이 변경될때 일어나는 것
-    {
-        get
-        {
-            return mPosition;
-        }
-
-        set
-        {
-            GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
-            // enemyBox.transform.GetChild(spawnNum).position = value;
-            // mPosition = value;
-            foreach (Transform enemyPos in enemyBox.transform)
-            {
-                Debug.Log($"EV: {value}");
-                if (enemyPos.position == mPosition) // 만약 
-                {
-                    enemyPos.position = value;
-                    mPosition = value;
-                }
-            }
-        }
-    }
-
-    public EnemyValues(int hp, int moveCtrl, int uniqueNum, int index, Vector3 position)
-    {
-        this.hp = hp;
-        mMoveCtrl = moveCtrl;
-        this.uniqueNum = uniqueNum;
-        this.index = index;
-        mPosition = position;
-    }
-}
 
 public class GameManager : MonoBehaviour
 {
@@ -88,6 +35,9 @@ public class GameManager : MonoBehaviour
 
     public int currentStage;
 
+    public int playerCount;
+    public List<GameObject> players;
+    public List<PlayerActionUI> playerActionUis;
     public GameObject player;
     public PlayerActionUI playerActionUI;
     public UiManager uiManager;
@@ -100,8 +50,11 @@ public class GameManager : MonoBehaviour
     public List<AreaAbility> areaAbilityList = new List<AreaAbility>();
     public int tempTurn;
 
+    // public static GameManager Instance;
+    // GameManager() { }
     void Awake()
     {
+        currentStage = StageManager.currentStage;
         Turn = 1; // 턴 초기화
         playerGridPosition = new Vector2Int(0, -4); // 플레이어 위치 초기화
         for (int i = 0; i < mapGraph.GetLength(0); i++) // 맵 그래프 초기화
@@ -126,9 +79,12 @@ public class GameManager : MonoBehaviour
             }
         }
         // DebugMap();
-        player = Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], ChangeCoord(playerGridPosition), Quaternion.identity);
-        playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
+        PlayerSpawn();
+        //player = Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], ChangeCoord(playerGridPosition), Quaternion.identity);
+        //playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
         uiManager = GetComponent<UiManager>();
+        Debug.Log("GameManager Awake");
+
     }
     private void Start()
     {
@@ -136,11 +92,16 @@ public class GameManager : MonoBehaviour
 #if UNITY_ANDROID
         Application.targetFrameRate = 60;
 #endif
+        Debug.Log("GameManager Start");
     }
     public void Initialize()
     {
         enemyPositions.Clear();
         enemyObjects.Clear();
+        for (int i = 0; i < areaAbilityList.Count; i++)
+        {
+            DestroyImmediate(areaAbilityList[i].gameObject);
+        }
         playerGridPosition = new Vector2Int(0, -4);
         playerControlStatus = EPlayerControlStatus.None;
         Turn = 1; // 턴 초기화
@@ -166,15 +127,16 @@ public class GameManager : MonoBehaviour
                 mapGraph[i, row * 9 + (col + 1)] = 1;
             }
         }
+        GetComponent<CrashHandler>().Init();
     }
     void Update()
     {
         if (playerControlStatus == EPlayerControlStatus.None)
         {
-            if (player.GetComponent<Player>().touchState == ETouchState.Began)
+            if (players[(Turn / 2) % playerCount].GetComponent<Player>().touchState == TouchUtil.ETouchState.Began)
             {
                 Vector2 clickPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                RaycastHit2D hit = Physics2D.Raycast(player.GetComponent<Player>().touchPosition, Vector3.forward, 15f, LayerMask.GetMask("Token"));
+                RaycastHit2D hit = Physics2D.Raycast(players[(Turn / 2) % playerCount].GetComponent<Player>().touchPosition, Vector3.forward, 15f, LayerMask.GetMask("Token"));
 
                 if (hit.collider != null && hit.collider.gameObject.tag == "Enemy")
                 {
@@ -216,6 +178,7 @@ public class GameManager : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.D)) DebugMap();
+        if (Input.GetKeyDown(KeyCode.R)) SceneManager.LoadScene(0);
     }
     //DFS 알고리즘을 이용한 벽에 갇혀있는지 체크
     public bool CheckStuck()
@@ -272,10 +235,30 @@ public class GameManager : MonoBehaviour
         Debug.Log(log);
     }
 
+    public void PlayerSpawn()
+    {
+        RaycastHit2D hit;
+        Vector2 playerPos;
+        for(int count = 0; count < playerCount; count++)
+        {
+            // 좌표 뽑아오기
+            do
+            {
+                playerPos = new Vector2Int(Random.Range(-4, 5), -4);
+                hit = Physics2D.Raycast(playerPos * gridSize, Vector3.forward, 15f, LayerMask.GetMask("Token"));
+            } while (hit);
+
+            players.Add(Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], playerPos * gridSize, Quaternion.identity));
+            players[count].GetComponent<Player>().playerIndex = count;
+            playerActionUis.Add(players[count].transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>());
+        }
+    }
+
     //적턴이 끝나고 플레이어 턴이 시작될 때 실행될 것들
     public void PlayerTurnSet()
     {
-        playerActionUI.ActiveUI();
+        // 현재 턴에서 enemy턴을 제외한 전체 player갯수중 하나 player가 사망시 예외처리 적용해야함
+        playerActionUis[(Turn / 2) % playerCount].ActiveUI();
         uiManager.turnEndButton.SetActive(true);
     }
     public static Vector3 ChangeCoord(Vector2Int originVector) { return ((Vector3)(Vector2)originVector * gridSize); }
