@@ -56,15 +56,6 @@ public class EnemyManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            CheckEnemyInfo();
-        }
-
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            testMove();
-        }
         // 적 턴일때 (이동 및 공격확인)
         if (GameManager.Turn % 2 == 0 && enemyTurnAnchor && gameManager.canEnemyTurn)
         {
@@ -243,38 +234,17 @@ public class EnemyManager : MonoBehaviour
     }
 
     static public bool turnCheck = false;
-    void testMove()
-    {
-        Enemy currentEnemyState;
-        int count;
-        for (count = 0; count < GameManager.enemyObjects.Count; count++)
-        {
-            currentEnemyState = GameManager.enemyObjects[count].GetComponent<Enemy>();
 
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 행동력은 → " + currentEnemyState.moveCtrl[1]);
-            currentEnemyState.moveCtrl[1] += currentEnemyState.moveCtrl[2]; // 회복하는 적 행동력
-            Debug.Log("iter " + count + " : " + GameManager.enemyObjects[count] + "의 변동 행동력은 → " + currentEnemyState.moveCtrl[1]);
-        }
-    }
+    //IEnumerator StartEnemyTurn()
+    //{
+    //    //yield return new WaitForSeconds(0.01f);
+    //    //MoveCtrlUpdate();
 
-    void CheckEnemyInfo()
-    {
-        for (int count = 0; count < GameManager.enemyPositions.Count; count++)
-        {
-            Debug.Log((count + 1) + "iter - enemyPos : " + GameManager.enemyPositions[count] + " - enemyObj : " + GameManager.enemyObjects[count]);
-        }
-    }
-
-    IEnumerator StartEnemyTurn()
-    {
-        //yield return new WaitForSeconds(0.01f);
-        //MoveCtrlUpdate();
-
-        yield return StartCoroutine(MoveCtrlUpdateCoroutine());
-        UiManager uiManager = GetComponent<UiManager>();
-        //while (uiManager.)
-        //enemyTurnAnchor = true;
-    }
+    //    yield return StartCoroutine(MoveCtrlUpdateCoroutine());
+    //    UiManager uiManager = GetComponent<UiManager>();
+    //    //while (uiManager.)
+    //    //enemyTurnAnchor = true;
+    //}
 
     //적 턴이 전부 끝났을 때 호출됨.
     public void EnemyTurnAnchorTrue()
@@ -313,76 +283,77 @@ public class EnemyManager : MonoBehaviour
         EnemyTurnAnchorTrue();
     }
 
-    //적 움직임 상태창 애니메이션에 맞춰 순차적으로 움직이도록 수정 (이규빈)
-    IEnumerator MoveCtrlUpdateCoroutine()
-    {
-        UiManager uiManager = GetComponent<UiManager>();
-        List<int> originSortingList = new List<int>(); //적들이 움직이기 전에 행동력 순서로 분류되어있던 리스트
-        for (int i = 0; i < uiManager.sortingList.Count; i++)
-        {
-            originSortingList.Add(uiManager.sortingList[i]);
-        }
+    ////적 움직임 상태창 애니메이션에 맞춰 순차적으로 움직이도록 수정 (이규빈)
+    //IEnumerator MoveCtrlUpdateCoroutine()
+    //{
+    //    UiManager uiManager = GetComponent<UiManager>();
+    //    List<int> originSortingList = new List<int>(); //적들이 움직이기 전에 행동력 순서로 분류되어있던 리스트
+    //    for (int i = 0; i < uiManager.sortingList.Count; i++)
+    //    {
+    //        originSortingList.Add(uiManager.sortingList[i]);
+    //    }
 
-        Enemy currentEnemyState;
-        int count;
-        int originMoveCtrl;  //원래 행동력.
-        for (count = 0; count < GameManager.enemyValueList.Count; count++)
-        {
-            currentEnemyState = GetEnemy(GameManager.enemyValueList[originSortingList[count]].position);
-            originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl;
+    //    Enemy currentEnemyState;
+    //    int count;
+    //    int originMoveCtrl;  //원래 행동력.
+    //    for (count = 0; count < GameManager.enemyValueList.Count; count++)
+    //    {
+    //        currentEnemyState = GetEnemy(GameManager.enemyValueList[originSortingList[count]].position);
+    //        originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl;
 
-            if (currentEnemyState.debuffs[Enemy.EDebuff.CantMove] == 0)
-            {
-                GameManager.enemyValueList[originSortingList[count]].moveCtrl += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
-            }
+    //        if (currentEnemyState.debuffs[Enemy.EDebuff.CantMove] == 0)
+    //        {
+    //            GameManager.enemyValueList[originSortingList[count]].moveCtrl += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
+    //        }
 
-            uiManager.SortEnemyStates(); //행동력에 따라 적 상태창 순서 정렬
-            yield return StartCoroutine(uiManager.CountMovectrlAnim(originSortingList[count], originMoveCtrl, GameManager.enemyValueList[originSortingList[count]].moveCtrl, false)); //원래 행동력에서 바뀐 행동력까지 숫자가 바뀌는 애니메이션
-            originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl; //여기서부터 originMoveCtrl은 바뀐 후의 행동력
-            if (count == GameManager.enemyValueList.Count - 1)
-            {
-                if (currentEnemyState.moveCtrl[0] > GameManager.enemyValueList[originSortingList[count]].moveCtrl)
-                {
-                    EnemyTurnAnchorTrue();
-                }
-            }
-            if (currentEnemyState.moveCtrl[0] <= GameManager.enemyValueList[originSortingList[count]].moveCtrl)
-            {
-                bool isPlayer = true; // true == player, false == dump
-                GameObject currenEnemy = GetEnemyObject(GameManager.enemyValueList[originSortingList[count]].position);
-                ///////////////////요 윗부분 originalSortingList랑 그 안에 어쩌구 뭐 있었는데 테스트하느라 지웠다함!!! 문제생기면 여기일듯??ㅁㅁㅇㅁㄴㄻㄴㅇ훠ㅑㅁㅈ둬모ㅓ몬ㅇ 
+    //        uiManager.SortEnemyStates(); //행동력에 따라 적 상태창 순서 정렬
+    //        yield return StartCoroutine(uiManager.CountMovectrlAnim(originSortingList[count], originMoveCtrl, GameManager.enemyValueList[originSortingList[count]].moveCtrl, false)); //원래 행동력에서 바뀐 행동력까지 숫자가 바뀌는 애니메이션
+    //        originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl; //여기서부터 originMoveCtrl은 바뀐 후의 행동력
+    //        if (count == GameManager.enemyValueList.Count - 1)
+    //        {
+    //            if (currentEnemyState.moveCtrl[0] > GameManager.enemyValueList[originSortingList[count]].moveCtrl)
+    //            {
+    //                EnemyTurnAnchorTrue();
+    //            }
+    //        }
+    //        if (currentEnemyState.moveCtrl[0] <= GameManager.enemyValueList[originSortingList[count]].moveCtrl)
+    //        {
+    //            bool isPlayer = true; // true == player, false == dump
+    //            GameObject currenEnemy = GetEnemyObject(GameManager.enemyValueList[originSortingList[count]].position);
+    //            ///////////////////요 윗부분 originalSortingList랑 그 안에 어쩌구 뭐 있었는데 테스트하느라 지웠다함!!! 문제생기면 여기일듯??ㅁㅁㅇㅁㄴㄻㄴㅇ훠ㅑㅁㅈ둬모ㅓ몬ㅇ 
 
-                GameObject player = GameObject.FindWithTag("Player");
-                currentEnemyState.state = Enemy.EState.Move;
+    //            GameObject player = GameObject.FindWithTag("Player");
+    //            currentEnemyState.state = Enemy.EState.Move;
 
-                // 능력 29번 부분
-                if (GameObject.FindWithTag("PlayerDummy"))
-                {
-                    PathFinding(currenEnemy, GameObject.FindWithTag("PlayerDummy"));
-                    List<Path> playerDumpPathList = FinalPathList;
-                    PathFinding(currenEnemy, player);
-                    List<Path> playerPathList = FinalPathList;
+    //            // 능력 29번 부분
+    //            if (GameObject.FindWithTag("PlayerDummy"))
+    //            {
+    //                PathFinding(currenEnemy, GameObject.FindWithTag("PlayerDummy"));
+    //                List<Path> playerDumpPathList = FinalPathList;
+    //                PathFinding(currenEnemy, player);
+    //                List<Path> playerPathList = FinalPathList;
 
-                    if (playerDumpPathList.Count <= playerPathList.Count)
-                    {
-                        FinalPathList = playerDumpPathList;
-                        isPlayer = false;
-                    }
-                }
-                else
-                {
-                    PathFinding(currenEnemy, player);
-                }
-                currentEnemyState.EnemyMove(FinalPathList, isPlayer);
-                GameManager.enemyValueList[originSortingList[count]].moveCtrl = -1; //상태창 순서를 행동력 순으로 정렬했을 때, 방금 이동한 적의 순서가 가장 아래로 내려오도록 행동력을 마이너스로 수정.
-                uiManager.SortEnemyStates(); //방금 이동한 적의 상태창이 아래로 내려오도록 리스트를 재정렬
-                GameManager.enemyValueList[originSortingList[count]].moveCtrl = originMoveCtrl - currentEnemyState.moveCtrl[0]; //적의 행동력 감소
-                currentEnemyState.moveCtrl[1] = GameManager.enemyValueList[originSortingList[count]].moveCtrl; // 현재 이동한 유닛 행동력 변경
-                yield return StartCoroutine(uiManager.ReloadState(originSortingList[count], GameManager.enemyValueList[originSortingList[count]].moveCtrl, count));
-            }
-            currentEnemyState.UpdateTurn(); // 매턴마다 시행 - 동현
-        }
-    }
+    //                if (playerDumpPathList.Count <= playerPathList.Count)
+    //                {
+    //                    FinalPathList = playerDumpPathList;
+    //                    isPlayer = false;
+    //                }
+    //            }
+    //            else
+    //            {
+    //                PathFinding(currenEnemy, player);
+    //            }
+    //            currentEnemyState.EnemyMove(FinalPathList, isPlayer);
+    //            GameManager.enemyValueList[originSortingList[count]].moveCtrl = -1; //상태창 순서를 행동력 순으로 정렬했을 때, 방금 이동한 적의 순서가 가장 아래로 내려오도록 행동력을 마이너스로 수정.
+    //            uiManager.SortEnemyStates(); //방금 이동한 적의 상태창이 아래로 내려오도록 리스트를 재정렬
+    //            GameManager.enemyValueList[originSortingList[count]].moveCtrl = originMoveCtrl - currentEnemyState.moveCtrl[0]; //적의 행동력 감소
+    //            currentEnemyState.moveCtrl[1] = GameManager.enemyValueList[originSortingList[count]].moveCtrl; // 현재 이동한 유닛 행동력 변경
+    //            yield return StartCoroutine(uiManager.ReloadState(originSortingList[count], GameManager.enemyValueList[originSortingList[count]].moveCtrl, count));
+    //        }
+    //        currentEnemyState.UpdateTurn(); // 매턴마다 시행 - 동현
+    //    }
+    //}
+
     public void SetEnemyBox()
     {
         if (EnemyBox != null) Destroy(EnemyBox);
