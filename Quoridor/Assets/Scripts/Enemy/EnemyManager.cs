@@ -69,7 +69,8 @@ public class EnemyManager : MonoBehaviour
         {
             enemyTurnAnchor = false;
 
-            StartCoroutine(StartEnemyTurn());
+            EnemyMoveStart();
+            //StartCoroutine(StartEnemyTurn());
         }
     }
 
@@ -282,6 +283,7 @@ public class EnemyManager : MonoBehaviour
         gameManager.PlayerTurnSet(); //플레이어 턴이 시작됨을 알림
     }
 
+    // 하나하나 적 오브젝트들이 순차적으로 움직이면서 경로를 탐색하는 함수
     void EnemyMoveStart()
     {
         GameObject moveEnemyObj = GetEnemyObject(GameManager.enemyValueList[(GameManager.Turn / 2) % GameManager.enemyValueList.Count].position);
@@ -303,7 +305,11 @@ public class EnemyManager : MonoBehaviour
             }
         }
 
-        GetEnemy(moveEnemyObj.transform.position).EnemyMove(shortPath, isPlayer);
+        Enemy currentEnemy = GetEnemy(moveEnemyObj.transform.position);
+        currentEnemy.state = Enemy.EState.Move;
+        currentEnemy.EnemyMove(shortPath, isPlayer);
+        currentEnemy.UpdateTurn();
+        EnemyTurnAnchorTrue();
     }
 
     //적 움직임 상태창 애니메이션에 맞춰 순차적으로 움직이도록 수정 (이규빈)
