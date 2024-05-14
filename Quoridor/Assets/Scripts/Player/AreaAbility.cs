@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using HM.Physics;
 
 public delegate void EnterEvent(Enemy enemy);
 public delegate void ExitEvent(Enemy enemy);
@@ -70,7 +71,7 @@ public class AreaAbility : MonoBehaviour
         targetStayList.Clear();
         for (int i = 0; i < areaPositionList.Count; i++) // 적이 들어왔을 때 실행하는 구문 설치된 방향과 기준점으로부터 레이를 쏴 적이 들어왔는지 인식
         {
-            bool[] result = player.CheckRay(transform.position, areaPositionList[i]);
+            bool[] result = HMPhysics.CheckRay(transform.position, areaPositionList[i]);
             if (result[0])
             {
                 areaObjectList[i].SetActive(false);
@@ -144,7 +145,7 @@ public class AreaAbility : MonoBehaviour
         {
             Debug.Log("Exit Event!!");
             targetList.Remove(exitObject[i]);
-            if(lifeType == ELifeType.Slipper)
+            if (lifeType == ELifeType.Slipper)
             {
                 slipperOut = true;
             }

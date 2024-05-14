@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using HM.Containers;
 
 // 스테이지마다 등급에 따라 유닛의 수를 정해두기
 public class SpawnList

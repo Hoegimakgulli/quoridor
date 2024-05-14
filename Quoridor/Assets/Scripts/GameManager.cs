@@ -14,67 +14,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 // using static Player;
 using HM.Utils;
+using HM.Containers;
 
-public class EnemyValues
-{
-    private Vector3 mPosition; // position
-    private int mMoveCtrl; // moveCtrl
-
-    public int hp; // 유닛 hp
-    public int maxHp; // 유닛 최대 hp
-    public int moveCtrl
-    {
-        get
-        {
-            return mMoveCtrl;
-        }
-
-        set
-        {
-            // Debug.Log($"SetPreMoveCtrl : {index}: {value}");
-            value = Mathf.Max(value, 0);
-            // Debug.Log($"SetMoveCtrl : {index}: {value}");
-            Enemy correctEnemy = EnemyManager.GetEnemy(mPosition);
-            correctEnemy.moveCtrl[1] = value;
-            mMoveCtrl = value;
-        }
-    }
-    public int maxMoveCtrl; // 유닛이 가질 수 있는 최대 행동력
-    public int uniqueNum; // 어떤 유닛을 생성할지 정하는 번호
-    public int index; // 생성 순서, EnemyBox 내 Index
-    public Vector3 position // position이 변경될때 일어나는 것
-    {
-        get
-        {
-            return mPosition;
-        }
-
-        set
-        {
-            GameObject enemyBox = GameObject.FindWithTag("EnemyBox");
-            // enemyBox.transform.GetChild(spawnNum).position = value;
-            // mPosition = value;
-            foreach (Transform enemyPos in enemyBox.transform)
-            {
-                Debug.Log($"EV: {value}");
-                if (enemyPos.position == mPosition) // 만약 
-                {
-                    enemyPos.position = value;
-                    mPosition = value;
-                }
-            }
-        }
-    }
-
-    public EnemyValues(int hp, int moveCtrl, int uniqueNum, int index, Vector3 position)
-    {
-        this.hp = hp;
-        mMoveCtrl = moveCtrl;
-        this.uniqueNum = uniqueNum;
-        this.index = index;
-        mPosition = position;
-    }
-}
 
 public class GameManager : MonoBehaviour
 {
