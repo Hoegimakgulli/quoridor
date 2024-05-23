@@ -34,8 +34,6 @@ public class PlayerActionUI : MonoBehaviour
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         player = transform.parent.parent.GetComponent<Player>();
-        // 이부분을 수정하면 될것 같음
-        if(player.playerIndex == 0) ActiveUI();
     }
 
     // Update is called once per frame

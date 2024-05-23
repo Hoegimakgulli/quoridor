@@ -22,6 +22,11 @@ public class GameManager : MonoBehaviour
     public enum EPlayerControlStatus { None, Move, Build, Attack, Ability };
     public EPlayerControlStatus playerControlStatus = EPlayerControlStatus.None;
 
+    // 회륜 추가
+    public TouchUtil.ETouchState touchState = TouchUtil.ETouchState.None;
+    public Vector2 touchPosition;
+    //
+
     public static int Turn = 1; // 현재 턴
     public const float gridSize = 1.3f; // 그리드의 크기
 
@@ -131,19 +136,37 @@ public class GameManager : MonoBehaviour
     }
     void Update()
     {
+        TouchUtil.TouchSetUp(ref touchState, ref touchPosition);
         if (playerControlStatus == EPlayerControlStatus.None)
         {
-            if (players[(Turn / 2) % playerCount].GetComponent<Player>().touchState == TouchUtil.ETouchState.Began)
+            if(touchState == TouchUtil.ETouchState.Began)
             {
-                Vector2 clickPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                RaycastHit2D hit = Physics2D.Raycast(players[(Turn / 2) % playerCount].GetComponent<Player>().touchPosition, Vector3.forward, 15f, LayerMask.GetMask("Token"));
+                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(touchPosition), Vector3.forward, 15f, LayerMask.GetMask("Token"));
 
-                if (hit.collider != null && hit.collider.gameObject.tag == "Enemy")
+                if (hit.collider != null && hit.collider.gameObject.tag == "Player")
+                {
+                    player = hit.transform.gameObject;
+                    foreach (GameObject child in players)
+                    {
+                        if (child == player)
+                        {
+                            child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().ActiveUI();
+                        }
+                        else
+                        {
+                            child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().PassiveUI();
+                        }
+                    }
+                }
+
+                else if (hit.collider != null && hit.collider.gameObject.tag == "Enemy")
                 {
                     hit.collider.gameObject.GetComponent<Enemy>().EnemyActionInfo();
                 }
+
                 else
                 {
+                    player = null;
                     uiManager.PassiveEnemyInfoUI();
                 }
             }
@@ -172,6 +195,7 @@ public class GameManager : MonoBehaviour
             if (tempTurn != Turn)
             {
                 canEnemyTurn = false;
+                player = null;
                 tempTurn = Turn;
             }
             canEnemyTurn = areaAbilityList.All(areaAbility => areaAbility.canDone);
@@ -258,8 +282,11 @@ public class GameManager : MonoBehaviour
     public void PlayerTurnSet()
     {
         // 현재 턴에서 enemy턴을 제외한 전체 player갯수중 하나 player가 사망시 예외처리 적용해야함
-        playerActionUis[(Turn / 2) % playerCount].ActiveUI();
         uiManager.turnEndButton.SetActive(true);
+        foreach(GameObject child in players)
+        {
+            child.GetComponent<Player>().shouldReset = true;
+        }
     }
     public static Vector3 ChangeCoord(Vector2Int originVector) { return ((Vector3)(Vector2)originVector * gridSize); }
     public static Vector2Int ChangeCoord(Vector3 originVector) { return new Vector2Int(Mathf.RoundToInt((originVector / gridSize).x), Mathf.RoundToInt((originVector / gridSize).y)); }

@@ -61,8 +61,8 @@ public class EnemyManager : MonoBehaviour
         {
             enemyTurnAnchor = false;
 
-            EnemyMoveStart();
-            //StartCoroutine(StartEnemyTurn());
+            //EnemyMoveStart();
+            StartCoroutine(StartEnemyTurn());
         }
     }
 
@@ -235,16 +235,16 @@ public class EnemyManager : MonoBehaviour
 
     static public bool turnCheck = false;
 
-    //IEnumerator StartEnemyTurn()
-    //{
-    //    //yield return new WaitForSeconds(0.01f);
-    //    //MoveCtrlUpdate();
+    IEnumerator StartEnemyTurn()
+    {
+        //yield return new WaitForSeconds(0.01f);
+        //MoveCtrlUpdate();
 
-    //    yield return StartCoroutine(MoveCtrlUpdateCoroutine());
-    //    UiManager uiManager = GetComponent<UiManager>();
-    //    //while (uiManager.)
-    //    //enemyTurnAnchor = true;
-    //}
+        yield return StartCoroutine(MoveCtrlUpdateCoroutine());
+        UiManager uiManager = GetComponent<UiManager>();
+        //while (uiManager.)
+        //enemyTurnAnchor = true;
+    }
 
     //적 턴이 전부 끝났을 때 호출됨.
     public void EnemyTurnAnchorTrue()
@@ -255,104 +255,103 @@ public class EnemyManager : MonoBehaviour
     }
 
     // 하나하나 적 오브젝트들이 순차적으로 움직이면서 경로를 탐색하는 함수
-    void EnemyMoveStart()
+    //void EnemyMoveStart()
+    //{
+    //    GameObject moveEnemyObj = GetEnemyObject(GameManager.enemyValueList[(GameManager.Turn / 2) % GameManager.enemyValueList.Count].position);
+    //    GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+    //    List<Path> shortPath = new List<Path>();
+
+    //    bool isPlayer = GameObject.FindWithTag("PlayerDummy") ? false : true;
+    //    PathFinding(moveEnemyObj, GameObject.FindWithTag("PlayerDummy") ? GameObject.FindWithTag("PlayerDummy") : players[0]);
+    //    shortPath = FinalPathList;
+    //    for (int count = 0; count < players.Length; count++)
+    //    {
+    //        PathFinding(moveEnemyObj, players[count]);
+
+    //        // 모든 player랑 비교해서 가장 가까운 player 위치로 이동함
+    //        if (shortPath.Count > FinalPathList.Count)
+    //        {
+    //            isPlayer = true;
+    //            shortPath = FinalPathList;
+    //        }
+    //    }
+
+    //    Enemy currentEnemy = GetEnemy(moveEnemyObj.transform.position);
+    //    currentEnemy.state = Enemy.EState.Move;
+    //    currentEnemy.EnemyMove(shortPath, isPlayer);
+    //    currentEnemy.UpdateTurn();
+    //    EnemyTurnAnchorTrue();
+    //}
+
+    //적 움직임 상태창 애니메이션에 맞춰 순차적으로 움직이도록 수정 (이규빈)
+    IEnumerator MoveCtrlUpdateCoroutine()
     {
-        GameObject moveEnemyObj = GetEnemyObject(GameManager.enemyValueList[(GameManager.Turn / 2) % GameManager.enemyValueList.Count].position);
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-        List<Path> shortPath = new List<Path>();
-
-        bool isPlayer = GameObject.FindWithTag("PlayerDummy") ? false : true;
-        PathFinding(moveEnemyObj, GameObject.FindWithTag("PlayerDummy") ? GameObject.FindWithTag("PlayerDummy") : players[0]);
-        shortPath = FinalPathList;
-        for (int count = 0; count < players.Length; count++)
+        UiManager uiManager = GetComponent<UiManager>();
+        List<int> originSortingList = new List<int>(); //적들이 움직이기 전에 행동력 순서로 분류되어있던 리스트
+        for (int i = 0; i < uiManager.sortingList.Count; i++)
         {
-            PathFinding(moveEnemyObj, players[count]);
-
-            // 모든 player랑 비교해서 가장 가까운 player 위치로 이동함
-            if (shortPath.Count > FinalPathList.Count)
-            {
-                isPlayer = true;
-                shortPath = FinalPathList;
-            }
+            originSortingList.Add(uiManager.sortingList[i]);
         }
 
-        Enemy currentEnemy = GetEnemy(moveEnemyObj.transform.position);
-        currentEnemy.state = Enemy.EState.Move;
-        currentEnemy.EnemyMove(shortPath, isPlayer);
-        currentEnemy.UpdateTurn();
-        EnemyTurnAnchorTrue();
+        Enemy currentEnemyState;
+        int count;
+        int originMoveCtrl;  //원래 행동력.
+        for (count = 0; count < GameManager.enemyValueList.Count; count++)
+        {
+            currentEnemyState = GetEnemy(GameManager.enemyValueList[originSortingList[count]].position);
+            originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl;
+
+            if (currentEnemyState.debuffs[Enemy.EDebuff.CantMove] == 0)
+            {
+                GameManager.enemyValueList[originSortingList[count]].moveCtrl += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
+            }
+
+            uiManager.SortEnemyStates(); //행동력에 따라 적 상태창 순서 정렬
+            yield return StartCoroutine(uiManager.CountMovectrlAnim(originSortingList[count], originMoveCtrl, GameManager.enemyValueList[originSortingList[count]].moveCtrl, false)); //원래 행동력에서 바뀐 행동력까지 숫자가 바뀌는 애니메이션
+            originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl; //여기서부터 originMoveCtrl은 바뀐 후의 행동력
+            if (count == GameManager.enemyValueList.Count - 1)
+            {
+                if (currentEnemyState.moveCtrl[0] > GameManager.enemyValueList[originSortingList[count]].moveCtrl)
+                {
+                    EnemyTurnAnchorTrue();
+                }
+            }
+            if (currentEnemyState.moveCtrl[0] <= GameManager.enemyValueList[originSortingList[count]].moveCtrl)
+            {
+                bool isPlayer = true; // true == player, false == dump
+                GameObject currenEnemy = GetEnemyObject(GameManager.enemyValueList[originSortingList[count]].position);
+                ///////////////////요 윗부분 originalSortingList랑 그 안에 어쩌구 뭐 있었는데 테스트하느라 지웠다함!!! 문제생기면 여기일듯??ㅁㅁㅇㅁㄴㄻㄴㅇ훠ㅑㅁㅈ둬모ㅓ몬ㅇ 
+
+                GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+                List<Path> shortPath = new List<Path>();
+
+                isPlayer = GameObject.FindWithTag("PlayerDummy") ? false : true;
+                PathFinding(currenEnemy, GameObject.FindWithTag("PlayerDummy") ? GameObject.FindWithTag("PlayerDummy") : players[0]);
+                shortPath = FinalPathList;
+                for (int sortCount = 0; sortCount < players.Length; sortCount++)
+                {
+                    PathFinding(currenEnemy, players[sortCount]);
+
+                    // 모든 player랑 비교해서 가장 가까운 player 위치로 이동함
+                    if (shortPath.Count > FinalPathList.Count)
+                    {
+                        isPlayer = true;
+                        shortPath = FinalPathList;
+                    }
+                }
+
+                currentEnemyState.state = Enemy.EState.Move;
+                currentEnemyState.EnemyMove(shortPath, isPlayer);
+
+                GameManager.enemyValueList[originSortingList[count]].moveCtrl = -1; //상태창 순서를 행동력 순으로 정렬했을 때, 방금 이동한 적의 순서가 가장 아래로 내려오도록 행동력을 마이너스로 수정.
+                uiManager.SortEnemyStates(); //방금 이동한 적의 상태창이 아래로 내려오도록 리스트를 재정렬
+                GameManager.enemyValueList[originSortingList[count]].moveCtrl = originMoveCtrl - currentEnemyState.moveCtrl[0]; //적의 행동력 감소
+                currentEnemyState.moveCtrl[1] = GameManager.enemyValueList[originSortingList[count]].moveCtrl; // 현재 이동한 유닛 행동력 변경
+                yield return StartCoroutine(uiManager.ReloadState(originSortingList[count], GameManager.enemyValueList[originSortingList[count]].moveCtrl, count));
+            }
+            currentEnemyState.UpdateTurn(); // 매턴마다 시행 - 동현
+        }
     }
-
-    ////적 움직임 상태창 애니메이션에 맞춰 순차적으로 움직이도록 수정 (이규빈)
-    //IEnumerator MoveCtrlUpdateCoroutine()
-    //{
-    //    UiManager uiManager = GetComponent<UiManager>();
-    //    List<int> originSortingList = new List<int>(); //적들이 움직이기 전에 행동력 순서로 분류되어있던 리스트
-    //    for (int i = 0; i < uiManager.sortingList.Count; i++)
-    //    {
-    //        originSortingList.Add(uiManager.sortingList[i]);
-    //    }
-
-    //    Enemy currentEnemyState;
-    //    int count;
-    //    int originMoveCtrl;  //원래 행동력.
-    //    for (count = 0; count < GameManager.enemyValueList.Count; count++)
-    //    {
-    //        currentEnemyState = GetEnemy(GameManager.enemyValueList[originSortingList[count]].position);
-    //        originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl;
-
-    //        if (currentEnemyState.debuffs[Enemy.EDebuff.CantMove] == 0)
-    //        {
-    //            GameManager.enemyValueList[originSortingList[count]].moveCtrl += currentEnemyState.moveCtrl[2]; // 랜덤으로 들어오는 무작위 행동력 0 ~ 적 행동력 회복 최대치
-    //        }
-
-    //        uiManager.SortEnemyStates(); //행동력에 따라 적 상태창 순서 정렬
-    //        yield return StartCoroutine(uiManager.CountMovectrlAnim(originSortingList[count], originMoveCtrl, GameManager.enemyValueList[originSortingList[count]].moveCtrl, false)); //원래 행동력에서 바뀐 행동력까지 숫자가 바뀌는 애니메이션
-    //        originMoveCtrl = GameManager.enemyValueList[originSortingList[count]].moveCtrl; //여기서부터 originMoveCtrl은 바뀐 후의 행동력
-    //        if (count == GameManager.enemyValueList.Count - 1)
-    //        {
-    //            if (currentEnemyState.moveCtrl[0] > GameManager.enemyValueList[originSortingList[count]].moveCtrl)
-    //            {
-    //                EnemyTurnAnchorTrue();
-    //            }
-    //        }
-    //        if (currentEnemyState.moveCtrl[0] <= GameManager.enemyValueList[originSortingList[count]].moveCtrl)
-    //        {
-    //            bool isPlayer = true; // true == player, false == dump
-    //            GameObject currenEnemy = GetEnemyObject(GameManager.enemyValueList[originSortingList[count]].position);
-    //            ///////////////////요 윗부분 originalSortingList랑 그 안에 어쩌구 뭐 있었는데 테스트하느라 지웠다함!!! 문제생기면 여기일듯??ㅁㅁㅇㅁㄴㄻㄴㅇ훠ㅑㅁㅈ둬모ㅓ몬ㅇ 
-
-    //            GameObject player = GameObject.FindWithTag("Player");
-    //            currentEnemyState.state = Enemy.EState.Move;
-
-    //            // 능력 29번 부분
-    //            if (GameObject.FindWithTag("PlayerDummy"))
-    //            {
-    //                PathFinding(currenEnemy, GameObject.FindWithTag("PlayerDummy"));
-    //                List<Path> playerDumpPathList = FinalPathList;
-    //                PathFinding(currenEnemy, player);
-    //                List<Path> playerPathList = FinalPathList;
-
-    //                if (playerDumpPathList.Count <= playerPathList.Count)
-    //                {
-    //                    FinalPathList = playerDumpPathList;
-    //                    isPlayer = false;
-    //                }
-    //            }
-    //            else
-    //            {
-    //                PathFinding(currenEnemy, player);
-    //            }
-    //            currentEnemyState.EnemyMove(FinalPathList, isPlayer);
-    //            GameManager.enemyValueList[originSortingList[count]].moveCtrl = -1; //상태창 순서를 행동력 순으로 정렬했을 때, 방금 이동한 적의 순서가 가장 아래로 내려오도록 행동력을 마이너스로 수정.
-    //            uiManager.SortEnemyStates(); //방금 이동한 적의 상태창이 아래로 내려오도록 리스트를 재정렬
-    //            GameManager.enemyValueList[originSortingList[count]].moveCtrl = originMoveCtrl - currentEnemyState.moveCtrl[0]; //적의 행동력 감소
-    //            currentEnemyState.moveCtrl[1] = GameManager.enemyValueList[originSortingList[count]].moveCtrl; // 현재 이동한 유닛 행동력 변경
-    //            yield return StartCoroutine(uiManager.ReloadState(originSortingList[count], GameManager.enemyValueList[originSortingList[count]].moveCtrl, count));
-    //        }
-    //        currentEnemyState.UpdateTurn(); // 매턴마다 시행 - 동현
-    //    }
-    //}
 
     public void SetEnemyBox()
     {
