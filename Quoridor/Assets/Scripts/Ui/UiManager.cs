@@ -645,18 +645,58 @@ public class UiManager : MonoBehaviour
         enemyActionInfoPanel.gameObject.SetActive(false);
     }
 
+    private bool canPlayerTurnEnd = true;
+    private GameObject wariningPanel;
     //턴 종료 시 호출
     public void PlayerTurnEnd()
     {
+        canPlayerTurnEnd = true;
         if (!freezeButton)
         {
-            EnemyManager.turnCheck = false;
-            GameManager.Turn++;
-            for(int count = 0; count < gameManager.playerActionUis.Count; count++)
+            foreach(GameObject child in gameManager.players)
             {
-                gameManager.playerActionUis[count].PassiveUI();
+                Player childPlayer = child.GetComponent<Player>();
+                if (childPlayer.canAction || childPlayer.canAttack)
+                {
+                    canPlayerTurnEnd = false;
+                    if (wariningPanel == null)
+                    {
+                        wariningPanel = GameObject.Find("WarningPanel");
+                        GameObject.Find("YesButton").GetComponent<Button>().onClick.AddListener(() => YesButtonClick());
+                        GameObject.Find("NoButton").GetComponent<Button>().onClick.AddListener(() => NoButtonClick());
+                    }
+                    wariningPanel.GetComponent<RectTransform>().DOScale(new Vector3(1, 1, 1), 0.2f).SetEase(Ease.Linear);
+                    break;
+                }
             }
-            turnEndButton.SetActive(false);
+
+            if (canPlayerTurnEnd)
+            {
+                EnemyManager.turnCheck = false;
+                GameManager.Turn++;
+                for (int count = 0; count < gameManager.playerActionUis.Count; count++)
+                {
+                    gameManager.playerActionUis[count].PassiveUI();
+                }
+                turnEndButton.SetActive(false);
+            }
         }
+    }
+
+    public void YesButtonClick()
+    {
+        wariningPanel.GetComponent<RectTransform>().DOScale(new Vector3(0, 0, 0), 0.01f).SetEase(Ease.Linear);
+        EnemyManager.turnCheck = false;
+        GameManager.Turn++;
+        for (int count = 0; count < gameManager.playerActionUis.Count; count++)
+        {
+            gameManager.playerActionUis[count].PassiveUI();
+        }
+        turnEndButton.SetActive(false);
+    }
+
+    public void NoButtonClick()
+    {
+        wariningPanel.GetComponent<RectTransform>().DOScale(new Vector3(0, 0, 0), 0.01f).SetEase(Ease.Linear);
     }
 }

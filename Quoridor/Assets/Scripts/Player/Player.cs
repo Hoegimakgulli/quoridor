@@ -47,6 +47,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     public int wallCount = 0;
     public int maxWallCount;
+    public int moveCtrl = 100;
 
     int minWallLength = 1;
     Vector2 wallStartPos = new Vector2(-50, -50);
@@ -58,6 +59,7 @@ public class Player : MonoBehaviour
     public bool isMoveBuildTogether = true;
     public int moveCount = 1;
     public int buildCount = 1;
+    public int attackCount = 1;
     public bool canAttack = true;
     public int abilityCount = 0;
     protected bool canSignAbility = true;
@@ -161,7 +163,7 @@ public class Player : MonoBehaviour
         // if (playerAbility.NeedSave)
         // playerAbility.SaveAbility();
         GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position);
-        if (GameManager.Turn % 2 == playerOrder && (GameManager.Turn / 2) % gameManager.playerCount == playerIndex) // 플레이어 차례인지 확인
+        if (GameManager.Turn % 2 == playerOrder && gameManager.player == gameObject) // 플레이어 차례인지 확인
         {
             if (playerTurnStartAnchor)
             {
@@ -175,9 +177,9 @@ public class Player : MonoBehaviour
                 Transform canvas = playerUI.transform.GetChild(0);
                 canvas.GetChild(5).GetComponent<Text>().text = $"{maxWallCount - wallCount}/{maxWallCount}";
                 // [디버그용] //
-                canvas.GetChild(1).GetComponent<Button>().interactable = canAction || buildCount > 0;  // 건설 버튼
-                canvas.GetChild(2).GetComponent<Button>().interactable = canAction || moveCount > 0;   // 이동 버튼
-                canvas.GetChild(0).GetComponent<Button>().interactable = canAttack;                 // 공격 버튼
+                canvas.GetChild(1).GetComponent<Button>().interactable = canAction || buildCount > 0 || moveCtrl == 100;  // 건설 버튼
+                canvas.GetChild(2).GetComponent<Button>().interactable = canAction || moveCount > 0 || moveCtrl == 100;   // 이동 버튼
+                canvas.GetChild(0).GetComponent<Button>().interactable = canAttack || moveCtrl == 100;                 // 공격 버튼
                 canvas.GetChild(3).GetComponent<Button>().interactable = abilityCount == 0;         // 능력 버튼
             }
             if (abilityCount > 0)
@@ -208,11 +210,13 @@ public class Player : MonoBehaviour
                 default:
                     break;
             }
-            shouldReset = true;
         }
         else // 플레이어 차례가 아니면
         {
-            if (shouldReset) Reset();
+            if (shouldReset)
+            {
+                Reset();
+            }
         }
     }
     protected virtual void Reset()
@@ -224,12 +228,20 @@ public class Player : MonoBehaviour
         canAttack = true;
         moveCount = 1;
         buildCount = 1;
+        attackCount = 1;
+        MoveCtrlUpCount();
         ResetPreview();
         isMoveBuildTogether = true;
         playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEnemyTurnStart);
 
         shouldReset = false;
         playerTurnStartAnchor = true;
+    }
+
+    void MoveCtrlUpCount()
+    {
+        if(moveCtrl < 100) moveCtrl += 50;
+        if (moveCtrl > 100) moveCtrl = 100;
     }
 
     void MovePlayer()
@@ -242,6 +254,10 @@ public class Player : MonoBehaviour
             {
                 if (previewHit.transform.CompareTag("PlayerPreview")) // 클릭좌표에 플레이어미리보기가 있다면
                 {
+                    if (moveCount <= 0)
+                    {
+                        moveCtrl = 0;
+                    }
                     transform.position = previewHit.transform.position; //플레이어 위치 이동
                     GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position); //플레이어 위치정보 저장
                     moveCount--;
@@ -252,7 +268,7 @@ public class Player : MonoBehaviour
                     }
                     if (!isDisposableMove)
                     {
-                        canAction = false; // 이동이나 벽 설치 불가
+                        if(moveCtrl != 100) canAction = false; // 이동이나 벽 설치 불가
                     }
                     else isDisposableMove = false;
                     playerAbility.MoveEvent();
@@ -285,6 +301,10 @@ public class Player : MonoBehaviour
     {
         if (!playerWallPreview.GetComponent<PreviewWall>().isBlock && playerWallPreview.tag != "CantBuild" && playerWallPreview.activeInHierarchy) //갇혀있거나 겹쳐있거나 비활성화 되어있지않다면
         {
+            if(buildCount <= 0)
+            {
+                moveCtrl = 0;
+            }
             GameObject playerWall = wallStorage.transform.GetChild(wallCount).gameObject; // 벽설치
             playerWall.SetActive(true);
             playerWall.transform.position = playerWallPreview.transform.position;
@@ -298,7 +318,8 @@ public class Player : MonoBehaviour
                 moveCount--;
                 isMoveBuildTogether = false;
             }
-            canAction = false; // 이동이나 벽 설치 불가
+
+            if(moveCtrl != 100) canAction = false; // 이동이나 벽 설치 불가
 
             return true;
         }
@@ -324,6 +345,7 @@ public class Player : MonoBehaviour
                         {
                             if (enemyHit.transform.CompareTag("Enemy"))
                             {
+                                if (attackCount <= 0) moveCtrl = 0;
                                 Enemy enemy = enemyHit.transform.GetComponent<Enemy>();
 
                                 //적 체력 줄이기, 사망처리 모두 Enemy에서 관리하도록 수정 (이규빈)
@@ -331,7 +353,8 @@ public class Player : MonoBehaviour
                                 //enemy.hp -= atk;
                                 //if (enemy.hp <= 0) enemy.DieEnemy();
                                 Debug.Log($"{enemyHit.transform.name}의 현재 체력 {enemy.hp}");
-                                canAttack = false;
+                                attackCount--;
+                                if(moveCtrl != 100) canAttack = false;
                                 playerAbility.PostAttackEvent((bool)isDead, enemy);
                                 if (gameManager.playerControlStatus == GameManager.EPlayerControlStatus.Attack)
                                 {
