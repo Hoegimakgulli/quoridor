@@ -38,6 +38,13 @@ namespace HM
 #endif
             }
         }
+        public static class MathUtil
+        {
+            public static float GetTaxiDistance(Vector2Int start, Vector2Int end)
+            {
+                return Mathf.Abs(start.x - end.x) + Mathf.Abs(start.y - end.y);
+            }
+        }
     }
     namespace Containers
     {
