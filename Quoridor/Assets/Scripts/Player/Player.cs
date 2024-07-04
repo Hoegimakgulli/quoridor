@@ -45,8 +45,10 @@ public class Player : MonoBehaviour
     public int atk;
 
     [SerializeField]
-    public int wallCount = 0;
-    public int maxWallCount;
+    // public static int wallCount = 0;
+    // public static int maxWallCount;
+    // public int destroyCount = 0;
+    // public static int maxDestroyCount;
     public int moveCtrl = 100;
 
     int minWallLength = 1;
@@ -55,12 +57,50 @@ public class Player : MonoBehaviour
 
     public bool shouldReset = true;
 
-    public bool canAction = true;
-    public bool isMoveBuildTogether = true;
-    public int moveCount = 1;
-    public int buildCount = 1;
-    public int attackCount = 1;
-    public bool canAttack = true;
+    // public bool canAction = true;
+    // public bool isMoveBuildTogether = true;
+    // public int moveCount = 1;
+    // public int buildCount = 1;
+    // public int attackCount = 1;
+    // public bool canAttack = true;
+    private bool bMove = true;
+    private bool bAttack = true;
+    public bool canMove
+    {
+        get
+        {
+            return bMove;
+        }
+        set
+        {
+            bMove = value;
+        }
+    }
+    public bool canBuild
+    {
+        get
+        {
+            return gameManager.playerWallCount < gameManager.playerMaxBuildWallCount && moveCtrl >= 100;
+        }
+    }
+    public bool canAttack
+    {
+        get
+        {
+            return bAttack;
+        }
+        set
+        {
+            bAttack = value;
+        }
+    }
+    public bool canDestroy
+    {
+        get
+        {
+            return gameManager.playerDestroyedWallCount < gameManager.playerMaxDestroyWallCount && moveCtrl >= 100;
+        }
+    }
     public int abilityCount = 0;
     protected bool canSignAbility = true;
     public int usingAbilityID;
@@ -123,7 +163,7 @@ public class Player : MonoBehaviour
             playerAbilityHighlights[i].transform.parent = previewStorage.transform;
             playerAbilityHighlights[i].SetActive(false);
         }
-        for (int i = 0; i < maxWallCount; i++)
+        for (int i = 0; i < gameManager.playerMaxBuildWallCount; i++)
         {
             Instantiate(playerPrefabs.wall, wallStorage.transform).SetActive(false);
         }
@@ -142,7 +182,7 @@ public class Player : MonoBehaviour
     public void Initialize()
     {
         //transform.position = GameManager.gridSize * new Vector3(0, -4, 0);
-        wallCount = 0;
+        gameManager.playerWallCount = 0;
 
         for (int i = 0; i < wallStorage.transform.childCount; i++)
         {
@@ -171,16 +211,16 @@ public class Player : MonoBehaviour
 
                 playerTurnStartAnchor = false;
             }
-            playerUI.SetActive(true); // [디버그용]
-            {
-                Transform canvas = playerUI.transform.GetChild(0);
-                canvas.GetChild(5).GetComponent<Text>().text = $"{maxWallCount - wallCount}/{maxWallCount}";
-                // [디버그용] //
-                canvas.GetChild(1).GetComponent<Button>().interactable = canAction || buildCount > 0 || moveCtrl == 100;  // 건설 버튼
-                canvas.GetChild(2).GetComponent<Button>().interactable = canAction || moveCount > 0 || moveCtrl == 100;   // 이동 버튼
-                canvas.GetChild(0).GetComponent<Button>().interactable = canAttack || moveCtrl == 100;                 // 공격 버튼
-                canvas.GetChild(3).GetComponent<Button>().interactable = abilityCount == 0;         // 능력 버튼
-            }
+            // playerUI.SetActive(true); // [디버그용]
+            // {
+            //     Transform canvas = playerUI.transform.GetChild(0);
+            //     canvas.GetChild(5).GetComponent<Text>().text = $"{maxWallCount - wallCount}/{maxWallCount}";
+            //     // [디버그용] //
+            //     canvas.GetChild(1).GetComponent<Button>().interactable = canAction || buildCount > 0 || moveCtrl == 100;  // 건설 버튼
+            //     canvas.GetChild(2).GetComponent<Button>().interactable = canAction || moveCount > 0 || moveCtrl == 100;   // 이동 버튼
+            //     canvas.GetChild(0).GetComponent<Button>().interactable = canAttack || moveCtrl == 100;                 // 공격 버튼
+            //     canvas.GetChild(3).GetComponent<Button>().interactable = abilityCount == 0;         // 능력 버튼
+            // }
             if (abilityCount > 0)
             {   //[임시 능력 UI]
                 abilityUI.SetActive(true);
@@ -191,11 +231,11 @@ public class Player : MonoBehaviour
             switch (gameManager.playerControlStatus)
             {
                 case GameManager.EPlayerControlStatus.Move:
-                    if (canAction || moveCount > 0) MovePlayer();
+                    if (canMove) MovePlayer();
                     else ResetPreview();
                     break;
                 case GameManager.EPlayerControlStatus.Build:
-                    if (canAction || buildCount > 0) BuildWall();
+                    if (canBuild) BuildWall();
                     else ResetPreview();
                     break;
                 case GameManager.EPlayerControlStatus.Attack:
@@ -206,6 +246,11 @@ public class Player : MonoBehaviour
                 //     if (abilityCount > 0) UseAbility();
                 //     else ResetPreview();
                 //     break;
+                case GameManager.EPlayerControlStatus.Destroy:
+                    if (canDestroy) Destroy();
+                    else ResetPreview();
+                    break;
+
                 default:
                     break;
             }
@@ -223,20 +268,20 @@ public class Player : MonoBehaviour
         playerUI.SetActive(false); // [디버그용]
         abilityUI.SetActive(false); // [임시 능력 UI]
         gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
-        canAction = true;
+        // canAction = true;
         canAttack = true;
-        moveCount = 1;
-        buildCount = 1;
-        attackCount = 1;
+        // moveCount = 1;
+        // buildCount = 1;
+        // attackCount = 1;
         MoveCtrlUpCount();
         ResetPreview();
-        isMoveBuildTogether = true;
+        // isMoveBuildTogether = true;
         // playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEnemyTurnStart);
 
         shouldReset = false;
         playerTurnStartAnchor = true;
     }
-
+    #region MOVE
     void MoveCtrlUpCount()
     {
         if (moveCtrl < 100) moveCtrl += 50;
@@ -253,24 +298,25 @@ public class Player : MonoBehaviour
             {
                 if (previewHit.transform.CompareTag("PlayerPreview")) // 클릭좌표에 플레이어미리보기가 있다면
                 {
-                    if (moveCount <= 0)
-                    {
-                        moveCtrl = 0;
-                    }
+                    // if (moveCount <= 0)
+                    // {
+                    //     moveCtrl = 0;
+                    // }
                     transform.position = previewHit.transform.position; //플레이어 위치 이동
                     GameManager.playerGridPositionList[playerIndex] = GameManager.ChangeCoord(transform.position); //플레이어 위치정보 저장
-                    moveCount--;
-                    if (isMoveBuildTogether)
-                    {
-                        buildCount--;
-                        isMoveBuildTogether = false;
-                    }
-                    if (!isDisposableMove)
-                    {
-                        if (moveCtrl != 100) canAction = false; // 이동이나 벽 설치 불가
-                    }
-                    else isDisposableMove = false;
+                    // moveCount--;
+                    // if (isMoveBuildTogether)
+                    // {
+                    //     buildCount--;
+                    //     isMoveBuildTogether = false;
+                    // }
+                    // if (!isDisposableMove)
+                    // {
+                    //     if (moveCtrl != 100) canAction = false; // 이동이나 벽 설치 불가
+                    // }
+                    // else isDisposableMove = false;
                     // playerAbility.MoveEvent();
+                    canMove = false;
                     if (gameManager.playerControlStatus == GameManager.EPlayerControlStatus.Move) gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
                     playerActionUI.ActiveUI(); //플레이어 행동 UI 등장 애니메이션
                     ResetPreview();
@@ -280,19 +326,21 @@ public class Player : MonoBehaviour
             else //다른 곳 클릭 시 다시 선택으로
             {
                 gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
-                if (isDisposableMove)
-                {
-                    moveCount--;
-                    isDisposableMove = false;
-                }
+                // if (isDisposableMove)
+                // {
+                //     moveCount--;
+                //     isDisposableMove = false;
+                // }
                 playerActionUI.ActiveUI();
                 ResetPreview();
             }
         }
     }
+    #endregion
+    #region BUILD
     void BuildWall()
     {
-        if (wallCount >= maxWallCount) return;
+        if (gameManager.playerWallCount >= gameManager.playerMaxBuildWallCount) return;
         if (touchState == TouchUtil.ETouchState.Began || touchState == TouchUtil.ETouchState.Moved)
             SetPreviewWall();
     }
@@ -300,31 +348,38 @@ public class Player : MonoBehaviour
     {
         if (!playerWallPreview.GetComponent<PreviewWall>().isBlock && playerWallPreview.tag != "CantBuild" && playerWallPreview.activeInHierarchy) //갇혀있거나 겹쳐있거나 비활성화 되어있지않다면
         {
-            if (buildCount <= 0)
-            {
-                moveCtrl = 0;
-            }
-            GameObject playerWall = wallStorage.transform.GetChild(wallCount).gameObject; // 벽설치
+            // if (buildCount <= 0)
+            // {
+            //     moveCtrl = 0;
+            // }
+            GameObject playerWall = wallStorage.transform.GetChild(gameManager.playerWallCount).gameObject; // 벽설치
             // playerWall.SetActive(true);
             // playerWall.transform.position = playerWallPreview.transform.position;
             // playerWall.transform.rotation = playerWallPreview.transform.rotation;
             gameManager.wallData.SetWallBasedPreview(playerWallPreview, ref playerWall);
             GameManager.playerGridPositionList[playerIndex] = GameManager.ChangeCoord(transform.position);
             // tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
-            wallCount++; // 설치한 벽 개수 +1
-            buildCount--;
-            if (isMoveBuildTogether)
-            {
-                moveCount--;
-                isMoveBuildTogether = false;
-            }
+            gameManager.playerWallCount++; // 설치한 벽 개수 +1
+            moveCtrl -= 100;
 
-            if (moveCtrl != 100) canAction = false; // 이동이나 벽 설치 불가
+            gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
+            playerActionUI.ActiveUI();
+            ResetPreview();
+            // buildCount--;
+            // if (isMoveBuildTogether)
+            // {
+            //     moveCount--;
+            //     isMoveBuildTogether = false;
+            // }
+
+            // if (moveCtrl != 100) canAction = false; // 이동이나 벽 설치 불가
 
             return true;
         }
         else return false;
     }
+    #endregion
+    #region ATTACK
     protected virtual bool? Attack()
     {
         bool? isDead = null;
@@ -345,7 +400,7 @@ public class Player : MonoBehaviour
                         {
                             if (enemyHit.transform.CompareTag("Enemy"))
                             {
-                                if (attackCount <= 0) moveCtrl = 0;
+                                // if (attackCount <= 0) moveCtrl = 0;
                                 Enemy enemy = enemyHit.transform.GetComponent<Enemy>();
 
                                 //적 체력 줄이기, 사망처리 모두 Enemy에서 관리하도록 수정 (이규빈)
@@ -353,9 +408,10 @@ public class Player : MonoBehaviour
                                 //enemy.hp -= atk;
                                 //if (enemy.hp <= 0) enemy.DieEnemy();
                                 Debug.Log($"{enemyHit.transform.name}의 현재 체력 {enemy.hp}");
-                                attackCount--;
-                                if (moveCtrl != 100) canAttack = false;
+                                // attackCount--;
+                                // if (moveCtrl != 100) canAttack = false;
                                 // playerAbility.PostAttackEvent((bool)isDead, enemy);
+                                canAttack = false;
                                 if (gameManager.playerControlStatus == GameManager.EPlayerControlStatus.Attack)
                                 {
                                     gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
@@ -376,6 +432,32 @@ public class Player : MonoBehaviour
         }
         return isDead;
     }
+    #endregion
+    #region DESTROY
+    void Destroy()
+    {
+        if (touchState == TouchUtil.ETouchState.Ended)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(touchPosition, transform.forward, 15f, LayerMask.GetMask("WallTouch")); //TODO: 이렇게 하면 벽 터치 UX 그지 같을 예정이므로 나중에 수정해야 할듯.
+            if (hit)
+            {
+                GameObject wallObject = hit.transform.parent.gameObject;
+                gameManager.wallData.RemoveWall(ref wallObject);
+                wallObject.SetActive(false);
+                moveCtrl -= 100;
+                gameManager.playerDestroyedWallCount++;
+                gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
+                playerActionUI.ActiveUI();
+            }
+            else
+            {
+                gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
+                playerActionUI.ActiveUI();
+            }
+        }
+    }
+    #endregion
+    #region ABILITY
     // void UseAbility()
     // {
     //     IActiveAbility activeAbility = playerAbility.abilities[playerAbility.abilitiesID.IndexOf(usingAbilityID)] as IActiveAbility;
@@ -414,6 +496,8 @@ public class Player : MonoBehaviour
     //         }
     //     }
     // }
+    #endregion
+    #region SET PREVIEW
     // 미리보기 벽 설치
     void SetPreviewWall()
     {
@@ -730,6 +814,7 @@ public class Player : MonoBehaviour
             highlight.SetActive(false);
         }
     }
+    #endregion
     public virtual void Die()
     {
         // if (playerAbility.DieEvent()) this.gameObject.SetActive(false);

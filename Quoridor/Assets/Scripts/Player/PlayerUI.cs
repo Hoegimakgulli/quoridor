@@ -98,6 +98,6 @@ public class PlayerUI : MonoBehaviour
     }
     public void OnCompleteBuildClick() // 건설 완료 버튼
     {
-        if (player.BuildComplete()) buttonComplete.SetActive(false);
+        // if (player.BuildComplete()) buttonComplete.SetActive(false);
     }
 }

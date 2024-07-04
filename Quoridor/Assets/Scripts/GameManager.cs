@@ -19,7 +19,7 @@ using HM.Containers;
 
 public class GameManager : MonoBehaviour
 {
-    public enum EPlayerControlStatus { None, Move, Build, Attack, Ability };
+    public enum EPlayerControlStatus { None, Move, Build, Attack, Ability, Destroy };
     public EPlayerControlStatus playerControlStatus = EPlayerControlStatus.None;
 
     // 회륜 추가
@@ -37,6 +37,12 @@ public class GameManager : MonoBehaviour
     public static List<EnemyValues> enemyValueList = new List<EnemyValues>();
 
     public WallData wallData = new WallData();
+    public GameObject wallPrefab;
+    int mapWallCount = 10;
+    public int playerWallCount = 0;
+    public int playerMaxBuildWallCount = 10;
+    public int playerDestroyedWallCount = 0;
+    public int playerMaxDestroyWallCount = 10;
 
     public int currentStage;
 
@@ -54,6 +60,9 @@ public class GameManager : MonoBehaviour
 
     public List<AreaAbility> areaAbilityList = new List<AreaAbility>();
     public int tempTurn;
+
+    //[디버그용]
+    public static Messanger messanger;
 
     private static GameManager _instance;
     private GameManager() { }
@@ -75,6 +84,13 @@ public class GameManager : MonoBehaviour
     }
     void Awake()
     {
+        if (DataCommunicator.TryGet("MaxWallData", out messanger))
+        {
+            Debug.Log("Messanger Loaded");
+            mapWallCount = messanger.Get<int>("MapWallCount");
+            playerMaxBuildWallCount = messanger.Get<int>("BuildWallCount");
+            playerMaxDestroyWallCount = messanger.Get<int>("DestroyWallCount");
+        }
         currentStage = StageManager.currentStage;
         Turn = 1; // 턴 초기화
         playerGridPositionList = new List<Vector2Int>(); // 플레이어 위치 초기화
@@ -94,6 +110,9 @@ public class GameManager : MonoBehaviour
         Application.targetFrameRate = 60;
 #endif
         Debug.Log("GameManager Start");
+
+        GetComponent<EnemyStage>().StartEnemyStage();
+        CreateRandomWall(mapWallCount);
     }
     public void Initialize()
     {
@@ -212,6 +231,25 @@ public class GameManager : MonoBehaviour
         {
             child.GetComponent<Player>().shouldReset = true;
         }
+    }
+    void CreateRandomWall(int count)
+    {
+        List<Vector2Int> wallPosList = new List<Vector2Int>();
+        for (int i = 0; i < count; i++)
+        {
+            Vector2Int wallPos;
+            int rotation;
+            do
+            {
+                wallPos = new Vector2Int(Random.Range(-4, 5), Random.Range(-4, 5));
+                rotation = Random.Range(0, 2);
+            } while (wallPosList.Contains(wallPos) || !(bool)(wallData.CanSetWall(wallPos.x, wallPos.y, rotation, true) ?? false));
+            GameObject wallObject = Instantiate(wallPrefab);
+            wallData.SetWall(wallPos.x, wallPos.y, rotation, ref wallObject);
+            wallPosList.Add(wallPos);
+
+        }
+
     }
     public static Vector3 ChangeCoord(Vector2Int originVector) { return ((Vector3)(Vector2)originVector * gridSize); }
     public static Vector2Int ChangeCoord(Vector3 originVector) { return new Vector2Int(Mathf.RoundToInt((originVector / gridSize).x), Mathf.RoundToInt((originVector / gridSize).y)); }

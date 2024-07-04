@@ -653,10 +653,10 @@ public class UiManager : MonoBehaviour
         canPlayerTurnEnd = true;
         if (!freezeButton)
         {
-            foreach(GameObject child in gameManager.players)
+            foreach (GameObject child in gameManager.players)
             {
                 Player childPlayer = child.GetComponent<Player>();
-                if (childPlayer.canAction || childPlayer.canAttack)
+                if (childPlayer.canMove || childPlayer.canBuild || childPlayer.canDestroy || childPlayer.canAttack)
                 {
                     canPlayerTurnEnd = false;
                     if (wariningPanel == null)

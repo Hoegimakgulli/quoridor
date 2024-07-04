@@ -7,8 +7,11 @@ using UnityEngine;
 public class WallData
 {
     public int[,] mapGraph = new int[81, 81]; //DFS용 맵 그래프
+    public List<GameObject> wallObjectList = new List<GameObject>(); // 설치된 벽 오브젝트 리스트
+    private List<int[]> unavailableWallInfoList = new List<int[]>(); // 설치할 수 없는 벽 정보 리스트
     public void Reset()
     {
+        wallObjectList.Clear();
         mapGraph = new int[81, 81];
         for (int i = 0; i < mapGraph.GetLength(0); i++) // 맵 그래프 초기화
         {
@@ -109,8 +112,14 @@ public class WallData
         previewObject.transform.position = new Vector3(x + 0.5f, y + 0.5f, 0) * GameManager.gridSize;
         previewObject.transform.rotation = Quaternion.Euler(0, 0, rotation * 90);
         previewObject.SetActive(true);
-        previewObject.TryGetComponent<PreviewWall>(out var previewWall);
-        previewWall.isBlock = !result;
+        if (previewObject.TryGetComponent<PreviewWall>(out var previewWall))
+        {
+            previewWall.isBlock = !result;
+        }
+        else
+        {
+            throw new ArgumentException("previewObject is not a PreviewWall");
+        }
     }
     public void SetWallBasedPreview(GameObject previewObject, ref GameObject wallObject)
     {
@@ -124,9 +133,10 @@ public class WallData
         }
         if (previewObject.activeSelf)
         {
-            wallObject.transform.position = previewObject.transform.position;
-            wallObject.transform.rotation = previewObject.transform.rotation;
-            wallObject.SetActive(true);
+            Vector2Int pos = GameManager.ChangeCoord(previewObject.transform.position - new Vector3(0.5f, 0.5f, 0) * GameManager.gridSize);
+            int rotation = (int)((previewObject.transform.rotation.eulerAngles.z / 90) % 2);
+            Debug.Log($"pos: {pos}, rotation: {rotation}");
+            SetWall(pos.x, pos.y, rotation, ref wallObject);
         }
         else
         {
@@ -150,10 +160,68 @@ public class WallData
             wallObject.transform.position = new Vector3(x + 0.5f, y + 0.5f, 0) * GameManager.gridSize;
             wallObject.transform.rotation = Quaternion.Euler(0, 0, rotation * 90);
             wallObject.SetActive(true);
+            wallObjectList.Add(wallObject);
+
+            unavailableWallInfoList.Add(new int[] { x, y, rotation });
+            unavailableWallInfoList.Add(new int[] { x, y, (rotation + 1) % 2 });
+            if (rotation == 0)
+            {
+                unavailableWallInfoList.Add(new int[] { x, y + 1, rotation });
+                unavailableWallInfoList.Add(new int[] { x, y - 1, rotation });
+            }
+            else
+            {
+                unavailableWallInfoList.Add(new int[] { x + 1, y, rotation });
+                unavailableWallInfoList.Add(new int[] { x - 1, y, rotation });
+            }
         }
         else
         {
             throw new ArgumentException("설치할 수 없는 벽 구조입니다.");
+        }
+    }
+    public void RemoveWall(ref GameObject wallObject)
+    {
+        if (wallObject == null)
+        {
+            throw new ArgumentNullException("wallObject is null");
+        }
+        Vector2Int pos = GameManager.ChangeCoord(wallObject.transform.position - new Vector3(0.5f, 0.5f, 0) * GameManager.gridSize);
+        int rotation = (int)((wallObject.transform.rotation.eulerAngles.z / 90) % 2);
+        wallObjectList.Remove(wallObject);
+        unavailableWallInfoList.Remove(new int[] { pos.x, pos.y, rotation });
+        unavailableWallInfoList.Remove(new int[] { pos.x, pos.y, (rotation + 1) % 2 });
+        if (rotation == 0)
+        {
+            unavailableWallInfoList.Remove(new int[] { pos.x, pos.y + 1, rotation });
+            unavailableWallInfoList.Remove(new int[] { pos.x, pos.y - 1, rotation });
+        }
+        else
+        {
+            unavailableWallInfoList.Remove(new int[] { pos.x + 1, pos.y, rotation });
+            unavailableWallInfoList.Remove(new int[] { pos.x - 1, pos.y, rotation });
+        }
+        if (pos.x < -4 || pos.x > 3 || pos.y < -4 || pos.y > 3)
+        {
+            throw new ArgumentOutOfRangeException("좌표가 범위를 벗어났습니다.");
+        }
+        if (rotation == 0) // 세로 벽이면
+        {
+            int wallGraphPosition = (pos.y + 4) * 9 + pos.x + 4; // 벽좌표를 그래프좌표로 변환
+                                                                 // 벽 넘어로 못넘어가게 그래프에서 설정
+            mapGraph[wallGraphPosition, wallGraphPosition + 1] = 1;
+            mapGraph[wallGraphPosition + 1, wallGraphPosition] = 1;
+            mapGraph[wallGraphPosition + 9, wallGraphPosition + 10] = 1;
+            mapGraph[wallGraphPosition + 10, wallGraphPosition + 9] = 1;
+        }
+        if (rotation == 1) // 가로 벽이면
+        {
+            int wallGraphPosition = (pos.y + 4) * 9 + pos.x + 4;// 벽좌표를 그래프좌표로 변환
+                                                                // 벽 넘어로 못넘어가게 그래프에서 설정
+            mapGraph[wallGraphPosition, wallGraphPosition + 9] = 1;
+            mapGraph[wallGraphPosition + 9, wallGraphPosition] = 1;
+            mapGraph[wallGraphPosition + 1, wallGraphPosition + 10] = 1;
+            mapGraph[wallGraphPosition + 10, wallGraphPosition + 1] = 1;
         }
     }
     public bool? CanSetWall(int x, int y, int rotation, bool isFake = false)
@@ -161,6 +229,10 @@ public class WallData
         if (x < -4 || x > 3 || y < -4 || y > 3)
         {
             return null;
+        }
+        if (unavailableWallInfoList.Any(wallInfo => wallInfo.SequenceEqual(new int[] { x, y, rotation })))
+        {
+            return false;
         }
         int[,] tempMapGraph = (int[,])mapGraph.Clone();
         if (rotation == 0) // 세로 벽이면
@@ -181,7 +253,7 @@ public class WallData
             tempMapGraph[wallGraphPosition + 1, wallGraphPosition + 10] = 0;
             tempMapGraph[wallGraphPosition + 10, wallGraphPosition + 1] = 0;
         }
-        if (!CheckStuck(GameManager.playerGridPositionList, GameManager.enemyValueList.Select(e => GameManager.ChangeCoord(e.position)).ToList()))
+        if (!CheckStuck(GameManager.playerGridPositionList, GameManager.enemyValueList.Select(e => GameManager.ChangeCoord(e.position)).ToList(), tempMapGraph))
         {
             if (!isFake) mapGraph = tempMapGraph.Clone() as int[,];
             return true;

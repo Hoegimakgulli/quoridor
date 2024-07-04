@@ -44,6 +44,9 @@ public class EnemyStage : MonoBehaviour
     public void Start()
     {
         gameManager = GameManager.Instance;
+    }
+    public void StartEnemyStage()
+    {
         stageEnemySettig.Clear();
         SpawnSettingStart(); // 스테이지마다 등급별 소환 유닛 수 설정
         ShareEnemys(); // enemy 스크립트 안에 있는 value에 따라 등급 리스트 저장
@@ -59,7 +62,6 @@ public class EnemyStage : MonoBehaviour
             Debug.LogError("지정된 스테이지가 아닙니다 다시 확인해주세요");
         }
     }
-
     public void Update()
     {
         // 모든 적 유닛이 사망했을때
