@@ -96,11 +96,11 @@ public class Messanger
 public class TestBuildDestroy : MonoBehaviour
 {
     [SerializeField]
-    InputField mapInput, buildInput, destroyInput;
-    public int mapWallCount, buildWallCount, destroyWallCount;
+    InputField mapInput, buildInput, destroyInput, buildDistanceInput, destroyDistanceInput;
+    public int mapWallCount, buildWallCount, destroyWallCount, buildDistance, destroyDistance;
     public void OnClickStart()
     {
-        DataCommunicator.Set("MaxWallData", new Messanger("MapWallCount", mapWallCount, "BuildWallCount", buildWallCount, "DestroyWallCount", destroyWallCount));
+        DataCommunicator.Set("MaxWallData", new Messanger("MapWallCount", mapWallCount, "BuildWallCount", buildWallCount, "DestroyWallCount", destroyWallCount, "BuildDistance", buildDistance, "DestroyDistance", destroyDistance));
         SceneManager.LoadScene("SampleScene");
     }
     private void Awake()
@@ -108,6 +108,13 @@ public class TestBuildDestroy : MonoBehaviour
         mapInput.onValueChanged.AddListener(OnValueChangedMap);
         buildInput.onValueChanged.AddListener(OnValueChangedBuild);
         destroyInput.onValueChanged.AddListener(OnValueChangedDestroy);
+        buildDistanceInput.onValueChanged.AddListener(OnValueChangedBuildDistance);
+        destroyDistanceInput.onValueChanged.AddListener(OnValueChangedDestroyDistance);
+        OnValueChangedMap(mapInput.text);
+        OnValueChangedBuild(buildInput.text);
+        OnValueChangedDestroy(destroyInput.text);
+        OnValueChangedBuildDistance(buildDistanceInput.text);
+        OnValueChangedDestroyDistance(destroyDistanceInput.text);
     }
     public void OnValueChangedMap(string value)
     {
@@ -133,6 +140,24 @@ public class TestBuildDestroy : MonoBehaviour
         if (int.TryParse(value, out int i))
         {
             destroyWallCount = i;
+            Debug.Log(i);
+        }
+    }
+    public void OnValueChangedBuildDistance(string value)
+    {
+        value = buildDistanceInput.text;
+        if (int.TryParse(value, out int i))
+        {
+            buildDistance = i;
+            Debug.Log(i);
+        }
+    }
+    public void OnValueChangedDestroyDistance(string value)
+    {
+        value = destroyDistanceInput.text;
+        if (int.TryParse(value, out int i))
+        {
+            destroyDistance = i;
             Debug.Log(i);
         }
     }

@@ -63,6 +63,8 @@ public class GameManager : MonoBehaviour
 
     //[디버그용]
     public static Messanger messanger;
+    public int buildDistance;
+    public int destroyDistance;
 
     private static GameManager _instance;
     private GameManager() { }
@@ -90,6 +92,8 @@ public class GameManager : MonoBehaviour
             mapWallCount = messanger.Get<int>("MapWallCount");
             playerMaxBuildWallCount = messanger.Get<int>("BuildWallCount");
             playerMaxDestroyWallCount = messanger.Get<int>("DestroyWallCount");
+            buildDistance = messanger.Get<int>("BuildDistance");
+            destroyDistance = messanger.Get<int>("DestroyDistance");
         }
         currentStage = StageManager.currentStage;
         Turn = 1; // 턴 초기화
@@ -217,7 +221,10 @@ public class GameManager : MonoBehaviour
 
             players.Add(Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], playerPos * gridSize, Quaternion.identity));
             playerGridPositionList.Add(ChangeCoord(playerPos));
-            players[count].GetComponent<Player>().playerIndex = count;
+            Player player = players[count].GetComponent<Player>();
+            player.playerIndex = count;
+            player.buildInteractionDistance = buildDistance;
+            player.destroyInteractionDistance = destroyDistance;
             playerActionUis.Add(players[count].transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>());
         }
     }

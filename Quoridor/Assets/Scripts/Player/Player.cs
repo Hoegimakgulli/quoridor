@@ -101,6 +101,11 @@ public class Player : MonoBehaviour
             return gameManager.playerDestroyedWallCount < gameManager.playerMaxDestroyWallCount && moveCtrl >= 100;
         }
     }
+
+    public int buildInteractionDistance = 100;
+    public int destroyInteractionDistance = 100;
+
+
     public int abilityCount = 0;
     protected bool canSignAbility = true;
     public int usingAbilityID;
@@ -436,11 +441,17 @@ public class Player : MonoBehaviour
     #region DESTROY
     void Destroy()
     {
+        SetPreviewDestroy();
         if (touchState == TouchUtil.ETouchState.Ended)
         {
             RaycastHit2D hit = Physics2D.Raycast(touchPosition, transform.forward, 15f, LayerMask.GetMask("WallTouch")); //TODO: 이렇게 하면 벽 터치 UX 그지 같을 예정이므로 나중에 수정해야 할듯.
             if (hit)
             {
+                if (MathUtil.GetTaxiDistance(GameManager.ChangeCoord(transform.position), GameManager.ChangeCoord(hit.transform.position - new Vector3(0.5f, 0.5f, 0) * GameManager.gridSize)) > destroyInteractionDistance)
+                {
+                    Debug.Log("Range Over");
+                    return;
+                }
                 GameObject wallObject = hit.transform.parent.gameObject;
                 gameManager.wallData.RemoveWall(ref wallObject);
                 wallObject.SetActive(false);
@@ -448,11 +459,13 @@ public class Player : MonoBehaviour
                 gameManager.playerDestroyedWallCount++;
                 gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
                 playerActionUI.ActiveUI();
+                ResetPreview();
             }
             else
             {
                 gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
                 playerActionUI.ActiveUI();
+                ResetPreview();
             }
         }
     }
@@ -498,6 +511,36 @@ public class Player : MonoBehaviour
     // }
     #endregion
     #region SET PREVIEW
+    public void ResetPreview()
+    {
+        // 미리보기들 비활성화
+        for (int i = 0; i < playerPreviews.Count; i++)
+        {
+            playerPreviews[i].SetActive(false);
+        }
+        playerWallPreview.SetActive(false);
+        for (int i = 0; i < playerAttackPreviews.Count; i++)
+        {
+            playerAttackPreviews[i].SetActive(false);
+        }
+        for (int i = 0; i < playerAttackHighlights.Count; i++)
+        {
+            playerAttackHighlights[i].SetActive(false);
+        }
+        foreach (GameObject preview in playerAbilityPreviews)
+        {
+            preview.SetActive(false);
+        }
+        foreach (GameObject highlight in playerAbilityHighlights)
+        {
+            highlight.SetActive(false);
+        }
+        foreach (var wallObject in gameManager.wallData.wallObjectList)
+        {
+            wallObject.GetComponent<SpriteRenderer>().color = Color.white;
+        }
+    }
+    #region WALL PREVIEW
     // 미리보기 벽 설치
     void SetPreviewWall()
     {
@@ -542,6 +585,12 @@ public class Player : MonoBehaviour
                     playerWallPreview.SetActive(false); //비활성화
                     touchState = TouchUtil.ETouchState.Began;
                 }
+
+                if (MathUtil.GetTaxiDistance(GameManager.ChangeCoord(transform.position), GameManager.ChangeCoord(playerWallPreview.transform.position - new Vector3(0.5f, 0.5f, 0) * GameManager.gridSize)) > buildInteractionDistance)
+                {
+                    playerWallPreview.SetActive(false);
+                    return;
+                }
                 // Debug.Log(wallStartPos);
             }
             else if (touchState == TouchUtil.ETouchState.Moved)
@@ -581,46 +630,35 @@ public class Player : MonoBehaviour
                             wallInfo[2] = 0;
                         }
                     }
-                    // playerWallPreview.transform.position = new Vector3(wallInfo[0] + 0.5f, wallInfo[1] + 0.5f, 0) * GameManager.gridSize;
-                    // playerWallPreview.transform.rotation = Quaternion.Euler(0, 0, wallInfo[2] * 90);
-                    // playerWallPreview.SetActive(true);
-                    // if (wallInfo[0] < -4 || wallInfo[0] > 3 || wallInfo[1] < -4 || wallInfo[1] > 3) // 벽 좌표가 땅 밖이라면
-                    // {
-                    //     playerWallPreview.SetActive(false); // 비활성화
-                    //     return;
-                    // }
                     gameManager.wallData.SetWallPreview(wallInfo[0], wallInfo[1], wallInfo[2], ref playerWallPreview);
+                    if (MathUtil.GetTaxiDistance(GameManager.ChangeCoord(transform.position), GameManager.ChangeCoord(playerWallPreview.transform.position - new Vector3(0.5f, 0.5f, 0) * GameManager.gridSize)) > buildInteractionDistance)
+                    {
+                        playerWallPreview.SetActive(false);
+                        return;
+                    }
                 }
             }
             Debug.Log($"{wallInfo[0]}, {wallInfo[1]}");
-            // if (!wallInfo.SequenceEqual(previousWallInfo)) // 벽 위치가 바뀐다면
-            // {
-            //     Debug.Log($"{wallInfo[0]}, {wallInfo[1]}, {wallInfo[2]}");
-            // gameManager.mapGraph = (int[,])tempMapGraph.Clone(); // 맵 그래프 원상태로
-            // if (wallInfo[2] == 0) // 세로 벽이면
-            // {
-            //     int wallGraphPosition = (wallInfo[1] + 4) * 9 + wallInfo[0] + 4; // 벽좌표를 그래프좌표로 변환
-            //     // 벽 넘어로 못넘어가게 그래프에서 설정
-            //     gameManager.mapGraph[wallGraphPosition, wallGraphPosition + 1] = 0;
-            //     gameManager.mapGraph[wallGraphPosition + 1, wallGraphPosition] = 0;
-            //     gameManager.mapGraph[wallGraphPosition + 9, wallGraphPosition + 10] = 0;
-            //     gameManager.mapGraph[wallGraphPosition + 10, wallGraphPosition + 9] = 0;
-            // }
-            // if (wallInfo[2] == 1) // 가로 벽이면
-            // {
-            //     int wallGraphPosition = (wallInfo[1] + 4) * 9 + wallInfo[0] + 4;// 벽좌표를 그래프좌표로 변환
-            //     // 벽 넘어로 못넘어가게 그래프에서 설정
-            //     gameManager.mapGraph[wallGraphPosition, wallGraphPosition + 9] = 0;
-            //     gameManager.mapGraph[wallGraphPosition + 9, wallGraphPosition] = 0;
-            //     gameManager.mapGraph[wallGraphPosition + 1, wallGraphPosition + 10] = 0;
-            //     gameManager.mapGraph[wallGraphPosition + 10, wallGraphPosition + 1] = 0;
-            // }
-            // // gameManager.DebugMap();
-            // playerWallPreview.GetComponent<PreviewWall>().isBlock = !gameManager.wallData.CanSetWall(wallInfo[0], wallInfo[1], wallInfo[2], true); // Stuck 결과를 벽미리보기로 전송
-            // }
-            // previousWallInfo = (int[])wallInfo.Clone(); // 현재 벽정보를 이전벽정보로 저장
         }
     }
+    #endregion
+    #region DESTROY PREVIEW
+    void SetPreviewDestroy()
+    {
+        foreach (var wallObject in gameManager.wallData.wallObjectList)
+        {
+            if (MathUtil.GetTaxiDistance(GameManager.ChangeCoord(transform.position), GameManager.ChangeCoord(wallObject.transform.position - new Vector3(0.5f, 0.5f, 0) * GameManager.gridSize)) <= destroyInteractionDistance)
+            {
+                wallObject.GetComponent<SpriteRenderer>().color = Color.red;
+            }
+            else
+            {
+                wallObject.GetComponent<SpriteRenderer>().color = Color.white;
+            }
+        }
+    }
+    #endregion
+    #region PLAYER PREVIEW
     // 플레이어 미리보기 설정
     void SetPreviewPlayer()
     {
@@ -652,6 +690,8 @@ public class Player : MonoBehaviour
             }
         }
     }
+    #endregion
+    #region ATTACK PREVIEW
     // 공격 미리보기
     void SetPreviewAttack()
     {
@@ -722,6 +762,8 @@ public class Player : MonoBehaviour
 
         }
     }
+    #endregion
+    #region ABILITY PREVIEW
     void SetPreviewAbility(List<Vector2Int> abilityRange, List<Vector2Int> abilityScale, bool isPenetration)
     {
         for (int i = 0; i < abilityRange.Count; i++)
@@ -789,31 +831,7 @@ public class Player : MonoBehaviour
 
         }
     }
-    public void ResetPreview()
-    {
-        // 미리보기들 비활성화
-        for (int i = 0; i < playerPreviews.Count; i++)
-        {
-            playerPreviews[i].SetActive(false);
-        }
-        playerWallPreview.SetActive(false);
-        for (int i = 0; i < playerAttackPreviews.Count; i++)
-        {
-            playerAttackPreviews[i].SetActive(false);
-        }
-        for (int i = 0; i < playerAttackHighlights.Count; i++)
-        {
-            playerAttackHighlights[i].SetActive(false);
-        }
-        foreach (GameObject preview in playerAbilityPreviews)
-        {
-            preview.SetActive(false);
-        }
-        foreach (GameObject highlight in playerAbilityHighlights)
-        {
-            highlight.SetActive(false);
-        }
-    }
+    #endregion
     #endregion
     public virtual void Die()
     {
