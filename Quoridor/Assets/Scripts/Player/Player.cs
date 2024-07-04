@@ -81,7 +81,7 @@ public class Player : MonoBehaviour
     GameObject previewStorage;
     public PlayerActionUI playerActionUI;
 
-    PlayerAbility playerAbility;
+    // PlayerAbility playerAbility;
 
     bool playerTurnStartAnchor = true;
 
@@ -92,9 +92,10 @@ public class Player : MonoBehaviour
     }
     void Start()
     {
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        gameManager = GameManager.Instance;
         wallStorage = GameObject.FindGameObjectWithTag("WallStorage");
         previewStorage = GameObject.FindGameObjectWithTag("PreviewStorage");
+        // GameManager.playerGridPositionList.Add(GameManager.ChangeCoord(transform.position));
         for (int i = 0; i < movablePositions.Count; i++) // 플레이어 미리보기 -> 미리소환하여 비활성화 해놓기
         {
             playerPreviews.Add(Instantiate(playerPrefabs.playerPreview, previewStorage.transform));
@@ -132,11 +133,10 @@ public class Player : MonoBehaviour
         }
         playerWallPreview = Instantiate(playerPrefabs.wallPreview, transform.position, Quaternion.identity); // 플레이어 벽 미리보기 -> 미리소환하여 비활성화 해놓기
         playerWallPreview.SetActive(false);
-        tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵그래프 저장
 
         //playerUI = Instantiate(playerUI); // [디버그용]
-        abilityUI = Instantiate(abilityUI); // [임시 능력 UI]
-        playerAbility = GetComponent<PlayerAbility>();
+        // abilityUI = Instantiate(abilityUI); // [임시 능력 UI]
+        // playerAbility = GetComponent<PlayerAbility>();
         // playerAbility.LoadAbility();
     }
     public void Initialize()
@@ -152,23 +152,22 @@ public class Player : MonoBehaviour
         Reset();
 
         previousWallInfo = new int[3];
-        tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵그래프 저장
     }
     // Update is called once per frame
     void Update()
     {
         TouchUtil.TouchSetUp(ref touchState, ref touchPosition);
         // Debug.Log(touchState.ToString());
-        playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEveryTick);
+        // playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEveryTick);
         // if (playerAbility.NeedSave)
         // playerAbility.SaveAbility();
-        GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position);
+        GameManager.playerGridPositionList[playerIndex] = GameManager.ChangeCoord(transform.position);
         if (GameManager.Turn % 2 == playerOrder && gameManager.player == gameObject) // 플레이어 차례인지 확인
         {
             if (playerTurnStartAnchor)
             {
-                playerAbility.ResetEvent(PlayerAbility.EResetTime.OnPlayerTurnStart);
-                tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
+                // playerAbility.ResetEvent(PlayerAbility.EResetTime.OnPlayerTurnStart);
+                // tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
 
                 playerTurnStartAnchor = false;
             }
@@ -185,7 +184,7 @@ public class Player : MonoBehaviour
             if (abilityCount > 0)
             {   //[임시 능력 UI]
                 abilityUI.SetActive(true);
-                playerAbility.ActiveEvent();
+                // playerAbility.ActiveEvent();
             }
 
             touchPosition = Camera.main.ScreenToWorldPoint(touchPosition); //카메라에 찍힌 좌표를 월드좌표로
@@ -203,10 +202,10 @@ public class Player : MonoBehaviour
                     if (canAttack) Attack();
                     else ResetPreview();
                     break;
-                case GameManager.EPlayerControlStatus.Ability:
-                    if (abilityCount > 0) UseAbility();
-                    else ResetPreview();
-                    break;
+                // case GameManager.EPlayerControlStatus.Ability:
+                //     if (abilityCount > 0) UseAbility();
+                //     else ResetPreview();
+                //     break;
                 default:
                     break;
             }
@@ -232,7 +231,7 @@ public class Player : MonoBehaviour
         MoveCtrlUpCount();
         ResetPreview();
         isMoveBuildTogether = true;
-        playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEnemyTurnStart);
+        // playerAbility.ResetEvent(PlayerAbility.EResetTime.OnEnemyTurnStart);
 
         shouldReset = false;
         playerTurnStartAnchor = true;
@@ -240,7 +239,7 @@ public class Player : MonoBehaviour
 
     void MoveCtrlUpCount()
     {
-        if(moveCtrl < 100) moveCtrl += 50;
+        if (moveCtrl < 100) moveCtrl += 50;
         if (moveCtrl > 100) moveCtrl = 100;
     }
 
@@ -259,7 +258,7 @@ public class Player : MonoBehaviour
                         moveCtrl = 0;
                     }
                     transform.position = previewHit.transform.position; //플레이어 위치 이동
-                    GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position); //플레이어 위치정보 저장
+                    GameManager.playerGridPositionList[playerIndex] = GameManager.ChangeCoord(transform.position); //플레이어 위치정보 저장
                     moveCount--;
                     if (isMoveBuildTogether)
                     {
@@ -268,10 +267,10 @@ public class Player : MonoBehaviour
                     }
                     if (!isDisposableMove)
                     {
-                        if(moveCtrl != 100) canAction = false; // 이동이나 벽 설치 불가
+                        if (moveCtrl != 100) canAction = false; // 이동이나 벽 설치 불가
                     }
                     else isDisposableMove = false;
-                    playerAbility.MoveEvent();
+                    // playerAbility.MoveEvent();
                     if (gameManager.playerControlStatus == GameManager.EPlayerControlStatus.Move) gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
                     playerActionUI.ActiveUI(); //플레이어 행동 UI 등장 애니메이션
                     ResetPreview();
@@ -301,16 +300,17 @@ public class Player : MonoBehaviour
     {
         if (!playerWallPreview.GetComponent<PreviewWall>().isBlock && playerWallPreview.tag != "CantBuild" && playerWallPreview.activeInHierarchy) //갇혀있거나 겹쳐있거나 비활성화 되어있지않다면
         {
-            if(buildCount <= 0)
+            if (buildCount <= 0)
             {
                 moveCtrl = 0;
             }
             GameObject playerWall = wallStorage.transform.GetChild(wallCount).gameObject; // 벽설치
-            playerWall.SetActive(true);
-            playerWall.transform.position = playerWallPreview.transform.position;
-            playerWall.transform.rotation = playerWallPreview.transform.rotation;
-            GameManager.playerGridPosition = GameManager.ChangeCoord(transform.position);
-            tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
+            // playerWall.SetActive(true);
+            // playerWall.transform.position = playerWallPreview.transform.position;
+            // playerWall.transform.rotation = playerWallPreview.transform.rotation;
+            gameManager.wallData.SetWallBasedPreview(playerWallPreview, ref playerWall);
+            GameManager.playerGridPositionList[playerIndex] = GameManager.ChangeCoord(transform.position);
+            // tempMapGraph = (int[,])gameManager.mapGraph.Clone(); // 맵정보 새로저장
             wallCount++; // 설치한 벽 개수 +1
             buildCount--;
             if (isMoveBuildTogether)
@@ -319,7 +319,7 @@ public class Player : MonoBehaviour
                 isMoveBuildTogether = false;
             }
 
-            if(moveCtrl != 100) canAction = false; // 이동이나 벽 설치 불가
+            if (moveCtrl != 100) canAction = false; // 이동이나 벽 설치 불가
 
             return true;
         }
@@ -354,8 +354,8 @@ public class Player : MonoBehaviour
                                 //if (enemy.hp <= 0) enemy.DieEnemy();
                                 Debug.Log($"{enemyHit.transform.name}의 현재 체력 {enemy.hp}");
                                 attackCount--;
-                                if(moveCtrl != 100) canAttack = false;
-                                playerAbility.PostAttackEvent((bool)isDead, enemy);
+                                if (moveCtrl != 100) canAttack = false;
+                                // playerAbility.PostAttackEvent((bool)isDead, enemy);
                                 if (gameManager.playerControlStatus == GameManager.EPlayerControlStatus.Attack)
                                 {
                                     gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
@@ -376,44 +376,44 @@ public class Player : MonoBehaviour
         }
         return isDead;
     }
-    void UseAbility()
-    {
-        IActiveAbility activeAbility = playerAbility.abilities[playerAbility.abilitiesID.IndexOf(usingAbilityID)] as IActiveAbility;
-        RaycastHit2D previewHit = Physics2D.Raycast(touchPosition, transform.forward, 15f, LayerMask.GetMask("Preview"));
-        if (activeAbility.attackRange.Count == 0)
-        {
-            List<Vector2Int> attackRange = allPositions.Select(position => position - GameManager.ChangeCoord(transform.position)).ToList();
+    // void UseAbility()
+    // {
+    //     IActiveAbility activeAbility = playerAbility.abilities[playerAbility.abilitiesID.IndexOf(usingAbilityID)] as IActiveAbility;
+    //     RaycastHit2D previewHit = Physics2D.Raycast(touchPosition, transform.forward, 15f, LayerMask.GetMask("Preview"));
+    //     if (activeAbility.attackRange.Count == 0)
+    //     {
+    //         List<Vector2Int> attackRange = allPositions.Select(position => position - GameManager.ChangeCoord(transform.position)).ToList();
 
-            SetPreviewAbility(attackRange, activeAbility.attackScale, activeAbility.canPenetrate[0]);
-            SetAbilityHighlight(activeAbility.attackScale, activeAbility.canPenetrate[1]);
-        }
-        else
-        {
-            SetPreviewAbility(activeAbility.attackRange, activeAbility.attackScale, activeAbility.canPenetrate[0]);
-            SetAbilityHighlight(activeAbility.attackScale, activeAbility.canPenetrate[1]);
-        }
-        if (touchState == TouchUtil.ETouchState.Ended) //화면 클릭시
-        {
-            if (previewHit)
-            {
-                if (previewHit.transform.CompareTag("PlayerAttackPreview")) // 클릭좌표에 플레이어공격미리보기가 있다면
-                {
-                    activeAbility.targetPos = GameManager.ChangeCoord(previewHit.transform.position);
-                    (activeAbility as IAbility).Event();
-                    usingAbilityID = 0;
-                    gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
-                    playerActionUI.ActiveUI();
-                    ResetPreview();
-                }
-            }
-            else //다른데 클릭하면 다시 선택화면으로
-            {
-                gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
-                playerActionUI.ActiveUI();
-                ResetPreview();
-            }
-        }
-    }
+    //         SetPreviewAbility(attackRange, activeAbility.attackScale, activeAbility.canPenetrate[0]);
+    //         SetAbilityHighlight(activeAbility.attackScale, activeAbility.canPenetrate[1]);
+    //     }
+    //     else
+    //     {
+    //         SetPreviewAbility(activeAbility.attackRange, activeAbility.attackScale, activeAbility.canPenetrate[0]);
+    //         SetAbilityHighlight(activeAbility.attackScale, activeAbility.canPenetrate[1]);
+    //     }
+    //     if (touchState == TouchUtil.ETouchState.Ended) //화면 클릭시
+    //     {
+    //         if (previewHit)
+    //         {
+    //             if (previewHit.transform.CompareTag("PlayerAttackPreview")) // 클릭좌표에 플레이어공격미리보기가 있다면
+    //             {
+    //                 activeAbility.targetPos = GameManager.ChangeCoord(previewHit.transform.position);
+    //                 (activeAbility as IAbility).Event();
+    //                 usingAbilityID = 0;
+    //                 gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
+    //                 playerActionUI.ActiveUI();
+    //                 ResetPreview();
+    //             }
+    //         }
+    //         else //다른데 클릭하면 다시 선택화면으로
+    //         {
+    //             gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
+    //             playerActionUI.ActiveUI();
+    //             ResetPreview();
+    //         }
+    //     }
+    // }
     // 미리보기 벽 설치
     void SetPreviewWall()
     {
@@ -497,43 +497,44 @@ public class Player : MonoBehaviour
                             wallInfo[2] = 0;
                         }
                     }
-                    playerWallPreview.transform.position = new Vector3(wallInfo[0] + 0.5f, wallInfo[1] + 0.5f, 0) * GameManager.gridSize;
-                    playerWallPreview.transform.rotation = Quaternion.Euler(0, 0, wallInfo[2] * 90);
-                    playerWallPreview.SetActive(true);
-                    if (wallInfo[0] < -4 || wallInfo[0] > 3 || wallInfo[1] < -4 || wallInfo[1] > 3) // 벽 좌표가 땅 밖이라면
-                    {
-                        playerWallPreview.SetActive(false); // 비활성화
-                        return;
-                    }
+                    // playerWallPreview.transform.position = new Vector3(wallInfo[0] + 0.5f, wallInfo[1] + 0.5f, 0) * GameManager.gridSize;
+                    // playerWallPreview.transform.rotation = Quaternion.Euler(0, 0, wallInfo[2] * 90);
+                    // playerWallPreview.SetActive(true);
+                    // if (wallInfo[0] < -4 || wallInfo[0] > 3 || wallInfo[1] < -4 || wallInfo[1] > 3) // 벽 좌표가 땅 밖이라면
+                    // {
+                    //     playerWallPreview.SetActive(false); // 비활성화
+                    //     return;
+                    // }
+                    gameManager.wallData.SetWallPreview(wallInfo[0], wallInfo[1], wallInfo[2], ref playerWallPreview);
                 }
             }
             Debug.Log($"{wallInfo[0]}, {wallInfo[1]}");
-            if (!wallInfo.SequenceEqual(previousWallInfo)) // 벽 위치가 바뀐다면
-            {
-                Debug.Log($"{wallInfo[0]}, {wallInfo[1]}, {wallInfo[2]}");
-                gameManager.mapGraph = (int[,])tempMapGraph.Clone(); // 맵 그래프 원상태로
-                if (wallInfo[2] == 0) // 세로 벽이면
-                {
-                    int wallGraphPosition = (wallInfo[1] + 4) * 9 + wallInfo[0] + 4; // 벽좌표를 그래프좌표로 변환
-                    // 벽 넘어로 못넘어가게 그래프에서 설정
-                    gameManager.mapGraph[wallGraphPosition, wallGraphPosition + 1] = 0;
-                    gameManager.mapGraph[wallGraphPosition + 1, wallGraphPosition] = 0;
-                    gameManager.mapGraph[wallGraphPosition + 9, wallGraphPosition + 10] = 0;
-                    gameManager.mapGraph[wallGraphPosition + 10, wallGraphPosition + 9] = 0;
-                }
-                if (wallInfo[2] == 1) // 가로 벽이면
-                {
-                    int wallGraphPosition = (wallInfo[1] + 4) * 9 + wallInfo[0] + 4;// 벽좌표를 그래프좌표로 변환
-                    // 벽 넘어로 못넘어가게 그래프에서 설정
-                    gameManager.mapGraph[wallGraphPosition, wallGraphPosition + 9] = 0;
-                    gameManager.mapGraph[wallGraphPosition + 9, wallGraphPosition] = 0;
-                    gameManager.mapGraph[wallGraphPosition + 1, wallGraphPosition + 10] = 0;
-                    gameManager.mapGraph[wallGraphPosition + 10, wallGraphPosition + 1] = 0;
-                }
-                // gameManager.DebugMap();
-                playerWallPreview.GetComponent<PreviewWall>().isBlock = !gameManager.CheckStuck(); // Stuck 결과를 벽미리보기로 전송
-            }
-            previousWallInfo = (int[])wallInfo.Clone(); // 현재 벽정보를 이전벽정보로 저장
+            // if (!wallInfo.SequenceEqual(previousWallInfo)) // 벽 위치가 바뀐다면
+            // {
+            //     Debug.Log($"{wallInfo[0]}, {wallInfo[1]}, {wallInfo[2]}");
+            // gameManager.mapGraph = (int[,])tempMapGraph.Clone(); // 맵 그래프 원상태로
+            // if (wallInfo[2] == 0) // 세로 벽이면
+            // {
+            //     int wallGraphPosition = (wallInfo[1] + 4) * 9 + wallInfo[0] + 4; // 벽좌표를 그래프좌표로 변환
+            //     // 벽 넘어로 못넘어가게 그래프에서 설정
+            //     gameManager.mapGraph[wallGraphPosition, wallGraphPosition + 1] = 0;
+            //     gameManager.mapGraph[wallGraphPosition + 1, wallGraphPosition] = 0;
+            //     gameManager.mapGraph[wallGraphPosition + 9, wallGraphPosition + 10] = 0;
+            //     gameManager.mapGraph[wallGraphPosition + 10, wallGraphPosition + 9] = 0;
+            // }
+            // if (wallInfo[2] == 1) // 가로 벽이면
+            // {
+            //     int wallGraphPosition = (wallInfo[1] + 4) * 9 + wallInfo[0] + 4;// 벽좌표를 그래프좌표로 변환
+            //     // 벽 넘어로 못넘어가게 그래프에서 설정
+            //     gameManager.mapGraph[wallGraphPosition, wallGraphPosition + 9] = 0;
+            //     gameManager.mapGraph[wallGraphPosition + 9, wallGraphPosition] = 0;
+            //     gameManager.mapGraph[wallGraphPosition + 1, wallGraphPosition + 10] = 0;
+            //     gameManager.mapGraph[wallGraphPosition + 10, wallGraphPosition + 1] = 0;
+            // }
+            // // gameManager.DebugMap();
+            // playerWallPreview.GetComponent<PreviewWall>().isBlock = !gameManager.wallData.CanSetWall(wallInfo[0], wallInfo[1], wallInfo[2], true); // Stuck 결과를 벽미리보기로 전송
+            // }
+            // previousWallInfo = (int[])wallInfo.Clone(); // 현재 벽정보를 이전벽정보로 저장
         }
     }
     // 플레이어 미리보기 설정
@@ -731,6 +732,7 @@ public class Player : MonoBehaviour
     }
     public virtual void Die()
     {
-        if (playerAbility.DieEvent()) this.gameObject.SetActive(false);
+        // if (playerAbility.DieEvent()) this.gameObject.SetActive(false);
+        this.gameObject.SetActive(false);
     }
 }

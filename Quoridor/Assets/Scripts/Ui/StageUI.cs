@@ -8,15 +8,15 @@ public class StageUI : MonoBehaviour
 {
     GameManager gameManager;
     EnemyStage enemyStage;
-    AbilitySelect abilitySelect;
+    // AbilitySelect abilitySelect;
     Player player;
     // Start is called before the first frame update
     void Start()
     {
-        GameObject gameManagerObject = GameObject.Find("GameManager");
+        GameObject gameManagerObject = GameManager.Instance.gameObject;
         gameManager = gameManagerObject.GetComponent<GameManager>();
         enemyStage = gameManagerObject.GetComponent<EnemyStage>();
-        abilitySelect = gameManagerObject.GetComponent<AbilitySelect>();
+        // abilitySelect = gameManagerObject.GetComponent<AbilitySelect>();
         player = GameObject.FindWithTag("Player").GetComponent<Player>();
     }
 

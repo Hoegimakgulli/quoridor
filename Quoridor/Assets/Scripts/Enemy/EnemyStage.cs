@@ -43,7 +43,7 @@ public class EnemyStage : MonoBehaviour
 
     public void Start()
     {
-        gameManager = transform.GetComponent<GameManager>();
+        gameManager = GameManager.Instance;
         stageEnemySettig.Clear();
         SpawnSettingStart(); // 스테이지마다 등급별 소환 유닛 수 설정
         ShareEnemys(); // enemy 스크립트 안에 있는 value에 따라 등급 리스트 저장
@@ -210,11 +210,11 @@ public class EnemyStage : MonoBehaviour
             {
                 Vector3 enemyPosition = child.position / GameManager.gridSize;
                 int currentShieldPos = (int)(enemyPosition.x + 4 + ((enemyPosition.y + 4) * 9)); // mapgraph 좌표로 변환
-                if (currentShieldPos + 9 < 81 && gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] == 1) // 만약 쉴드가 보드만 외벽에 붙어있는지 확인 조건식에 부합하면 벽취급으로 변환
+                if (currentShieldPos + 9 < 81 && gameManager.wallData.mapGraph[currentShieldPos, currentShieldPos + 9] == 1) // 만약 쉴드가 보드만 외벽에 붙어있는지 확인 조건식에 부합하면 벽취급으로 변환
                 {
                     currentEnemyObj.GetComponent<Enemy>().ShieldTrue = true;
-                    gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 0;
-                    gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 0;
+                    gameManager.wallData.mapGraph[currentShieldPos, currentShieldPos + 9] = 0;
+                    gameManager.wallData.mapGraph[currentShieldPos + 9, currentShieldPos] = 0;
                 }
             }
 
