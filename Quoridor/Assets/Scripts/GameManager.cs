@@ -19,7 +19,7 @@ using HM.Containers;
 
 public class GameManager : MonoBehaviour
 {
-    public enum EPlayerControlStatus { None, Move, Build, Attack, Ability };
+    public enum EPlayerControlStatus { None, Move, Build, Attack, Ability, Destroy };
     public EPlayerControlStatus playerControlStatus = EPlayerControlStatus.None;
 
     // 회륜 추가
@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
     public static int Turn = 1; // 현재 턴
     public const float gridSize = 1.3f; // 그리드의 크기
 
-    public static Vector2Int playerGridPosition = new Vector2Int(0, -4); // 플레이어의 타일 위치
+    public static List<Vector2Int> playerGridPositionList = new List<Vector2Int>(); // 플레이어 위치 정보 저장
 
     public static List<Vector3> enemyPositions = new List<Vector3>();    // 모든 적들 위치 정보 저장      폐기처분 예정
     public static List<GameObject> enemyObjects = new List<GameObject>(); // 모든 적 기물 오브젝트 저장   폐기처분 예정
@@ -39,7 +39,13 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     public List<Vector2Int> playeMovementCoordinates = new List<Vector2Int>();
 
-    public int[,] mapGraph = new int[81, 81]; //DFS용 맵 그래프
+    public WallData wallData = new WallData();
+    public GameObject wallPrefab;
+    int mapWallCount = 10;
+    public int playerWallCount = 0;
+    public int playerMaxBuildWallCount = 10;
+    public int playerDestroyedWallCount = 0;
+    public int playerMaxDestroyWallCount = 10;
 
     public int currentStage;
 
@@ -58,34 +64,44 @@ public class GameManager : MonoBehaviour
     public List<AreaAbility> areaAbilityList = new List<AreaAbility>();
     public int tempTurn;
 
-    // public static GameManager Instance;
-    // GameManager() { }
+    //[디버그용]
+    public static Messanger messanger;
+    public int buildDistance;
+    public int destroyDistance;
+
+    private static GameManager _instance;
+    private GameManager() { }
+    public static GameManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindObjectOfType<GameManager>();
+                if (_instance == null)
+                {
+                    GameObject container = new GameObject("GameManager");
+                    _instance = container.AddComponent<GameManager>();
+                }
+            }
+            return _instance;
+        }
+    }
     void Awake()
     {
+        if (DataCommunicator.TryGet("MaxWallData", out messanger))
+        {
+            Debug.Log("Messanger Loaded");
+            mapWallCount = messanger.Get<int>("MapWallCount");
+            playerMaxBuildWallCount = messanger.Get<int>("BuildWallCount");
+            playerMaxDestroyWallCount = messanger.Get<int>("DestroyWallCount");
+            buildDistance = messanger.Get<int>("BuildDistance");
+            destroyDistance = messanger.Get<int>("DestroyDistance");
+        }
         currentStage = StageManager.currentStage;
         Turn = 1; // 턴 초기화
-        playerGridPosition = new Vector2Int(0, -4); // 플레이어 위치 초기화
-        for (int i = 0; i < mapGraph.GetLength(0); i++) // 맵 그래프 초기화
-        {
-            int row = i / 9;
-            int col = i % 9;
-            if (row > 0)
-            {
-                mapGraph[i, (row - 1) * 9 + col] = 1;
-            }
-            if (row < 8)
-            {
-                mapGraph[i, (row + 1) * 9 + col] = 1;
-            }
-            if (col > 0)
-            {
-                mapGraph[i, row * 9 + (col - 1)] = 1;
-            }
-            if (col < 8)
-            {
-                mapGraph[i, row * 9 + (col + 1)] = 1;
-            }
-        }
+        playerGridPositionList = new List<Vector2Int>(); // 플레이어 위치 초기화
+        wallData.Reset();
         // DebugMap();
         PlayerSpawn();
         //player = Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], ChangeCoord(playerGridPosition), Quaternion.identity);
@@ -101,6 +117,9 @@ public class GameManager : MonoBehaviour
         Application.targetFrameRate = 60;
 #endif
         Debug.Log("GameManager Start");
+
+        GetComponent<EnemyStage>().StartEnemyStage();
+        CreateRandomWall(mapWallCount);
     }
     public void Initialize()
     {
@@ -110,31 +129,10 @@ public class GameManager : MonoBehaviour
         {
             DestroyImmediate(areaAbilityList[i].gameObject);
         }
-        playerGridPosition = new Vector2Int(0, -4);
+        playerGridPositionList = new List<Vector2Int>();
         playerControlStatus = EPlayerControlStatus.None;
         Turn = 1; // 턴 초기화
-        mapGraph = new int[81, 81];
-        for (int i = 0; i < mapGraph.GetLength(0); i++) // 맵 그래프 초기화
-        {
-            int row = i / 9;
-            int col = i % 9;
-            if (row > 0)
-            {
-                mapGraph[i, (row - 1) * 9 + col] = 1;
-            }
-            if (row < 8)
-            {
-                mapGraph[i, (row + 1) * 9 + col] = 1;
-            }
-            if (col > 0)
-            {
-                mapGraph[i, row * 9 + (col - 1)] = 1;
-            }
-            if (col < 8)
-            {
-                mapGraph[i, row * 9 + (col + 1)] = 1;
-            }
-        }
+        wallData.Reset();
         GetComponent<CrashHandler>().Init();
     }
     void Update()
@@ -142,7 +140,7 @@ public class GameManager : MonoBehaviour
         TouchUtil.TouchSetUp(ref touchState, ref touchPosition);
         if (playerControlStatus == EPlayerControlStatus.None)
         {
-            if(touchState == TouchUtil.ETouchState.Began)
+            if (touchState == TouchUtil.ETouchState.Began)
             {
                 RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(touchPosition), Vector3.forward, 15f, LayerMask.GetMask("Token"));
 
@@ -204,79 +202,32 @@ public class GameManager : MonoBehaviour
             canEnemyTurn = areaAbilityList.All(areaAbility => areaAbility.canDone);
         }
 
-        if (Input.GetKeyDown(KeyCode.D)) DebugMap();
+        if (Input.GetKeyDown(KeyCode.D)) wallData.PrintMap();
         if (Input.GetKeyDown(KeyCode.R)) SceneManager.LoadScene(0);
-    }
-    //DFS 알고리즘을 이용한 벽에 갇혀있는지 체크
-    public bool CheckStuck()
-    {
-        bool[] visited = new bool[81];
-        int playerGraphPosition = (int)((playerGridPosition.y + 4) * 9 + playerGridPosition.x + 4);
-
-        void DFS(int now)
-        {
-            visited[now] = true;
-            for (int next = 0; next < 81; next++)
-            {
-                if (mapGraph[now, next] == 0)
-                    continue;
-                if (visited[next])
-                    continue;
-                DFS(next);
-            }
-        }
-        DFS(playerGraphPosition);
-        // Debug.Log(visited[enemyGraphPosition]);
-        foreach (Vector3 enemyPosition in enemyPositions)
-        {
-            int enemyGraphPosition = (int)((enemyPosition.y + 4) * 9 + enemyPosition.x + 4);
-            if (!visited[enemyGraphPosition]) return false;
-        }
-        return true;
-    }
-    //[디버그용] 맵그래프 출력
-    public void DebugMap()
-    {
-        string log = "";
-        for (int i = 0; i < mapGraph.GetLength(0); i++)
-        {
-            for (int row = 8; row >= 0; row--)
-            {
-                string rowInfo = "";
-                for (int col = 0; col < 9; col++)
-                {
-                    rowInfo = rowInfo + " " + mapGraph[i, row * 9 + col].ToString();
-                    if (mapGraph[i, row * 9 + col] == 1)
-                    {
-                        Vector3 start = new Vector3((i % 9) - 4, (i / 9) - 4, 0) * gridSize;
-                        Vector3 end = new Vector3(col - 4, row - 4, 0) * gridSize;
-                        Vector3 dir = end - start;
-                        Vector3 interval = (i % 2 == 0) ? Vector3.zero : new Vector3(0.1f, 0.1f, 0);
-                        Debug.DrawRay(start + interval, dir.normalized, Color.green, 1f);
-                    }
-                }
-                log += rowInfo + '\n';
-            }
-            log += '\n';
-        }
-        Debug.Log(log);
     }
 
     public void PlayerSpawn()
     {
-        RaycastHit2D hit;
+        // RaycastHit2D hit;
+        List<int> alreadySpawned = new List<int>();
         Vector2 playerPos;
-        for(int count = 0; count < playerCount; count++)
+        for (int count = 0; count < playerCount; count++)
         {
+            int x;
             // 좌표 뽑아오기
             do
             {
-                playerPos = new Vector2Int(Random.Range(-4, 5), -4);
-                hit = Physics2D.Raycast(playerPos * gridSize, Vector3.forward, 15f, LayerMask.GetMask("Token"));
-            } while (hit);
+                x = Random.Range(-4, 5);
+            } while (alreadySpawned.Contains(x));
+            alreadySpawned.Add(x);
+            playerPos = new Vector2(x, -4);
 
             players.Add(Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], playerPos * gridSize, Quaternion.identity));
-            players[count].GetComponent<Player>().playerIndex = count;
+            playerGridPositionList.Add(ChangeCoord(playerPos));
+            Player player = players[count].GetComponent<Player>();
+            player.playerIndex = count;
+            player.buildInteractionDistance = buildDistance;
+            player.destroyInteractionDistance = destroyDistance;
             playerActionUis.Add(players[count].transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>());
         }
     }
@@ -286,10 +237,29 @@ public class GameManager : MonoBehaviour
     {
         // 현재 턴에서 enemy턴을 제외한 전체 player갯수중 하나 player가 사망시 예외처리 적용해야함
         uiManager.turnEndButton.SetActive(true);
-        foreach(GameObject child in players)
+        foreach (GameObject child in players)
         {
             child.GetComponent<Player>().shouldReset = true;
         }
+    }
+    void CreateRandomWall(int count)
+    {
+        List<Vector2Int> wallPosList = new List<Vector2Int>();
+        for (int i = 0; i < count; i++)
+        {
+            Vector2Int wallPos;
+            int rotation;
+            do
+            {
+                wallPos = new Vector2Int(Random.Range(-4, 5), Random.Range(-4, 5));
+                rotation = Random.Range(0, 2);
+            } while (wallPosList.Contains(wallPos) || !(bool)(wallData.CanSetWall(wallPos.x, wallPos.y, rotation, true) ?? false));
+            GameObject wallObject = Instantiate(wallPrefab);
+            wallData.SetWall(wallPos.x, wallPos.y, rotation, ref wallObject);
+            wallPosList.Add(wallPos);
+
+        }
+
     }
     public static Vector3 ChangeCoord(Vector2Int originVector) { return ((Vector3)(Vector2)originVector * gridSize); }
     public static Vector2Int ChangeCoord(Vector3 originVector) { return new Vector2Int(Mathf.RoundToInt((originVector / gridSize).x), Mathf.RoundToInt((originVector / gridSize).y)); }
