@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -48,6 +48,8 @@ namespace HM
 
             public int hp; // 유닛 hp
             public int maxHp; // 유닛 최대 hp
+            public int attack;
+            public int damageResistance;
             public int moveCtrl
             {
                 get
@@ -97,6 +99,52 @@ namespace HM
                 this.hp = hp;
                 mMoveCtrl = moveCtrl;
                 this.uniqueNum = uniqueNum;
+                this.index = index;
+                mPosition = position;
+            }
+        }
+
+        public class PlayerValues
+        {
+            public GameObject player; // 해당 게임 오브젝트
+            public int hp; // 체력 최소값 10, 최댓값 100
+            public int attack; // 최소값 1, 최댓값 50
+            public int damageResistance; // 0%, 51%
+            public int index; // 해당 캐릭터 고유번호
+
+            public int mMoveCtrl; // 행동력
+            public int moveCtrl // 프로퍼티
+            {
+                get
+                {
+                    return mMoveCtrl;
+                }
+
+                set
+                {
+
+                }
+            }
+
+            public Vector3 mPosition; // 해당 위치
+            public Vector3 position
+            {
+                get
+                {
+                    return mPosition;
+                }
+
+                set
+                {
+                    player.transform.position = position;
+                    mPosition = value;
+                }
+            }
+
+            public PlayerValues(int hp, int moveCtrl, int index, Vector3 position)
+            {
+                this.hp = hp;
+                mMoveCtrl = moveCtrl;
                 this.index = index;
                 mPosition = position;
             }

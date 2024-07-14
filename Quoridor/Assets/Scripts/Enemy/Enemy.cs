@@ -8,7 +8,7 @@ using DG.Tweening.Core.Easing;
 using HM.Containers;
 using HM.Physics;
 
-public class Enemy : MonoBehaviour, IMove, IAttack, IDead
+public class Enemy : MonoBehaviour, IMove, IAttack, IDead, IDamage
 {
     public UiManager uiManager;
     // enemyValues

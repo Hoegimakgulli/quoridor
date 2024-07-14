@@ -21,6 +21,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     public List<Vector2Int> movablePositions = new List<Vector2Int>(); // 플레이어의 가능한 이동 좌표들
     [SerializeField]
+    public List<int[]> moveIndex = new List<int[]>(); // 플레이어 이동 동적 할당 GameManager.playerMoveCordinates 참고
+    [SerializeField]
     List<Vector2Int> attackablePositions = new List<Vector2Int>(); // 플레이어의 가능한 공격 좌표들
     [SerializeField]
     List<Vector2Int> attackPositions = new List<Vector2Int>() { Vector2Int.zero }; // 플레이어의 가능한 공격 좌표들
@@ -242,6 +244,14 @@ public class Player : MonoBehaviour
     {
         if(moveCtrl < 100) moveCtrl += 50;
         if (moveCtrl > 100) moveCtrl = 100;
+    }
+
+    void PlayerMoveSetup()
+    {
+        for(int moveCount = 0; moveCount < moveIndex.Count; moveCount++)
+        {
+            
+        }
     }
 
     void MovePlayer()
