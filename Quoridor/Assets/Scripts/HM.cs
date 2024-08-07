@@ -48,6 +48,75 @@ namespace HM
     }
     namespace Containers
     {
+        public class State
+        {
+            private int Hp;
+
+            public enum ECharacterType { Mutu = 0, Mana = 1, Machine = 2 }
+            public enum EPositionType { Tanker = 0, Attacker = 1, Supporter = 2 }
+
+            public int id; // 고유 인덱스
+            public bool playerable; // Player True, Enemy False
+            public string characterName; // 캐릭터 이름
+            public ECharacterType characterType; // 캐릭터 타입
+            public EPositionType characterPosition; // 캐릭터 포지션
+
+            public int hp
+            {
+                get
+                {
+                    return Hp;
+                }
+
+                set
+                {
+                    // 데미지를 입었을 경우 계산식
+                    if (value < Hp)
+                    {
+                        if (Random.Range(0.0f, 1.0f) < damageResistance)
+                        {
+                            Debug.LogFormat("캐릭터 이름 {0}이 공격을 회피했습니다.", characterName);
+                        }
+                        else
+                        {
+                            Debug.LogFormat("캐릭터 이름 {0}이 데미지({1})를 입었습니다. 현재 체력 : {2}", characterName, Hp - value, value);
+                            Hp = value;
+                        }
+                    }
+                }
+            }
+            public int attack;
+            public float damageResistance; // 피해저항
+            public int tia; // 증가 행동력
+            public int skillIndex;
+            public int moveRrange;
+            public int attackRange;
+
+            public State()
+            {
+                Debug.LogError("State 클래스에 할당된 값이 없습니다.");
+            }
+
+            // 초기 state설정
+            public State(int id, bool playerable, string characterName, ECharacterType characterType, EPositionType characterPosition,
+                int hp, int attack, float damageResistance, int tia, int skillIndex, int moveRange, int attackRange)
+            {
+                this.id = id;
+                this.playerable = playerable;
+                this.characterName = characterName;
+                this.characterType = characterType;
+                this.characterPosition = characterPosition;
+                Hp = hp;
+                this.attack = attack;
+                this.damageResistance = damageResistance;
+                this.tia = tia;
+                this.skillIndex = skillIndex;
+                this.moveRrange = moveRange;
+                this.attackRange = attackRange;
+            }
+        }
+
+
         public class EnemyValues
         {
             private Vector3 mPosition; // position

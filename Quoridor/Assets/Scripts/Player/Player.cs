@@ -10,6 +10,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using HM.Utils;
 using HM.Physics;
+using CharacterState;
 
 public class Player : MonoBehaviour
 {
@@ -33,7 +34,7 @@ public class Player : MonoBehaviour
     PlayerPrefabs playerPrefabs; // 플레이어 관련 프리팹 모음
     List<GameObject> playerPreviews = new List<GameObject>();
     List<GameObject> playerAttackPreviews = new List<GameObject>();
-    List<GameObject> playerAttackHighlights = new List<GameObject>();
+    List<GameObject> playerAttackHighlights = new List<GameObject>();   
     List<GameObject> playerAbilityPreviews = new List<GameObject>();
     List<GameObject> playerAbilityHighlights = new List<GameObject>();
     GameObject playerWallPreview;
@@ -116,6 +117,8 @@ public class Player : MonoBehaviour
     int[] previousWallInfo = new int[3];
     int[,] tempMapGraph = new int[81, 81];
 
+    public State testState;
+
     /*[디버그용]*/
     [SerializeField]
     GameObject playerUI;
@@ -142,6 +145,9 @@ public class Player : MonoBehaviour
         gameManager = GameManager.Instance;
         wallStorage = GameObject.FindGameObjectWithTag("WallStorage");
         previewStorage = GameObject.FindGameObjectWithTag("PreviewStorage");
+
+        //testState = StateManager.randPlayer();
+        //Debug.Log(testState.characterName);
         // GameManager.playerGridPositionList.Add(GameManager.ChangeCoord(transform.position));
         for (int i = 0; i < movablePositions.Count; i++) // 플레이어 미리보기 -> 미리소환하여 비활성화 해놓기
         {
