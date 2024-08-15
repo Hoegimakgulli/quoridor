@@ -146,6 +146,7 @@ public class GameManager : MonoBehaviour
                 if (hit.collider != null && hit.collider.gameObject.tag == "Player")
                 {
                     player = hit.transform.gameObject;
+                    playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
                     foreach (GameObject child in players)
                     {
                         if (child == player)
@@ -167,6 +168,10 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     player = null;
+                    foreach(PlayerActionUI playerUi in playerActionUis)
+                    {
+                        playerUi.PassiveUI();
+                    }
                     uiManager.PassiveEnemyInfoUI();
                 }
             }

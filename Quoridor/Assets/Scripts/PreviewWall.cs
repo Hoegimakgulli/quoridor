@@ -118,6 +118,8 @@ public class PreviewWall : MonoBehaviour
         //    WallButtonT[i].gameObject.SetActive(false);
         //}
         gameManager.playerActionUI.ActiveUI();
+        gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
+        gameManager.player.GetComponent<Player>().ResetPreview();
         gameManager.uiManager.WallCountText.text = $"남은 벽 수 : {gameManager.player.GetComponent<Player>().maxWallCount - gameManager.player.GetComponent<Player>().wallCount} / {gameManager.player.GetComponent<Player>().maxWallCount}"; //벽 갯수 표기
     }
 
