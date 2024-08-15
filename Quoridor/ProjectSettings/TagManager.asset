@@ -14,6 +14,7 @@ TagManager:
   - Trap
   - PreviewStorage
   - PlayerDummy
+  - PlayerDump
   layers:
   - Default
   - TransparentFX
@@ -30,7 +31,7 @@ TagManager:
   - Trap
   - AreaAbility
   - Stage
-  - 
+  - WallTouch
   - 
   - 
   - 

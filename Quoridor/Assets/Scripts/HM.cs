@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -38,9 +38,85 @@ namespace HM
 #endif
             }
         }
+        public static class MathUtil
+        {
+            public static float GetTaxiDistance(Vector2Int start, Vector2Int end)
+            {
+                return Mathf.Abs(start.x - end.x) + Mathf.Abs(start.y - end.y);
+            }
+        }
     }
     namespace Containers
     {
+        public class State
+        {
+            private int Hp;
+
+            public enum ECharacterType { Mutu = 0, Mana = 1, Machine = 2 }
+            public enum EPositionType { Tanker = 0, Attacker = 1, Supporter = 2 }
+
+            public int id; // 고유 인덱스
+            public bool playerable; // Player True, Enemy False
+            public string characterName; // 캐릭터 이름
+            public ECharacterType characterType; // 캐릭터 타입
+            public EPositionType characterPosition; // 캐릭터 포지션
+
+            public int hp
+            {
+                get
+                {
+                    return Hp;
+                }
+
+                set
+                {
+                    // 데미지를 입었을 경우 계산식
+                    if (value < Hp)
+                    {
+                        if (Random.Range(0.0f, 1.0f) < damageResistance)
+                        {
+                            Debug.LogFormat("캐릭터 이름 {0}이 공격을 회피했습니다.", characterName);
+                        }
+                        else
+                        {
+                            Debug.LogFormat("캐릭터 이름 {0}이 데미지({1})를 입었습니다. 현재 체력 : {2}", characterName, Hp - value, value);
+                            Hp = value;
+                        }
+                    }
+                }
+            }
+            public int attack;
+            public float damageResistance; // 피해저항
+            public int tia; // 증가 행동력
+            public int skillIndex;
+            public int moveRrange;
+            public int attackRange;
+
+            public State()
+            {
+                Debug.LogError("State 클래스에 할당된 값이 없습니다.");
+            }
+
+            // 초기 state설정
+            public State(int id, bool playerable, string characterName, ECharacterType characterType, EPositionType characterPosition,
+                int hp, int attack, float damageResistance, int tia, int skillIndex, int moveRange, int attackRange)
+            {
+                this.id = id;
+                this.playerable = playerable;
+                this.characterName = characterName;
+                this.characterType = characterType;
+                this.characterPosition = characterPosition;
+                Hp = hp;
+                this.attack = attack;
+                this.damageResistance = damageResistance;
+                this.tia = tia;
+                this.skillIndex = skillIndex;
+                this.moveRrange = moveRange;
+                this.attackRange = attackRange;
+            }
+        }
+
+
         public class EnemyValues
         {
             private Vector3 mPosition; // position
@@ -48,6 +124,8 @@ namespace HM
 
             public int hp; // 유닛 hp
             public int maxHp; // 유닛 최대 hp
+            public int attack;
+            public int damageResistance;
             public int moveCtrl
             {
                 get
@@ -97,6 +175,52 @@ namespace HM
                 this.hp = hp;
                 mMoveCtrl = moveCtrl;
                 this.uniqueNum = uniqueNum;
+                this.index = index;
+                mPosition = position;
+            }
+        }
+
+        public class PlayerValues
+        {
+            public GameObject player; // 해당 게임 오브젝트
+            public int hp; // 체력 최소값 10, 최댓값 100
+            public int attack; // 최소값 1, 최댓값 50
+            public int damageResistance; // 0%, 51%
+            public int index; // 해당 캐릭터 고유번호
+
+            public int mMoveCtrl; // 행동력
+            public int moveCtrl // 프로퍼티
+            {
+                get
+                {
+                    return mMoveCtrl;
+                }
+
+                set
+                {
+
+                }
+            }
+
+            public Vector3 mPosition; // 해당 위치
+            public Vector3 position
+            {
+                get
+                {
+                    return mPosition;
+                }
+
+                set
+                {
+                    player.transform.position = position;
+                    mPosition = value;
+                }
+            }
+
+            public PlayerValues(int hp, int moveCtrl, int index, Vector3 position)
+            {
+                this.hp = hp;
+                mMoveCtrl = moveCtrl;
                 this.index = index;
                 mPosition = position;
             }

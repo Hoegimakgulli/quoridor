@@ -17,7 +17,7 @@ public class PreviewWall : MonoBehaviour
 
     private void Awake()
     {
-        for(int i = 0; i < 2; i++)
+        for (int i = 0; i < 2; i++)
         {
             WallButtonT[i] = transform.GetChild(0).GetChild(i).GetComponent<RectTransform>();
         }
@@ -89,7 +89,7 @@ public class PreviewWall : MonoBehaviour
             WallButtonT[1].anchoredPosition = new Vector2(1, -1);
             foreach (RectTransform rt in WallButtonT)
             {
-                rt.rotation = Quaternion.Euler(0,0,0);
+                rt.rotation = Quaternion.Euler(0, 0, 0);
             }
         }
         else
@@ -101,11 +101,11 @@ public class PreviewWall : MonoBehaviour
                 rt.rotation = Quaternion.Euler(0, 0, 0);
             }
         }
-    }  
+    }
 
     public void OnCompleteBuildClick() // 건설 완료 버튼
     {
-        if (gameManager.player.GetComponent<Player>().BuildComplete()) 
+        if (gameManager.player.GetComponent<Player>().BuildComplete())
         {
             for (int i = 0; i < 2; i++)
             {
@@ -117,10 +117,8 @@ public class PreviewWall : MonoBehaviour
         //{
         //    WallButtonT[i].gameObject.SetActive(false);
         //}
-        gameManager.playerActionUI.ActiveUI();
-        gameManager.playerControlStatus = GameManager.EPlayerControlStatus.None;
-        gameManager.player.GetComponent<Player>().ResetPreview();
-        gameManager.uiManager.WallCountText.text = $"남은 벽 수 : {gameManager.player.GetComponent<Player>().maxWallCount - gameManager.player.GetComponent<Player>().wallCount} / {gameManager.player.GetComponent<Player>().maxWallCount}"; //벽 갯수 표기
+        // gameManager.playerActionUI.ActiveUI();
+        gameManager.uiManager.WallCountText.text = $"남은 벽 수 : {GameManager.Instance.playerMaxBuildWallCount - GameManager.Instance.playerWallCount} / {GameManager.Instance.playerMaxBuildWallCount}"; //벽 갯수 표기
     }
 
     //벽 건설 취소

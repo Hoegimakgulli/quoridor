@@ -8,7 +8,7 @@ using DG.Tweening.Core.Easing;
 using HM.Containers;
 using HM.Physics;
 
-public class Enemy : MonoBehaviour, IMove, IAttack, IDead
+public class Enemy : MonoBehaviour, IMove, IAttack, IDead, IDamage
 {
     public UiManager uiManager;
     // enemyValues
@@ -105,10 +105,10 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
             {
                 int currentShieldPos = (int)(fixPos.x + (fixPos.y * 9)); // mapgraph 형식으로 다듬기
-                if (currentShieldPos + 9 < 81 && gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] == 1) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
+                if (currentShieldPos + 9 < 81 && gameManager.wallData.mapGraph[currentShieldPos, currentShieldPos + 9] == 1) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
                 {
-                    gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 0; // 초기화 1
-                    gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 0; // 초기화 2
+                    gameManager.wallData.mapGraph[currentShieldPos, currentShieldPos + 9] = 0; // 초기화 1
+                    gameManager.wallData.mapGraph[currentShieldPos + 9, currentShieldPos] = 0; // 초기화 2
                     ShieldTrue = true;
                 }
             }
@@ -179,8 +179,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             Debug.Log(currentShieldPos);
             if (currentShieldPos + 9 < 81) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
             {
-                gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 1; // 초기화 1
-                gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
+                gameManager.wallData.mapGraph[currentShieldPos, currentShieldPos + 9] = 1; // 초기화 1
+                gameManager.wallData.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
             }
         }
         foreach (EnemyValues child in GameManager.enemyValueList)
@@ -205,8 +205,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             Debug.Log(currentShieldPos);
             if (currentShieldPos + 9 < 81) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
             {
-                gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 1; // 초기화 1
-                gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
+                gameManager.wallData.mapGraph[currentShieldPos, currentShieldPos + 9] = 1; // 초기화 1
+                gameManager.wallData.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
             }
         }
         foreach (EnemyValues child in GameManager.enemyValueList)
@@ -298,7 +298,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
     {
         player = GameObject.FindWithTag("Player").GetComponent<Player>();
         moveBeforePos = transform.position / GameManager.gridSize; // 초기 문제 생각
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        gameManager = GameManager.Instance;
         uiManager = GameObject.Find("GameManager").GetComponent<UiManager>();
         Material tmpObj = Instantiate(fadeObj, transform.position, Quaternion.identity, transform).GetComponent<SpriteRenderer>().material;
         highlightSPR = Instantiate(highlightObj, transform.position + new Vector3(0, 0, 0.1f), Quaternion.identity, transform).GetComponent<SpriteRenderer>(); //이규빈 작성
@@ -421,10 +421,10 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             if (transform.name.Contains("EnemyShieldSoldier")) // 이동 후 다시 벽으로 처리 실시
             {
                 int currentShieldPos = (int)(fixPos.x + (fixPos.y * 9)); // mapgraph 형식으로 다듬기
-                if (currentShieldPos + 9 < 81 && gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] == 1) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
+                if (currentShieldPos + 9 < 81 && gameManager.wallData.mapGraph[currentShieldPos, currentShieldPos + 9] == 1) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
                 {
-                    gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 0; // 초기화 1
-                    gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 0; // 초기화 2
+                    gameManager.wallData.mapGraph[currentShieldPos, currentShieldPos + 9] = 0; // 초기화 1
+                    gameManager.wallData.mapGraph[currentShieldPos + 9, currentShieldPos] = 0; // 초기화 2
                     ShieldTrue = true;
                 }
             }

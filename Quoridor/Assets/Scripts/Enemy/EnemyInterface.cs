@@ -14,6 +14,11 @@ public interface IAttack
     void AttackPlayer();
 }
 
+public interface IDamage
+{
+    bool AttackedEnemy(int playerAtk);
+}
+
 public interface IDead
 {
     void DieEnemy();

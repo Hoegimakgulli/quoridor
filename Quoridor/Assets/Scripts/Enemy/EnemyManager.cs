@@ -44,7 +44,7 @@ public class EnemyManager : MonoBehaviour
     {
         SetEnemyBox();
         Debug.Log("ui Spawned");
-        gameManager = transform.gameObject.GetComponent<GameManager>();
+        gameManager = GameManager.Instance;
         GameManager.enemyValueList.Clear();
         GameManager.enemyObjects.Clear(); // 적 위치 및 객체 정보 초기화
         GameManager.enemyPositions.Clear();
@@ -84,8 +84,8 @@ public class EnemyManager : MonoBehaviour
             int currentShieldPos = Mathf.FloorToInt(startObj.transform.position.x / GameManager.gridSize) + 4 + ((Mathf.FloorToInt(startObj.transform.position.y / GameManager.gridSize) + 4) * 9); // mapgraph 형식으로 다듬기
             if (currentShieldPos + 9 < 81 && startObj.GetComponent<Enemy>().ShieldTrue == true) // 방패가 위쪽 벽과 닿지 않았을 때만 실행
             {
-                gameManager.mapGraph[currentShieldPos, currentShieldPos + 9] = 1; // 초기화 1
-                gameManager.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
+                gameManager.wallData.mapGraph[currentShieldPos, currentShieldPos + 9] = 1; // 초기화 1
+                gameManager.wallData.mapGraph[currentShieldPos + 9, currentShieldPos] = 1; // 초기화 2
                 startObj.GetComponent<Enemy>().ShieldTrue = false;
             }
         }
@@ -178,20 +178,20 @@ public class EnemyManager : MonoBehaviour
         if (checkX >= bottomLeft.x && checkX < topRight.x + 1 && checkY >= bottomLeft.y && checkY < topRight.y + 1 && !ClosedList.Contains(PathArray[checkX - bottomLeft.x, checkY - bottomLeft.y]))
         {
             // start 지점으로 부터 end 지점 사이에 벽이 있는지 확인
-            if (gameManager.mapGraph[startGraphPosition, endGraphPosition] == 0) return;
+            if (gameManager.wallData.mapGraph[startGraphPosition, endGraphPosition] == 0) return;
             if (CheckEnemyPos(new Vector2((checkX - 4) * GameManager.gridSize, (checkY - 4) * GameManager.gridSize))) return;
             // 대각선 허용시, 벽 사이로 통과 안됨
             if (allowDiagonal)
             {
-                if (gameManager.mapGraph[startGraphPosition, startGraphPosition + (checkX - CurNode.x)] == 0)
+                if (gameManager.wallData.mapGraph[startGraphPosition, startGraphPosition + (checkX - CurNode.x)] == 0)
                 {
                     if (checkY - CurNode.y == 1)
                     {
-                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition + 9] == 0) return; // 아래에서 위로 올라가는 경우
+                        if (gameManager.wallData.mapGraph[startGraphPosition, startGraphPosition + 9] == 0) return; // 아래에서 위로 올라가는 경우
                     }
                     else if (checkY - CurNode.y == -1)
                     {
-                        if (gameManager.mapGraph[startGraphPosition, startGraphPosition - 9] == 0) return; // 위에서 아래로 내려가는 경우
+                        if (gameManager.wallData.mapGraph[startGraphPosition, startGraphPosition - 9] == 0) return; // 위에서 아래로 내려가는 경우
                     }
                 }
             }
