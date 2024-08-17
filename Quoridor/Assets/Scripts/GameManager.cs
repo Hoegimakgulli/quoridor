@@ -15,6 +15,8 @@ using UnityEngine.SceneManagement;
 // using static Player;
 using HM.Utils;
 using HM.Containers;
+using Unity.VisualScripting.Dependencies.Sqlite;
+using UnityEngine.UIElements;
 
 
 public class GameManager : MonoBehaviour
@@ -35,6 +37,8 @@ public class GameManager : MonoBehaviour
     public static List<Vector3> enemyPositions = new List<Vector3>();    // 모든 적들 위치 정보 저장      폐기처분 예정
     public static List<GameObject> enemyObjects = new List<GameObject>(); // 모든 적 기물 오브젝트 저장   폐기처분 예정
     public static List<EnemyValues> enemyValueList = new List<EnemyValues>();
+    public static List<Character> enemyCharacterList = new List<Character>(); // 새로 담을 적 리스트
+    public static List<Character> playerCharacterList = new List<Character>(); // 새로 담을 플레이어 리스트
     public static List<PlayerValues> playerValueList = new List<PlayerValues>(); // player 기물을 저장 후 사용 (player obj 존재
     [SerializeField]
     public List<Vector2Int> playeMovementCoordinates = new List<Vector2Int>();
@@ -123,8 +127,6 @@ public class GameManager : MonoBehaviour
     }
     public void Initialize()
     {
-        enemyPositions.Clear();
-        enemyObjects.Clear();
         for (int i = 0; i < areaAbilityList.Count; i++)
         {
             DestroyImmediate(areaAbilityList[i].gameObject);

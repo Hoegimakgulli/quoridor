@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using HM.Containers;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -50,8 +51,8 @@ namespace HM
         {
             public static List<Path> FinalPathList;
             public static List<Vector2> FinalVectorList;
-            public static Vector2Int bottomLeft, topRight, startPos, targetPos;
-            public static Vector2Int topLeft, bottomRight;
+            public static Vector2Int bottomLeft = new Vector2Int(0, 0), topRight = new Vector2Int(8, 8), startPos, targetPos;
+            public static Vector2Int topLeft = new Vector2Int(0, 8), bottomRight = new Vector2Int(8, 0);
             public static bool allowDiagonal, dontCrossCorner;
 
             public static int sizeX, sizeY;
@@ -64,11 +65,11 @@ namespace HM
             private static GameObject enemyBox;
 
             // 함수 오버로딩 피함 Vector 매개변수 - GetAstarVector, Gameobject - GetAStarGame~
-            public static List<Path> GetAStarVector(Vector2 startPathPos, Vector2 endPathPos)
+            public static List<Vector2> GetAStarVector(Vector2 startPathPos, Vector2 endPathPos)
             {
                 gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-                enemyBox = GameObject.Find("EnemyBox");
-
+                enemyBox = GameObject.FindWithTag("EnemyBox");
+                FinalVectorList = new List<Vector2>();
                 sizeX = topRight.x - bottomLeft.x + 1;
                 sizeY = topRight.y - bottomLeft.y + 1;
                 PathArray = new Path[sizeX, sizeY];
@@ -122,8 +123,7 @@ namespace HM
                         FinalPathList.Reverse();
 
                         foreach(Path node in FinalPathList) FinalVectorList.Add(new Vector2(node.x, node.y));
-                        
-                        break;
+                        return FinalVectorList;
                         //for (int i = 0; i < FinalPathList.Count; i++) print(i + "번째는 " + FinalPathList[i].x + ", " + FinalPathList[i].y);
                     }
 
@@ -211,14 +211,15 @@ namespace HM
                 {
                     GetAStarVector(startPathPos, blockEmemyObj.transform.position);
                 }
-                return FinalPathList;
+                return null;
             }
 
-            public static List<Path> GetAStarGameObject(GameObject startObj, GameObject endObj)
+            public static List<Vector2> GetAStarGameObject(GameObject startObj, GameObject endObj)
             {
                 gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-                enemyBox = GameObject.Find("EnemyBox");
-                
+                enemyBox = GameObject.FindWithTag("EnemyBox");
+                FinalVectorList = new List<Vector2>();
+
                 if (startObj.name.Contains("EnemyShieldSoldier")) // 만약 이동하는 객체가 방패병일 경우 벽처리로 해놨던 방패를 비활성화 후 이동 실시
                 {
                     int currentShieldPos = Mathf.FloorToInt(startObj.transform.position.x / GameManager.gridSize) + 4 + ((Mathf.FloorToInt(startObj.transform.position.y / GameManager.gridSize) + 4) * 9); // mapgraph 형식으로 다듬기
@@ -281,7 +282,9 @@ namespace HM
                         }
                         FinalPathList.Add(StartNode);
                         FinalPathList.Reverse();
-                        break;
+
+                        foreach (Path node in FinalPathList) FinalVectorList.Add(new Vector2(node.x, node.y));
+                        return FinalVectorList;
                         //for (int i = 0; i < FinalPathList.Count; i++) print(i + "번째는 " + FinalPathList[i].x + ", " + FinalPathList[i].y);
                     }
 
@@ -369,7 +372,7 @@ namespace HM
                 {
                     GetAStarGameObject(startObj, blockEmemyObj);
                 }
-                return FinalPathList;
+                return null;
             }
         }
     }
@@ -402,6 +405,7 @@ namespace HM
         public class Character
         {
             public int Hp;
+            public Vector2 Position;
 
             public enum ECharacterType { Mutu = 0, Mana = 1, Machine = 2 }
             public enum EPositionType { Tanker = 0, Attacker = 1, Supporter = 2 }
@@ -438,6 +442,21 @@ namespace HM
                 }
             }
 
+            public Vector2 position
+            {
+                get
+                {
+                    return Position;
+                }
+
+                set
+                {
+                    GameObject currentEnemy = EnemyManager.GetEnemyObject(Position);
+                    currentEnemy.transform.position = value;
+                    Position = value;
+                }
+            }
+
             public int attack;
             public float damageResistance; // 피해저항
             public int tia; // 증가 행동력
@@ -448,77 +467,22 @@ namespace HM
             // 캐릭터 position마다 정해져있는 알고리즘에 맞게 구성
             protected virtual void Move()
             {
-
+                Debug.LogFormat("{0} 캐릭터 Move함수 실행", characterName);
             }
 
             protected virtual void Attack()
             {
-
+                Debug.LogFormat("{0} 캐릭터 Attack함수 실행", characterName);
             }
 
             protected virtual void Build()
             {
-
+                Debug.LogFormat("{0} 캐릭터 Build함수 실행", characterName);
             }
-        }
 
-        public class characterTanker : Character
-        {
-            public characterTanker(int id, bool playerable, string characterName, ECharacterType characterType, EPositionType characterPosition,
-                int hp, int attack, float damageResistance, int tia, int skillIndex, int moveRange, int attackRange)
+            protected virtual void Ability()
             {
-                base.id = id;
-                base.playerable = playerable;
-                base.characterName = characterName;
-                base.characterType = characterType;
-                base.characterPosition = characterPosition;
-                base.Hp = hp;
-                base.attack = attack;
-                base.damageResistance = damageResistance;
-                base.tia = tia;
-                base.skillIndex = skillIndex;
-                base.moveRange = moveRange;
-                base.attackRange = attackRange;
-            }
-        }
-
-        public class characterAttacker : Character
-        {
-            public characterAttacker(int id, bool playerable, string characterName, ECharacterType characterType, EPositionType characterPosition,
-                int hp, int attack, float damageResistance, int tia, int skillIndex, int moveRange, int attackRange)
-            {
-                base.id = id;
-                base.playerable = playerable;
-                base.characterName = characterName;
-                base.characterType = characterType;
-                base.characterPosition = characterPosition;
-                base.Hp = hp;
-                base.attack = attack;
-                base.damageResistance = damageResistance;
-                base.tia = tia;
-                base.skillIndex = skillIndex;
-                base.moveRange = moveRange;
-                base.attackRange = attackRange;
-            }
-        }
-
-        public class characterSupporter : Character
-        {
-            public characterSupporter(int id, bool playerable, string characterName, ECharacterType characterType, EPositionType characterPosition,
-                int hp, int attack, float damageResistance, int tia, int skillIndex, int moveRange, int attackRange)
-            {
-                base.id = id;
-                base.playerable = playerable;
-                base.characterName = characterName;
-                base.characterType = characterType;
-                base.characterPosition = characterPosition;
-                base.Hp = hp;
-                base.attack = attack;
-                base.damageResistance = damageResistance;
-                base.tia = tia;
-                base.skillIndex = skillIndex;
-                base.moveRange = moveRange;
-                base.attackRange = attackRange;
+                Debug.LogFormat("{0} 캐릭터 능력함수 실행", characterName);
             }
         }
 
@@ -671,6 +635,69 @@ namespace HM
                     }
                 }
                 return new bool[] { false, false, tokenHit.Length > 1 };
+            }
+        }
+    }
+
+    namespace CharacterTypeFuc
+    {
+        public static class characterTanker
+        {
+            public static void Move()
+            {
+                
+            }
+            public static void Attack()
+            {
+               
+            }
+            public static void Build()
+            {
+                
+            }
+            public static void Ability()
+            {
+                
+            }
+        }
+
+        public static class characterDealer
+        {
+            public static void Move()
+            {
+
+            }
+            public static void Attack()
+            {
+
+            }
+            public static void Build()
+            {
+
+            }
+            public static void Ability()
+            {
+
+            }
+        }
+
+        public static class characterSupporter
+        {
+            public static void Move()
+            {
+
+            }
+            public static void Attack()
+            {
+
+            }
+            public static void Build()
+            {
+
+            }
+            public static void Ability()
+            {
+
             }
         }
     }

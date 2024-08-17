@@ -60,7 +60,7 @@ public class Player : MonoBehaviour
 
     public bool shouldReset = true;
 
-    // public bool canAction = true;
+    public bool canAction = true;
     // public bool isMoveBuildTogether = true;
     // public int moveCount = 1;
     // public int buildCount = 1;

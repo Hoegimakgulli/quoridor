@@ -162,6 +162,7 @@ public class EnemyStage : MonoBehaviour
             {
                 Vector3 enemyPosition;
                 GameObject tmpCurrentObj = currentValues[Random.Range(0, currentValues.Count)]; // 랜덤으로 적 오브젝트 생성 현재 소환되야하는 기물 등급에 따라서 결정됨
+
                 do
                 {
                     if (tmpCurrentObj.name.Contains("EnemyCavalry")) // 기마병 한정 소환 위치 조정
