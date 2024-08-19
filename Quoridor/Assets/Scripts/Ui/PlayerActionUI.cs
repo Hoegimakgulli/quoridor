@@ -133,6 +133,59 @@ public class PlayerActionUI : MonoBehaviour
         //     }
         // }
 
+        if (player != null && player.canMove) //플레이어가 움직임 가능한 상태라면
+        {
+            {
+                uiImages[0].raycastTarget = true; //버튼이 클릭 가능한 상태로
+                uiImages2[0].raycastTarget = true; //버튼이 클릭 가능한 상태로
+                playerUIs[0].localScale = Vector2.one;
+                playerUIs[0].anchoredPosition = Vector2.zero;
+                uiImages[0].DOFade(0.5f, 0);
+                uiImages2[0].DOFade(0.5f, 0);
+            }
+        }
+        else //플레이어가 움직임이 불가능한 상태라면
+        {
+            uiImages[0].raycastTarget = false; //버튼이 클릭 불가능한 상태로
+            uiImages2[0].raycastTarget = false; //버튼이 클릭 불가능한 상태로
+            playerUIs[0].localScale = Vector2.zero; //크기 0으로
+        }
+
+        if (player != null && player.canAction) //플레이어가 빌딩 가능한 상태라면
+        {
+            {
+                uiImages[1].raycastTarget = true; //버튼이 클릭 가능한 상태로
+                uiImages2[1].raycastTarget = true; //버튼이 클릭 가능한 상태로
+                playerUIs[1].localScale = Vector2.one;
+                playerUIs[1].anchoredPosition = Vector2.zero;
+                uiImages[1].DOFade(0.5f, 0);
+                uiImages2[1].DOFade(0.5f, 0);
+            }
+        }
+        else //플레이어가 빌딩이 불가능한 상태라면
+        {
+            uiImages[1].raycastTarget = false; //버튼이 클릭 불가능한 상태로
+            uiImages2[1].raycastTarget = false; //버튼이 클릭 불가능한 상태로
+            playerUIs[1].localScale = Vector2.zero; //크기 0으로
+        }
+
+        if (player != null && player.canAttack) //플레이어가 공격 가능한 상태라면
+        {
+            {
+                uiImages[2].raycastTarget = true; //버튼이 클릭 가능한 상태로
+                uiImages2[2].raycastTarget = true; //버튼이 클릭 가능한 상태로
+                playerUIs[2].localScale = Vector2.one;
+                playerUIs[2].anchoredPosition = Vector2.zero;
+                uiImages[2].DOFade(0.5f, 0);
+                uiImages2[2].DOFade(0.5f, 0);
+            }
+        }
+        else //플레이어가 공격이 불가능한 상태라면
+        {
+            uiImages[2].raycastTarget = false; //버튼이 클릭 불가능한 상태로
+            uiImages2[2].raycastTarget = false; //버튼이 클릭 불가능한 상태로
+            playerUIs[2].localScale = Vector2.zero; //크기 0으로
+        }
         // if (player != null && player.canAttack) //플레이어가 공격 가능한 상태라면
         // {
         //     {

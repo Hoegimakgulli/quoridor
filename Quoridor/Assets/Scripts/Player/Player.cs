@@ -10,6 +10,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using HM.Utils;
 using HM.Physics;
+using CharacterState;
 
 public class Player : MonoBehaviour
 {
@@ -21,6 +22,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     public List<Vector2Int> movablePositions = new List<Vector2Int>(); // 플레이어의 가능한 이동 좌표들
     [SerializeField]
+    public List<int[]> moveIndex = new List<int[]>(); // 플레이어 이동 동적 할당 GameManager.playerMoveCordinates 참고
+    [SerializeField]
     List<Vector2Int> attackablePositions = new List<Vector2Int>(); // 플레이어의 가능한 공격 좌표들
     [SerializeField]
     List<Vector2Int> attackPositions = new List<Vector2Int>() { Vector2Int.zero }; // 플레이어의 가능한 공격 좌표들
@@ -31,7 +34,7 @@ public class Player : MonoBehaviour
     PlayerPrefabs playerPrefabs; // 플레이어 관련 프리팹 모음
     List<GameObject> playerPreviews = new List<GameObject>();
     List<GameObject> playerAttackPreviews = new List<GameObject>();
-    List<GameObject> playerAttackHighlights = new List<GameObject>();
+    List<GameObject> playerAttackHighlights = new List<GameObject>();   
     List<GameObject> playerAbilityPreviews = new List<GameObject>();
     List<GameObject> playerAbilityHighlights = new List<GameObject>();
     GameObject playerWallPreview;
@@ -57,7 +60,7 @@ public class Player : MonoBehaviour
 
     public bool shouldReset = true;
 
-    // public bool canAction = true;
+    public bool canAction = true;
     // public bool isMoveBuildTogether = true;
     // public int moveCount = 1;
     // public int buildCount = 1;
@@ -114,6 +117,8 @@ public class Player : MonoBehaviour
     int[] previousWallInfo = new int[3];
     int[,] tempMapGraph = new int[81, 81];
 
+    public State testState;
+
     /*[디버그용]*/
     [SerializeField]
     GameObject playerUI;
@@ -140,6 +145,9 @@ public class Player : MonoBehaviour
         gameManager = GameManager.Instance;
         wallStorage = GameObject.FindGameObjectWithTag("WallStorage");
         previewStorage = GameObject.FindGameObjectWithTag("PreviewStorage");
+
+        //testState = StateManager.randPlayer();
+        //Debug.Log(testState.characterName);
         // GameManager.playerGridPositionList.Add(GameManager.ChangeCoord(transform.position));
         for (int i = 0; i < movablePositions.Count; i++) // 플레이어 미리보기 -> 미리소환하여 비활성화 해놓기
         {
@@ -293,6 +301,14 @@ public class Player : MonoBehaviour
         if (moveCtrl > 100) moveCtrl = 100;
     }
 
+    void PlayerMoveSetup()
+    {
+        for(int moveCount = 0; moveCount < moveIndex.Count; moveCount++)
+        {
+            
+        }
+    }
+
     void MovePlayer()
     {
         SetPreviewPlayer();
@@ -349,6 +365,7 @@ public class Player : MonoBehaviour
         if (touchState == TouchUtil.ETouchState.Began || touchState == TouchUtil.ETouchState.Moved)
             SetPreviewWall();
     }
+
     public bool BuildComplete()
     {
         if (!playerWallPreview.GetComponent<PreviewWall>().isBlock && playerWallPreview.tag != "CantBuild" && playerWallPreview.activeInHierarchy) //갇혀있거나 겹쳐있거나 비활성화 되어있지않다면

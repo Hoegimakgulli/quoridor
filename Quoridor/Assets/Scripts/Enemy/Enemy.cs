@@ -8,7 +8,7 @@ using DG.Tweening.Core.Easing;
 using HM.Containers;
 using HM.Physics;
 
-public class Enemy : MonoBehaviour, IMove, IAttack, IDead
+public class Enemy : MonoBehaviour, IMove, IAttack, IDead, IDamage
 {
     public UiManager uiManager;
     // enemyValues
@@ -40,7 +40,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     //--------------- Move 시작 ---------------//
     // 모든 enemy 객체 동시에 움직임 실시
-    public void EnemyMove(List<Path> path, bool isPlayer)
+    public void EnemyMove(List<Vector2> path, bool isPlayer)
     {
         // enemy가 Move 상태일 때 유닛의 특징에 따라 움직이는 범위 조정
         if (state == EState.Move)
@@ -63,8 +63,8 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
 
     public GameManager gameManager;
 
-    // A* 알고리즘
-    public void GetShortRoad(List<Path> path, bool isPlayer)
+    // A* 알고리즘 기반 이동 실시
+    public void GetShortRoad(List<Vector2> path, bool isPlayer)
     {
         this.isPlayer = isPlayer;
         Vector2 playerPos = (isPlayer) ? GameObject.FindWithTag("Player").transform.position / GameManager.gridSize : GameObject.FindWithTag("PlayerDummy").transform.position / GameManager.gridSize;
@@ -78,7 +78,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             int count;
             for (count = 1; count < path.Count; count++)
             {
-                Vector2 pathPoint = new Vector2(path[count].x, path[count].y);
+                Vector2 pathPoint = new Vector2(path[count][0], path[count][1]);
                 int moveCount;
                 for (moveCount = 0; moveCount < moveablePoints.Length; ++moveCount)
                 {
@@ -95,7 +95,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                     if (slipperyJellyStart)
                     {
                         Debug.Log("Start No.24");
-                        moveBeforePos = new Vector2((path[count - 1].x - 4) * GameManager.gridSize, (path[count - 1].y - 4) * GameManager.gridSize); // 갱신되기 이전 좌표까지 이동 아마 path[0] 이 부분이 적 초기 좌표임
+                        moveBeforePos = new Vector2((path[count - 1][0] - 4) * GameManager.gridSize, (path[count - 1][1] - 4) * GameManager.gridSize); // 갱신되기 이전 좌표까지 이동 아마 path[0] 이 부분이 적 초기 좌표임
                         MoveSlide();
                     }
                     break;
@@ -379,7 +379,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
         useShake = true;
     }
 
-    IEnumerator CheckStartSlipper(List<Path> path, bool isPlayer)
+    IEnumerator CheckStartSlipper(List<Vector2> path, bool isPlayer)
     {
         this.isPlayer = isPlayer;
         Vector2 playerPos = (isPlayer) ? GameObject.FindWithTag("Player").transform.position / GameManager.gridSize : GameObject.FindWithTag("PlayerDummy").transform.position / GameManager.gridSize;
@@ -392,7 +392,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
             int count;
             for (count = 1; count < path.Count; count++)
             {
-                Vector2 pathPoint = new Vector2(path[count].x, path[count].y);
+                Vector2 pathPoint = new Vector2(path[count][0], path[count][1]);
                 int moveCount;
                 for (moveCount = 0; moveCount < moveablePoints.Length; ++moveCount)
                 {
@@ -410,7 +410,7 @@ public class Enemy : MonoBehaviour, IMove, IAttack, IDead
                     if (slipperyJellyStart)
                     {
                         Debug.Log("Start No.24");
-                        moveBeforePos = new Vector2((path[count - 1].x - 4) * GameManager.gridSize, (path[count - 1].y - 4) * GameManager.gridSize); // 갱신되기 이전 좌표까지 이동 아마 path[0] 이 부분이 적 초기 좌표임
+                        moveBeforePos = new Vector2((path[count - 1][0] - 4) * GameManager.gridSize, (path[count - 1][1] - 4) * GameManager.gridSize); // 갱신되기 이전 좌표까지 이동 아마 path[0] 이 부분이 적 초기 좌표임
                         StartCoroutine(MoveSlide());
                         yield break;
                     }

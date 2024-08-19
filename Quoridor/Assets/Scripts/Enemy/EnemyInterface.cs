@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface IMove
 {
-    void GetShortRoad(List<Path> path, bool isPlayer);
+    void GetShortRoad(List<Vector2> path, bool isPlayer);
     void GetBackRoad();
     void GetHoldRoad();
 }
@@ -12,6 +12,11 @@ public interface IMove
 public interface IAttack
 {
     void AttackPlayer();
+}
+
+public interface IDamage
+{
+    bool AttackedEnemy(int playerAtk);
 }
 
 public interface IDead
