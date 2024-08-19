@@ -122,7 +122,7 @@ namespace HM
                         FinalPathList.Add(StartNode);
                         FinalPathList.Reverse();
 
-                        foreach(Path node in FinalPathList) FinalVectorList.Add(new Vector2(node.x, node.y));
+                        foreach (Path node in FinalPathList) FinalVectorList.Add(new Vector2(node.x, node.y));
                         return FinalVectorList;
                         //for (int i = 0; i < FinalPathList.Count; i++) print(i + "번째는 " + FinalPathList[i].x + ", " + FinalPathList[i].y);
                     }
@@ -404,8 +404,8 @@ namespace HM
 
         public class Character
         {
-            public int Hp;
-            public Vector2 Position;
+            private int mHp;
+            private Vector2 mPosition;
 
             public enum ECharacterType { Mutu = 0, Mana = 1, Machine = 2 }
             public enum EPositionType { Tanker = 0, Attacker = 1, Supporter = 2 }
@@ -421,13 +421,13 @@ namespace HM
             {
                 get
                 {
-                    return Hp;
+                    return mHp;
                 }
 
                 set
                 {
                     // 데미지를 입었을 경우 계산식
-                    if (value < Hp)
+                    if (value < mHp)
                     {
                         if (Random.Range(0.0f, 1.0f) < damageResistance)
                         {
@@ -435,8 +435,8 @@ namespace HM
                         }
                         else
                         {
-                            Debug.LogFormat("캐릭터 이름 {0}이 데미지({1})를 입었습니다. 현재 체력 : {2}", characterName, Hp - value, value);
-                            Hp = value;
+                            Debug.LogFormat("캐릭터 이름 {0}이 데미지({1})를 입었습니다. 현재 체력 : {2}", characterName, mHp - value, value);
+                            mHp = value;
                         }
                     }
                 }
@@ -446,14 +446,14 @@ namespace HM
             {
                 get
                 {
-                    return Position;
+                    return mPosition;
                 }
 
                 set
                 {
-                    GameObject currentEnemy = EnemyManager.GetEnemyObject(Position);
+                    GameObject currentEnemy = EnemyManager.GetEnemyObject(mPosition);
                     currentEnemy.transform.position = value;
-                    Position = value;
+                    mPosition = value;
                 }
             }
 
@@ -645,19 +645,19 @@ namespace HM
         {
             public static void Move()
             {
-                
+
             }
             public static void Attack()
             {
-               
+
             }
             public static void Build()
             {
-                
+
             }
             public static void Ability()
             {
-                
+
             }
         }
 

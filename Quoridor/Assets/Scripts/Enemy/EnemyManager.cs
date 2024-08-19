@@ -7,30 +7,6 @@ using HM.Containers;
 using HM.Utils;
 using DG.Tweening;
 
-[System.Serializable]
-public class Path
-{
-    // 중앙 좌표상 (0, 0) 시작으로 x, y 좌표
-    // G = 시작으로부터 이동한 거리, H = 가로, 세로로 벽을 무시하고 Player까지 이동한 거리
-    public int x, y, G, H;
-
-    public Path(int _x, int _y)
-    {
-        x = _x;
-        y = _y;
-    }
-
-    public Path ParentNode;
-
-    // F = G, H 총 합산값
-    public int F
-    {
-        get
-        {
-            return G + H;
-        }
-    }
-}
 
 public class EnemyManager : MonoBehaviour
 {
