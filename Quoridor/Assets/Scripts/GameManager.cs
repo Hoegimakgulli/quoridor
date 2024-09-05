@@ -37,8 +37,12 @@ public class GameManager : MonoBehaviour
     public static List<Vector3> enemyPositions = new List<Vector3>();    // 모든 적들 위치 정보 저장      폐기처분 예정
     public static List<GameObject> enemyObjects = new List<GameObject>(); // 모든 적 기물 오브젝트 저장   폐기처분 예정
     public static List<EnemyValues> enemyValueList = new List<EnemyValues>();
-    public static List<Character> enemyCharacterList = new List<Character>(); // 새로 담을 적 리스트
-    public static List<Character> playerCharacterList = new List<Character>(); // 새로 담을 플레이어 리스트
+
+    //새롭게 제작될 캐릭터 셋
+    public List<Dictionary<string, object>> stateDatas = new List<Dictionary<string, object>>();
+    public static List<BaseCharacter> characterFields = new List<BaseCharacter>();
+    public Dictionary<Define.ECharacter, List<BaseCharacter>> controlCharacter = new Dictionary<Define.ECharacter, List<BaseCharacter>>();
+
     public static List<PlayerValues> playerValueList = new List<PlayerValues>(); // player 기물을 저장 후 사용 (player obj 존재
     [SerializeField]
     public List<Vector2Int> playeMovementCoordinates = new List<Vector2Int>();
@@ -93,6 +97,7 @@ public class GameManager : MonoBehaviour
     }
     void Awake()
     {
+        stateDatas = CSVReader.Read("CharacterDatas");
         if (DataCommunicator.TryGet("MaxWallData", out messanger))
         {
             Debug.Log("Messanger Loaded");

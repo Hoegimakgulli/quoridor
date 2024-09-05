@@ -1,4 +1,4 @@
-using DG.Tweening;
+ï»¿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,7 +17,7 @@ public class SlopeSlider : MonoBehaviour
     float scope = 0.5f;
     int soundPower = 50;
     float speed = 0f;
-    float acceleration = 2f; //°¡¼Óµµ
+    float acceleration = 2f; //ê°€ì†ë„
     bool isRightScope = false;
     
 
@@ -64,7 +64,7 @@ public class SlopeSlider : MonoBehaviour
         }
     }
 
-    //¸¶¿ì½º À§Ä¡¸¦ Äµ¹ö½º »óÀÇ À§Ä¡·Î º¯È¯
+    //ë§ˆìš°ìŠ¤ ìœ„ì¹˜ë¥¼ ìº”ë²„ìŠ¤ ìƒì˜ ìœ„ì¹˜ë¡œ ë³€í™˜
     private Vector3 GetMousePositionInCanvas()
     {
         Vector3 mousePos = Input.mousePosition;
