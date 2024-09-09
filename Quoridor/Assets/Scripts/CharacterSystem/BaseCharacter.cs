@@ -5,6 +5,7 @@ using UnityEngine;
 public class BaseCharacter
 {
     protected readonly CharacterController controller;
+    protected private Dictionary<string, object> dataSet;
     public int maxHp;
     public int hp;
     public Vector2 Position;
@@ -28,7 +29,7 @@ public class BaseCharacter
         set
         {
             GameObject currentEnemy = controller.GetObjectToPosition(Position);
-            currentEnemy.transform.position = value;
+            currentEnemy.transform.position = value * GameManager.gridSize;
             Position = value;
         }
     }
@@ -114,6 +115,7 @@ public class BaseCharacter
 
     public void SetData(Dictionary<string, object> dataSet)
     {
+        this.dataSet = dataSet;
         playerable = bool.Parse(dataSet["playable"].ToString());
         characterName = (string)dataSet["ch_name"];
         characterType = (ECharacterType)dataSet["ch_type"];
@@ -128,5 +130,10 @@ public class BaseCharacter
         attackRangeIndex = (int)dataSet["atk_rg"];
         characterSprite = playerable ? Resources.Load<Sprite>("Sprites/Player/" + characterName) : Resources.Load<Sprite>("Sprites/Enemy/" + characterName); // 스프라이트 가져오기
         Debug.LogFormat("{0}이 생성되었습니다.", characterName);
+    }
+
+    public Dictionary<string, object> SendData()
+    {
+        return dataSet;
     }
 }

@@ -18,6 +18,7 @@ public class CharacterController : MonoBehaviour
     private Vector2 touchPos = new Vector2(0, 0);
 
     private List<GameObject> characters = new List<GameObject>();
+    public List<PlayerActionUI> playerActionUis;
 
     private void Start()
     {
@@ -111,6 +112,31 @@ public class CharacterController : MonoBehaviour
             } while (alreadySpawned.Contains(x));
             alreadySpawned.Add(x);
             playerPos = new Vector2(x, -4);
+            BaseCharacter baseCharacter = controlCharacter[Define.ECharacter.Player][Random.Range(0, controlCharacter[Define.ECharacter.Player].Count)];
+            GameObject spawnObject = Instantiate(playerPrefab, playerPos * GameManager.gridSize, Quaternion.identity);
+
+            switch (baseCharacter.characterPosition)
+            {
+                case BaseCharacter.EPositionType.Attacker:
+                    controlCharacter[Define.ECharacter.Player].Add(new AttackerCharacter(this));
+                    break;
+                case BaseCharacter.EPositionType.Tanker:
+                    controlCharacter[Define.ECharacter.Player].Add(new TankerCharacter(this));
+                    break;
+                case BaseCharacter.EPositionType.Supporter:
+                    controlCharacter[Define.ECharacter.Player].Add(new SupporterCharacter(this));
+                    break;
+                default:
+                    break;
+            }
+            controlCharacter[Define.ECharacter.Player][playerCount].SetData(baseCharacter.SendData());
+            controlCharacter[Define.ECharacter.Player][playerCount].position = playerPos;
+            controlCharacter[Define.ECharacter.Player][playerCount].id = playerCount;
+
+            spawnObject.GetComponent<SpriteRenderer>().sprite = baseCharacter.characterSprite;
+            spawnObject.name = baseCharacter.characterName + playerCount;
+            characters.Add(spawnObject);
+            playerActionUis.Add(spawnObject.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>());
         }
     }
 
