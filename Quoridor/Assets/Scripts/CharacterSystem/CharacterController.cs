@@ -7,18 +7,20 @@ using HM.Utils;
 
 public class CharacterController : MonoBehaviour
 {
-    public List<Dictionary<string, object>> stateDatas = new List<Dictionary<string, object>>();
-    public List<BaseCharacter> characterFields = new List<BaseCharacter>();
-    public Dictionary<Define.ECharacter, List<BaseCharacter>> controlCharacter = new Dictionary<Define.ECharacter, List<BaseCharacter>>();
-    public Define.EPlayerControlStatus playerControlStatus = Define.EPlayerControlStatus.None;
+    public List<Dictionary<string, object>> stateDatas                          = new List<Dictionary<string, object>>();
+    public List<BaseCharacter> characterFields                                  = new List<BaseCharacter>();
+    public Dictionary<Define.ECharacter, List<BaseCharacter>> controlCharacter  = new Dictionary<Define.ECharacter, List<BaseCharacter>>();
+    public Define.EPlayerControlStatus playerControlStatus                      = Define.EPlayerControlStatus.None;
 
     public GameObject playerPrefab;
+    public PlayerPrefabs playerPrefabs;
 
     private TouchUtil.ETouchState touchState = TouchUtil.ETouchState.None;
     private Vector2 touchPos = new Vector2(0, 0);
 
     private List<GameObject> characters = new List<GameObject>();
     public List<PlayerActionUI> playerActionUis;
+    private GameObject currentCtrlCharacter;
 
     private void Start()
     {
@@ -34,45 +36,45 @@ public class CharacterController : MonoBehaviour
     {
         TouchUtil.TouchSetUp(ref touchState, ref touchPos);
 
-        //if (playerControlStatus == Define.EPlayerControlStatus.None)
-        //{
-        //    if (touchState == TouchUtil.ETouchState.Began)
-        //    {
-        //        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(touchPos), Vector3.forward, 15f, LayerMask.GetMask("Token"));
+        if (playerControlStatus == Define.EPlayerControlStatus.None)
+        {
+            if (touchState == TouchUtil.ETouchState.Began)
+            {
+                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(touchPos), Vector3.forward, 15f, LayerMask.GetMask("Token"));
 
-        //        if (hit.collider != null && hit.collider.gameObject.tag == "Player")
-        //        {
-        //            player = hit.transform.gameObject;
-        //            playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
-        //            foreach (GameObject child in players)
-        //            {
-        //                if (child == player)
-        //                {
-        //                    child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().ActiveUI();
-        //                }
-        //                else
-        //                {
-        //                    child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().PassiveUI();
-        //                }
-        //            }
-        //        }
+                if (hit.collider != null && hit.collider.gameObject.tag == "Player")
+                {
+                    currentCtrlCharacter = hit.transform.gameObject;
+                    //playerActionUI = currentCtrlCharacter.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
+                    foreach (GameObject child in characters)
+                    {
+                        if (child == currentCtrlCharacter)
+                        {
+                            child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().ActiveUI();
+                        }
+                        else
+                        {
+                            child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().PassiveUI();
+                        }
+                    }
+                }
 
-        //        else if (hit.collider != null && hit.collider.gameObject.tag == "Enemy")
-        //        {
-        //            hit.collider.gameObject.GetComponent<Enemy>().EnemyActionInfo();
-        //        }
+                else if (hit.collider != null && hit.collider.gameObject.tag == "Enemy")
+                {
+                    hit.collider.gameObject.GetComponent<Enemy>().EnemyActionInfo();
+                }
 
-        //        else
-        //        {
-        //            player = null;
-        //            foreach (PlayerActionUI playerUi in playerActionUis)
-        //            {
-        //                playerUi.PassiveUI();
-        //            }
-        //            uiManager.PassiveEnemyInfoUI();
-        //        }
-        //    }
-        //}
+                else
+                {
+                    currentCtrlCharacter = null;
+                    foreach (PlayerActionUI playerUi in playerActionUis)
+                    {
+                        playerUi.PassiveUI();
+                    }
+                    //uiManager.PassiveEnemyInfoUI();
+                }
+            }
+        }
     }
 
     private void InitCharacter()
@@ -115,6 +117,9 @@ public class CharacterController : MonoBehaviour
             BaseCharacter baseCharacter = controlCharacter[Define.ECharacter.Player][Random.Range(0, controlCharacter[Define.ECharacter.Player].Count)];
             GameObject spawnObject = Instantiate(playerPrefab, playerPos * GameManager.gridSize, Quaternion.identity);
 
+            PlayerActionUI playerActionUI = Instantiate(playerPrefabs.actionUI, spawnObject.transform).transform.GetChild(0).GetComponent<PlayerActionUI>();
+            playerActionUI.GetComponentInParent<Canvas>().sortingLayerName = "Text"; // 임시 적용
+
             switch (baseCharacter.characterPosition)
             {
                 case BaseCharacter.EPositionType.Attacker:
@@ -136,7 +141,7 @@ public class CharacterController : MonoBehaviour
             spawnObject.GetComponent<SpriteRenderer>().sprite = baseCharacter.characterSprite;
             spawnObject.name = baseCharacter.characterName + playerCount;
             characters.Add(spawnObject);
-            playerActionUis.Add(spawnObject.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>());
+            playerActionUis.Add(playerActionUI);
         }
     }
 

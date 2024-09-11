@@ -20,6 +20,14 @@ public class Define
         Ability, 
         Destroy
     };
+
+    public enum EPlayerAxisField
+    {
+        None = -1,
+        Move,
+        Attack,
+        Ability
+    };
 }
 
 namespace CharacterState
@@ -42,5 +50,13 @@ namespace CharacterState
         {
             return attackIndex[Index];
         }
+    }
+}
+
+namespace SpawnUtil
+{
+    public class SpawnObject : MonoBehaviour
+    {
+
     }
 }
