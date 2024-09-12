@@ -11,19 +11,27 @@ public class CharacterController : MonoBehaviour
     public List<BaseCharacter> characterFields                                  = new List<BaseCharacter>();
     public Dictionary<Define.ECharacter, List<BaseCharacter>> controlCharacter  = new Dictionary<Define.ECharacter, List<BaseCharacter>>();
     public Define.EPlayerControlStatus playerControlStatus                      = Define.EPlayerControlStatus.None;
-
+    
+    [Header ("Prefabs Section")]
     public GameObject playerPrefab;
     public PlayerPrefabs playerPrefabs;
+
+    protected List<Vector2Int> allPositions = new List<Vector2Int>();
 
     private TouchUtil.ETouchState touchState = TouchUtil.ETouchState.None;
     private Vector2 touchPos = new Vector2(0, 0);
 
     private List<GameObject> characters = new List<GameObject>();
-    public List<PlayerActionUI> playerActionUis;
+    private List<PlayerActionUI> playerActionUis;
     private GameObject currentCtrlCharacter;
 
     private void Start()
     {
+        for (int i = 0; i < 81; i++)
+        {
+            allPositions.Add(new Vector2Int(i % 9 - 4, i / 9 - 4));
+        }
+
         InitCharacter();
     }
 
@@ -145,6 +153,7 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    #region BaseCharacterFuc
     public GameObject GetObjectToPosition(Vector3 pos)
     {
         foreach(GameObject character in characters)
@@ -156,4 +165,10 @@ public class CharacterController : MonoBehaviour
         }
         return null;
     }
+
+    public GameObject SetObjectToParent(GameObject child, GameObject parent = null, Vector3? pos = null, Quaternion? rot = null)
+    {
+        return Instantiate(child, pos.HasValue ? pos.Value : Vector3.zero, rot.HasValue ? rot.Value : Quaternion.identity, parent.transform);
+    }
+    #endregion
 }

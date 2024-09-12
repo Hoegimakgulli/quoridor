@@ -7,21 +7,27 @@ public class BaseCharacter
     protected readonly CharacterController controller;
     protected private Dictionary<string, object> dataSet;
 
+    #region PlayerCharacterValues
     protected readonly PlayerPrefabs playerPrefabs; // 플레이어 관련 프리팹 모음
-    private List<GameObject> playerPreviews = new List<GameObject>();
-    private List<GameObject> playerAttackPreviews = new List<GameObject>();
-    private List<GameObject> playerAttackHighlights = new List<GameObject>();
-    private List<GameObject> playerAbilityPreviews = new List<GameObject>();
+    private List<GameObject> playerPreviews          = new List<GameObject>();
+    private List<GameObject> playerAttackPreviews    = new List<GameObject>();
+    private List<GameObject> playerAttackHighlights  = new List<GameObject>();
+    private List<GameObject> playerAbilityPreviews   = new List<GameObject>();
     private List<GameObject> playerAbilityHighlights = new List<GameObject>();
-    GameObject playerWallPreview;
+    private GameObject playerWallPreview;
+    private GameObject wallStorage;
+    private GameObject previewStorage;
+    #endregion
 
     public int maxHp;
     public int hp;
     public Vector2 Position;
+    private List<Vector2> movablePositions = new List<Vector2>();
+    private List<Vector2> attackablePositions = new List<Vector2>();
 
     public enum ECharacterType { Mutu = 0, Mana = 1, Machine = 2 }
     public enum EPositionType { Tanker = 0, Attacker = 1, Supporter = 2 }
-
+    #region LoadDataSet
     public int id; // 고유 인덱스
     public bool playerable; // Player True, Enemy False
     public string characterName; // 캐릭터 이름
@@ -49,11 +55,13 @@ public class BaseCharacter
     public int skillIndex;
     public int moveRangeIndex;
     public int attackRangeIndex;
+    #endregion
 
     public BaseCharacter(CharacterController controller)
     {
         this.controller = controller;
         playerPrefabs = controller.playerPrefabs;
+        
     }
 
     // 캐릭터 position마다 정해져있는 알고리즘에 맞게 구성
@@ -149,49 +157,41 @@ public class BaseCharacter
 
     private void PlayerStart()
     {
-        //gameManager = GameManager.Instance;
-        //wallStorage = GameObject.FindGameObjectWithTag("WallStorage");
-        //previewStorage = GameObject.FindGameObjectWithTag("PreviewStorage");
+        wallStorage = GameObject.FindGameObjectWithTag("WallStorage");
+        previewStorage = GameObject.FindGameObjectWithTag("PreviewStorage");
 
-        ////testState = StateManager.randPlayer();
-        ////Debug.Log(testState.characterName);
-        //// GameManager.playerGridPositionList.Add(GameManager.ChangeCoord(transform.position));
-        //for (int i = 0; i < movablePositions.Count; i++) // 플레이어 미리보기 -> 미리소환하여 비활성화 해놓기
-        //{
-        //    playerPreviews.Add(Instantiate(playerPrefabs.playerPreview, previewStorage.transform));
-        //    playerPreviews[i].SetActive(false);
-        //}
-        //for (int i = 0; i < attackablePositions.Count; i++) // 플레이어 공격 미리보기 -> 미리소환하여 비활성화 해놓기
-        //{
-        //    playerAttackPreviews.Add(Instantiate(playerPrefabs.attackPreview, previewStorage.transform));
-        //    playerAttackPreviews[i].SetActive(false);
-        //}
+        for (int i = 0; i < movablePositions.Count; i++) // 플레이어 미리보기 -> 미리소환하여 비활성화 해놓기
+        {
+            playerPreviews.Add(controller.SetObjectToParent(playerPrefabs.playerPreview, previewStorage));
+            playerPreviews[i].SetActive(false);
+        }
+        for (int i = 0; i < attackablePositions.Count; i++) // 플레이어 공격 미리보기 -> 미리소환하여 비활성화 해놓기
+        {
+            playerAttackPreviews.Add(controller.SetObjectToParent(playerPrefabs.attackPreview, previewStorage));
+            playerAttackPreviews[i].SetActive(false);
+        }
         //for (int i = 0; i < attackPositions.Count; i++) // 플레이어 공격 하이라이트 -> 미리소환하여 비활성화 해놓기
         //{
-        //    playerAttackHighlights.Add(Instantiate(playerPrefabs.attackHighlight, previewStorage.transform));
+        //    playerAttackHighlights.Add(controller.SetObjectToParent(playerPrefabs.attackHighlight, previewStorage));
         //    playerAttackHighlights[i].SetActive(false);
         //}
-        //for (int i = 0; i < 81; i++) // 플레이어 능력 미리보기 -> 미리소환하여 비활성화 해놓기
-        //{
-        //    playerAbilityPreviews.Add(Instantiate(playerPrefabs.attackPreview, new Vector3(i % 9 - 4, i / 9 - 4, 0) * GameManager.gridSize, Quaternion.identity));
-        //    playerAbilityPreviews[i].transform.parent = previewStorage.transform;
-        //    playerAbilityPreviews[i].SetActive(false);
-        //}
-        //for (int i = 0; i < 81; i++) // 플레이어 능력 하이라이트 -> 미리소환하여 비활성화 해놓기
-        //{
-        //    playerAbilityHighlights.Add(Instantiate(playerPrefabs.attackHighlight, new Vector3(i % 9 - 4, i / 9 - 4, 0) * GameManager.gridSize, Quaternion.identity));
-        //    playerAbilityHighlights[i].transform.parent = previewStorage.transform;
-        //    playerAbilityHighlights[i].SetActive(false);
-        //}
-        //for (int i = 0; i < gameManager.playerMaxBuildWallCount; i++)
-        //{
-        //    Instantiate(playerPrefabs.wall, wallStorage.transform).SetActive(false);
-        //}
-        //for (int i = 0; i < 81; i++)
-        //{
-        //    allPositions.Add(new Vector2Int(i % 9 - 4, i / 9 - 4));
-        //}
-        //playerWallPreview = Instantiate(playerPrefabs.wallPreview, transform.position, Quaternion.identity); // 플레이어 벽 미리보기 -> 미리소환하여 비활성화 해놓기
-        //playerWallPreview.SetActive(false);
+        for (int i = 0; i < 81; i++) // 플레이어 능력 미리보기 -> 미리소환하여 비활성화 해놓기
+        {
+            playerAbilityPreviews.Add(controller.SetObjectToParent(playerPrefabs.attackPreview, previewStorage, new Vector3(i % 9 - 4, i / 9 - 4, 0) * GameManager.gridSize));
+            //playerAbilityPreviews[i].transform.parent = previewStorage.transform;
+            playerAbilityPreviews[i].SetActive(false);
+        }
+        for (int i = 0; i < 81; i++) // 플레이어 능력 하이라이트 -> 미리소환하여 비활성화 해놓기
+        {
+            playerAbilityHighlights.Add(controller.SetObjectToParent(playerPrefabs.attackHighlight, previewStorage, new Vector3(i % 9 - 4, i / 9 - 4, 0) * GameManager.gridSize));
+            //playerAbilityHighlights[i].transform.parent = previewStorage.transform;
+            playerAbilityHighlights[i].SetActive(false);
+        }
+        for (int i = 0; i < GameManager.Instance.playerMaxBuildWallCount; i++)
+        {
+            controller.SetObjectToParent(playerPrefabs.wall, wallStorage).SetActive(false);
+        }
+        playerWallPreview = controller.SetObjectToParent(playerPrefabs.wallPreview, null, position); // 플레이어 벽 미리보기 -> 미리소환하여 비활성화 해놓기
+        playerWallPreview.SetActive(false);
     }
 }
