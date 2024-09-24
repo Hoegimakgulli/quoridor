@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
     //새롭게 제작될 캐릭터 셋
     public List<Dictionary<string, object>> stateDatas = new List<Dictionary<string, object>>();
     public static List<BaseCharacter> characterFields = new List<BaseCharacter>();
-    public Dictionary<Define.ECharacter, List<BaseCharacter>> controlCharacter = new Dictionary<Define.ECharacter, List<BaseCharacter>>();
+    public Dictionary<CharacterDefinition.ECharacter, List<BaseCharacter>> controlCharacter = new Dictionary<CharacterDefinition.ECharacter, List<BaseCharacter>>();
 
     public static List<PlayerValues> playerValueList = new List<PlayerValues>(); // player 기물을 저장 후 사용 (player obj 존재
     [SerializeField]

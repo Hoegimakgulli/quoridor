@@ -9,8 +9,8 @@ public class CharacterController : MonoBehaviour
 {
     public List<Dictionary<string, object>> stateDatas                          = new List<Dictionary<string, object>>();
     public List<BaseCharacter> characterFields                                  = new List<BaseCharacter>();
-    public Dictionary<Define.ECharacter, List<BaseCharacter>> controlCharacter  = new Dictionary<Define.ECharacter, List<BaseCharacter>>();
-    public Define.EPlayerControlStatus playerControlStatus                      = Define.EPlayerControlStatus.None;
+    public Dictionary<CharacterDefinition.ECharacter, List<BaseCharacter>> controlCharacter  = new Dictionary<CharacterDefinition.ECharacter, List<BaseCharacter>>();
+    public CharacterDefinition.EPlayerControlStatus playerControlStatus                      = CharacterDefinition.EPlayerControlStatus.None;
     
     [Header ("Prefabs Section")]
     public GameObject playerPrefab;
@@ -44,7 +44,7 @@ public class CharacterController : MonoBehaviour
     {
         TouchUtil.TouchSetUp(ref touchState, ref touchPos);
 
-        if (playerControlStatus == Define.EPlayerControlStatus.None)
+        if (playerControlStatus == CharacterDefinition.EPlayerControlStatus.None)
         {
             if (touchState == TouchUtil.ETouchState.Began)
             {
@@ -122,7 +122,7 @@ public class CharacterController : MonoBehaviour
             } while (alreadySpawned.Contains(x));
             alreadySpawned.Add(x);
             playerPos = new Vector2(x, -4);
-            BaseCharacter baseCharacter = controlCharacter[Define.ECharacter.Player][Random.Range(0, controlCharacter[Define.ECharacter.Player].Count)];
+            BaseCharacter baseCharacter = controlCharacter[CharacterDefinition.ECharacter.Player][Random.Range(0, controlCharacter[CharacterDefinition.ECharacter.Player].Count)];
             GameObject spawnObject = Instantiate(playerPrefab, playerPos * GameManager.gridSize, Quaternion.identity);
 
             PlayerActionUI playerActionUI = Instantiate(playerPrefabs.actionUI, spawnObject.transform).transform.GetChild(0).GetComponent<PlayerActionUI>();
@@ -131,20 +131,20 @@ public class CharacterController : MonoBehaviour
             switch (baseCharacter.characterPosition)
             {
                 case BaseCharacter.EPositionType.Attacker:
-                    controlCharacter[Define.ECharacter.Player].Add(new AttackerCharacter(this));
+                    controlCharacter[CharacterDefinition.ECharacter.Player].Add(new AttackerCharacter(this));
                     break;
                 case BaseCharacter.EPositionType.Tanker:
-                    controlCharacter[Define.ECharacter.Player].Add(new TankerCharacter(this));
+                    controlCharacter[CharacterDefinition.ECharacter.Player].Add(new TankerCharacter(this));
                     break;
                 case BaseCharacter.EPositionType.Supporter:
-                    controlCharacter[Define.ECharacter.Player].Add(new SupporterCharacter(this));
+                    controlCharacter[CharacterDefinition.ECharacter.Player].Add(new SupporterCharacter(this));
                     break;
                 default:
                     break;
             }
-            controlCharacter[Define.ECharacter.Player][playerCount].SetData(baseCharacter.SendData());
-            controlCharacter[Define.ECharacter.Player][playerCount].position = playerPos;
-            controlCharacter[Define.ECharacter.Player][playerCount].id = playerCount;
+            controlCharacter[CharacterDefinition.ECharacter.Player][playerCount].SetData(baseCharacter.SendData());
+            controlCharacter[CharacterDefinition.ECharacter.Player][playerCount].position = playerPos;
+            controlCharacter[CharacterDefinition.ECharacter.Player][playerCount].id = playerCount;
 
             spawnObject.GetComponent<SpriteRenderer>().sprite = baseCharacter.characterSprite;
             spawnObject.name = baseCharacter.characterName + playerCount;
@@ -168,7 +168,14 @@ public class CharacterController : MonoBehaviour
 
     public GameObject SetObjectToParent(GameObject child, GameObject parent = null, Vector3? pos = null, Quaternion? rot = null)
     {
-        return Instantiate(child, pos.HasValue ? pos.Value : Vector3.zero, rot.HasValue ? rot.Value : Quaternion.identity, parent.transform);
+        if (parent)
+        {
+            return Instantiate(child, pos.HasValue ? pos.Value : Vector3.zero, rot.HasValue ? rot.Value : Quaternion.identity, parent.transform);
+        }
+        else
+        {
+            return Instantiate(child, pos.HasValue ? pos.Value : Vector3.zero, rot.HasValue ? rot.Value : Quaternion.identity);
+        }
     }
     #endregion
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Define
+namespace CharacterDefinition
 {
     public enum ECharacter
     {
@@ -21,7 +21,7 @@ public class Define
         Destroy
     };
 
-    public enum EPlayerAxisField
+    public enum EPlayerRangeField
     {
         None = -1,
         Move,
