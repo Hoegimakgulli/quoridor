@@ -30,7 +30,7 @@ namespace CharacterDefinition
     };
 }
 
-namespace CharacterState
+namespace CharacterRange
 {
     public class MoveIndex
     {

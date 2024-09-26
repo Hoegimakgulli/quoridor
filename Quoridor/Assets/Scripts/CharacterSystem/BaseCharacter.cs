@@ -1,10 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using CharacterDefinition;
 
 public class BaseCharacter
 {
     protected readonly CharacterController controller;
+    protected readonly RangeFrame rangeFrame;
     protected private Dictionary<string, object> dataSet;
 
     #region PlayerCharacterValues
@@ -44,7 +46,8 @@ public class BaseCharacter
         set
         {
             GameObject currentEnemy = controller.GetObjectToPosition(Position);
-            currentEnemy.transform.position = value * GameManager.gridSize;
+            if(currentEnemy)
+                currentEnemy.transform.position = value * GameManager.gridSize;
             Position = value;
         }
     }
@@ -61,7 +64,7 @@ public class BaseCharacter
     {
         this.controller = controller;
         playerPrefabs = controller.playerPrefabs;
-        
+        rangeFrame = playerPrefabs.rangeFrame.GetComponent<RangeFrame>();
     }
 
     // 캐릭터 position마다 정해져있는 알고리즘에 맞게 구성
@@ -71,7 +74,7 @@ public class BaseCharacter
     
     public virtual void Start()
     {
-
+        if (playerable) PlayerStart();
     }
 
     public virtual void Update()
@@ -133,26 +136,50 @@ public class BaseCharacter
 
     public void SetData(Dictionary<string, object> dataSet)
     {
-        this.dataSet = dataSet;
-        playerable = bool.Parse(dataSet["playable"].ToString());
-        characterName = (string)dataSet["ch_name"];
-        characterType = (ECharacterType)dataSet["ch_type"];
-        characterPosition = (EPositionType)dataSet["position"];
-        maxHp = (int)dataSet["hp"];
-        hp = maxHp;
-        attack = (int)dataSet["atk"];
-        damageResistance = (float)dataSet["rs"];
-        turnUpAction = (int)dataSet["tia"];
-        skillIndex = (int)dataSet["skill_id"];
-        moveRangeIndex = (int)dataSet["mov_rg"];
-        attackRangeIndex = (int)dataSet["atk_rg"];
-        characterSprite = playerable ? Resources.Load<Sprite>("Sprites/Player/" + characterName) : Resources.Load<Sprite>("Sprites/Enemy/" + characterName); // 스프라이트 가져오기
+        this.dataSet        = dataSet;
+        playerable          = bool.Parse(dataSet["playable"].ToString());
+        characterName       = (string)dataSet["ch_name"];
+        characterType       = (ECharacterType)dataSet["ch_type"];
+        characterPosition   = (EPositionType)dataSet["position"];
+        maxHp               = (int)dataSet["hp"];
+        hp                  = maxHp;
+        attack              = (int)dataSet["atk"];
+        damageResistance    = (float)dataSet["rs"];
+        turnUpAction        = (int)dataSet["tia"];
+        skillIndex          = (int)dataSet["skill_id"];
+        moveRangeIndex      = (int)dataSet["mov_rg"];
+        attackRangeIndex    = (int)dataSet["atk_rg"];
+        characterSprite     = playerable ? Resources.Load<Sprite>("Sprites/Player/" + characterName) : Resources.Load<Sprite>("Sprites/Enemy/" + characterName); // 스프라이트 가져오기
+                            
+        movablePositions    = rangeFrame.SelectFieldProperty(EPlayerRangeField.Move, moveRangeIndex);
+        attackablePositions = rangeFrame.SelectFieldProperty(EPlayerRangeField.Attack, moveRangeIndex);
         Debug.LogFormat("{0}이 생성되었습니다.", characterName);
     }
 
     public Dictionary<string, object> SendData()
     {
         return dataSet;
+    }
+
+    public BaseCharacter DeepCopy()
+    {
+        BaseCharacter baseCharacter = new BaseCharacter(controller);
+        baseCharacter.playerable    = playerable;
+        baseCharacter.characterName = characterName;
+        baseCharacter.characterType = characterType;
+        baseCharacter.characterPosition = characterPosition;
+        baseCharacter.maxHp = maxHp;
+        baseCharacter.hp = hp;
+        baseCharacter.attack = attack;
+        baseCharacter.damageResistance = damageResistance;
+        baseCharacter.turnUpAction = turnUpAction;
+        baseCharacter.skillIndex = skillIndex;
+        baseCharacter.moveRangeIndex = moveRangeIndex;
+        baseCharacter.attackRangeIndex = attackRangeIndex;
+        baseCharacter.characterSprite = characterSprite;
+        baseCharacter.movablePositions = movablePositions;
+        baseCharacter.attackablePositions = attackablePositions;
+        return baseCharacter;
     }
 
     private void PlayerStart()

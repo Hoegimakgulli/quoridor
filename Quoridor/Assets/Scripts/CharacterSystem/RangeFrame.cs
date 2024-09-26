@@ -7,8 +7,7 @@ using CharacterDefinition;
 public class RangeSetting
 {   
     [Header ("Total Property Value")]
-    [SerializeField] public List<Vector2> range;
-    [SerializeField] public EPlayerRangeField _playerField;
+    public List<Vector2> range;
 }
 
 [SerializeField]
@@ -25,9 +24,9 @@ public class MoveProperty
 
 public class RangeFrame : MonoBehaviour
 {
-    [HideInInspector] [SerializeField] public List<RangeSetting> moveProperties;
-    [HideInInspector] [SerializeField] public List<RangeSetting> attackProperties;
-    [HideInInspector] [SerializeField] public List<RangeSetting> abilityProperties; 
+    [SerializeField] private List<RangeSetting> moveProperties = new List<RangeSetting>();
+    [SerializeField] private List<RangeSetting> attackProperties = new List<RangeSetting>();
+    [SerializeField] private List<RangeSetting> abilityProperties = new List<RangeSetting>();
 
     public List<Vector2> SelectFieldProperty(EPlayerRangeField field = EPlayerRangeField.None, int Property = 0)
     {
@@ -49,10 +48,5 @@ public class RangeFrame : MonoBehaviour
         }
 
         return currentField.range;
-    }
-
-    public (List<RangeSetting> move, List<RangeSetting> attack, List<RangeSetting> ability) GetList()
-    {
-        return (moveProperties, attackProperties, abilityProperties);
     }
 }

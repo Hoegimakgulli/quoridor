@@ -10,7 +10,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using HM.Utils;
 using HM.Physics;
-using CharacterState;
 
 public class Player : MonoBehaviour
 {

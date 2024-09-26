@@ -112,7 +112,7 @@ public class GameManager : MonoBehaviour
         playerGridPositionList = new List<Vector2Int>(); // 플레이어 위치 초기화
         wallData.Reset();
         // DebugMap();
-        PlayerSpawn();
+        //PlayerSpawn(); // player 생성부분 No.1
         //player = Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], ChangeCoord(playerGridPosition), Quaternion.identity);
         //playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
         uiManager = GetComponent<UiManager>();
@@ -144,46 +144,46 @@ public class GameManager : MonoBehaviour
     }
     void Update()
     {
-        TouchUtil.TouchSetUp(ref touchState, ref touchPosition);
-        if (playerControlStatus == EPlayerControlStatus.None)
-        {
-            if (touchState == TouchUtil.ETouchState.Began)
-            {
-                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(touchPosition), Vector3.forward, 15f, LayerMask.GetMask("Token"));
+        //TouchUtil.TouchSetUp(ref touchState, ref touchPosition);
+        //if (playerControlStatus == EPlayerControlStatus.None)
+        //{
+        //    if (touchState == TouchUtil.ETouchState.Began)
+        //    {
+        //        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(touchPosition), Vector3.forward, 15f, LayerMask.GetMask("Token"));
 
-                if (hit.collider != null && hit.collider.gameObject.tag == "Player")
-                {
-                    player = hit.transform.gameObject;
-                    playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
-                    foreach (GameObject child in players)
-                    {
-                        if (child == player)
-                        {
-                            child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().ActiveUI();
-                        }
-                        else
-                        {
-                            child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().PassiveUI();
-                        }
-                    }
-                }
+        //        if (hit.collider != null && hit.collider.gameObject.tag == "Player")
+        //        {
+        //            player = hit.transform.gameObject;
+        //            playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
+        //            foreach (GameObject child in players)
+        //            {
+        //                if (child == player)
+        //                {
+        //                    child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().ActiveUI();
+        //                }
+        //                else
+        //                {
+        //                    child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().PassiveUI();
+        //                }
+        //            }
+        //        }
 
-                else if (hit.collider != null && hit.collider.gameObject.tag == "Enemy")
-                {
-                    hit.collider.gameObject.GetComponent<Enemy>().EnemyActionInfo();
-                }
+        //        else if (hit.collider != null && hit.collider.gameObject.tag == "Enemy")
+        //        {
+        //            hit.collider.gameObject.GetComponent<Enemy>().EnemyActionInfo();
+        //        }
 
-                else
-                {
-                    player = null;
-                    foreach(PlayerActionUI playerUi in playerActionUis)
-                    {
-                        playerUi.PassiveUI();
-                    }
-                    uiManager.PassiveEnemyInfoUI();
-                }
-            }
-        }
+        //        else
+        //        {
+        //            player = null;
+        //            foreach(PlayerActionUI playerUi in playerActionUis)
+        //            {
+        //                playerUi.PassiveUI();
+        //            }
+        //            uiManager.PassiveEnemyInfoUI();
+        //        }
+        //    }
+        //}
 
         if (Input.GetKeyDown(KeyCode.B))
         {

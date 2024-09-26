@@ -1,16 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using CharacterState;
 using HM.Containers;
+using CharacterDefinition;
 using HM.Utils;
 
 public class CharacterController : MonoBehaviour
 {
-    public List<Dictionary<string, object>> stateDatas                          = new List<Dictionary<string, object>>();
-    public List<BaseCharacter> characterFields                                  = new List<BaseCharacter>();
-    public Dictionary<CharacterDefinition.ECharacter, List<BaseCharacter>> controlCharacter  = new Dictionary<CharacterDefinition.ECharacter, List<BaseCharacter>>();
-    public CharacterDefinition.EPlayerControlStatus playerControlStatus                      = CharacterDefinition.EPlayerControlStatus.None;
+    public List<Dictionary<string, object>> stateDatas                   = new List<Dictionary<string, object>>();
+    public List<BaseCharacter> playerCharacterFields                     = new List<BaseCharacter>();
+    public List<BaseCharacter> enemyCharacterFields                      = new List<BaseCharacter>();
+    public Dictionary<ECharacter, List<BaseCharacter>> controlCharacter  = new Dictionary<ECharacter, List<BaseCharacter>>() 
+    {
+        {ECharacter.Player, new List<BaseCharacter>()},
+        {ECharacter.Enemy, new List<BaseCharacter>()}
+    };
+    public EPlayerControlStatus playerControlStatus                      = EPlayerControlStatus.None;
     
     [Header ("Prefabs Section")]
     public GameObject playerPrefab;
@@ -27,12 +32,29 @@ public class CharacterController : MonoBehaviour
 
     private void Start()
     {
+        stateDatas = CSVReader.Read("CharacterDatas");
         for (int i = 0; i < 81; i++)
         {
             allPositions.Add(new Vector2Int(i % 9 - 4, i / 9 - 4));
         }
 
         InitCharacter();
+        Debug.Log("Character Debug Start");
+        foreach(BaseCharacter ch in playerCharacterFields)
+        {
+            Debug.Log(ch.characterName);
+        }
+        Debug.Log("Enemy Character Debug Start");
+        foreach (BaseCharacter ch in enemyCharacterFields)
+        {
+            Debug.Log(ch.characterName);
+        }
+        PlayerSpawn();
+
+        foreach (BaseCharacter playerCharacter in controlCharacter[ECharacter.Player])
+        {
+            playerCharacter.Start();
+        }
     }
 
     private void Update()
@@ -44,7 +66,7 @@ public class CharacterController : MonoBehaviour
     {
         TouchUtil.TouchSetUp(ref touchState, ref touchPos);
 
-        if (playerControlStatus == CharacterDefinition.EPlayerControlStatus.None)
+        if (playerControlStatus == EPlayerControlStatus.None)
         {
             if (touchState == TouchUtil.ETouchState.Began)
             {
@@ -87,24 +109,28 @@ public class CharacterController : MonoBehaviour
 
     private void InitCharacter()
     {
+        BaseCharacter _baseCharacter;
         for (int dataCount = 0; dataCount < stateDatas.Count; ++dataCount)
         {
             switch ((int)stateDatas[dataCount]["position"]) // 현재 포지션 기준으로 클래스를 나눴지만 추후 구분해 어떤걸 넣을지 생각
             {
                 case 0:
-                    characterFields.Add(new TankerCharacter(this));
+                    _baseCharacter = new TankerCharacter(this);           
                     break;
                 case 1:
-                    characterFields.Add(new AttackerCharacter(this));
+                    _baseCharacter = new AttackerCharacter(this);
                     break;
                 case 2:
-                    characterFields.Add(new SupporterCharacter(this));
+                    _baseCharacter = new SupporterCharacter(this);
                     break;
                 default:
+                    _baseCharacter = new BaseCharacter(this);
                     Debug.LogError("해당 포지션은 올바르지않은 데이터입니다.");
                     break;
             }
-            characterFields[dataCount].SetData(stateDatas[dataCount]);
+            _baseCharacter.SetData(stateDatas[dataCount]);
+            if (bool.Parse(stateDatas[dataCount]["playable"].ToString())) playerCharacterFields.Add(_baseCharacter.DeepCopy());
+            else enemyCharacterFields.Add(_baseCharacter.DeepCopy());
         }
     }
 
@@ -122,7 +148,8 @@ public class CharacterController : MonoBehaviour
             } while (alreadySpawned.Contains(x));
             alreadySpawned.Add(x);
             playerPos = new Vector2(x, -4);
-            BaseCharacter baseCharacter = controlCharacter[CharacterDefinition.ECharacter.Player][Random.Range(0, controlCharacter[CharacterDefinition.ECharacter.Player].Count)];
+            // 도대체 이 병신은 이 줄을 왜 추가 했을까
+            BaseCharacter baseCharacter = playerCharacterFields[Random.Range(0, playerCharacterFields.Count)];
             GameObject spawnObject = Instantiate(playerPrefab, playerPos * GameManager.gridSize, Quaternion.identity);
 
             PlayerActionUI playerActionUI = Instantiate(playerPrefabs.actionUI, spawnObject.transform).transform.GetChild(0).GetComponent<PlayerActionUI>();
@@ -131,20 +158,20 @@ public class CharacterController : MonoBehaviour
             switch (baseCharacter.characterPosition)
             {
                 case BaseCharacter.EPositionType.Attacker:
-                    controlCharacter[CharacterDefinition.ECharacter.Player].Add(new AttackerCharacter(this));
+                    controlCharacter[ECharacter.Player].Add(new AttackerCharacter(this));
                     break;
                 case BaseCharacter.EPositionType.Tanker:
-                    controlCharacter[CharacterDefinition.ECharacter.Player].Add(new TankerCharacter(this));
+                    controlCharacter[ECharacter.Player].Add(new TankerCharacter(this));
                     break;
                 case BaseCharacter.EPositionType.Supporter:
-                    controlCharacter[CharacterDefinition.ECharacter.Player].Add(new SupporterCharacter(this));
+                    controlCharacter[ECharacter.Player].Add(new SupporterCharacter(this));
                     break;
                 default:
                     break;
             }
-            controlCharacter[CharacterDefinition.ECharacter.Player][playerCount].SetData(baseCharacter.SendData());
-            controlCharacter[CharacterDefinition.ECharacter.Player][playerCount].position = playerPos;
-            controlCharacter[CharacterDefinition.ECharacter.Player][playerCount].id = playerCount;
+            controlCharacter[ECharacter.Player][playerCount] = baseCharacter.DeepCopy();
+            controlCharacter[ECharacter.Player][playerCount].position = playerPos;
+            controlCharacter[ECharacter.Player][playerCount].id = playerCount;
 
             spawnObject.GetComponent<SpriteRenderer>().sprite = baseCharacter.characterSprite;
             spawnObject.name = baseCharacter.characterName + playerCount;
