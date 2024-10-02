@@ -15,7 +15,7 @@ public class PlayerActionUI : MonoBehaviour
     float uiMoveTime = 0.4f;
     public float uiMoveDistance = 50f;
     GameManager gameManager;
-    Player player;
+    public BaseCharacter baseCharacter;
     List<Tweener> activeTweens = new List<Tweener>();
 
     // Start is called before the first frame update
@@ -33,7 +33,6 @@ public class PlayerActionUI : MonoBehaviour
     private void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        player = transform.parent.parent.GetComponent<Player>();
     }
 
     // Update is called once per frame
@@ -68,8 +67,8 @@ public class PlayerActionUI : MonoBehaviour
         {
             tween.Kill();
         }
-        bool[] conditions = new bool[4] { player.canMove, player.canBuild, player.canAttack, player.canDestroy };
-        if (player != null)
+        bool[] conditions = new bool[4] { baseCharacter.canMove, baseCharacter.canBuild, baseCharacter.canAttack, baseCharacter.canDestroy };
+        if (baseCharacter != null)
         {
             for (int i = 0; i < 4; i++)
             {
@@ -90,7 +89,7 @@ public class PlayerActionUI : MonoBehaviour
                 }
             }
         }
-        // if (player != null && player.canAction) //플레이어가 이동 및 건설 가능한 상태라면
+        // if (baseCharacter != null && baseCharacter.canAction) //플레이어가 이동 및 건설 가능한 상태라면
         // {
         //     for (int i = 0; i < 2; i++)
         //     {
@@ -102,9 +101,9 @@ public class PlayerActionUI : MonoBehaviour
         //         uiImages2[i].DOFade(0.5f, 0);
         //     }
         // }
-        // else if ((player != null && player.buildCount > 0) || (player != null && player.moveCount > 0)) //플레이어가 건설 가능한 상태라면
+        // else if ((baseCharacter != null && baseCharacter.buildCount > 0) || (baseCharacter != null && baseCharacter.moveCount > 0)) //플레이어가 건설 가능한 상태라면
         // {
-        //     if (player.buildCount > 0)
+        //     if (baseCharacter.buildCount > 0)
         //     {
         //         uiImages[1].raycastTarget = true; //버튼이 클릭 가능한 상태로
         //         uiImages2[1].raycastTarget = true; //버튼이 클릭 가능한 상태로
@@ -113,7 +112,7 @@ public class PlayerActionUI : MonoBehaviour
         //         uiImages[1].DOFade(0.5f, 0);
         //         uiImages2[1].DOFade(0.5f, 0);
         //     }
-        //     if (player.moveCount > 0)
+        //     if (baseCharacter.moveCount > 0)
         //     {
         //         uiImages[0].raycastTarget = true; //버튼이 클릭 가능한 상태로
         //         uiImages2[0].raycastTarget = true; //버튼이 클릭 가능한 상태로
@@ -133,7 +132,7 @@ public class PlayerActionUI : MonoBehaviour
         //     }
         // }
 
-        if (player != null && player.canMove) //플레이어가 움직임 가능한 상태라면
+        if (baseCharacter != null && baseCharacter.canMove) //플레이어가 움직임 가능한 상태라면
         {
             {
                 uiImages[0].raycastTarget = true; //버튼이 클릭 가능한 상태로
@@ -151,7 +150,7 @@ public class PlayerActionUI : MonoBehaviour
             playerUIs[0].localScale = Vector2.zero; //크기 0으로
         }
 
-        if (player != null && player.canAction) //플레이어가 빌딩 가능한 상태라면
+        if (baseCharacter != null && baseCharacter.canAction) //플레이어가 빌딩 가능한 상태라면
         {
             {
                 uiImages[1].raycastTarget = true; //버튼이 클릭 가능한 상태로
@@ -169,7 +168,7 @@ public class PlayerActionUI : MonoBehaviour
             playerUIs[1].localScale = Vector2.zero; //크기 0으로
         }
 
-        if (player != null && player.canAttack) //플레이어가 공격 가능한 상태라면
+        if (baseCharacter != null && baseCharacter.canAttack) //플레이어가 공격 가능한 상태라면
         {
             {
                 uiImages[2].raycastTarget = true; //버튼이 클릭 가능한 상태로
@@ -186,7 +185,7 @@ public class PlayerActionUI : MonoBehaviour
             uiImages2[2].raycastTarget = false; //버튼이 클릭 불가능한 상태로
             playerUIs[2].localScale = Vector2.zero; //크기 0으로
         }
-        // if (player != null && player.canAttack) //플레이어가 공격 가능한 상태라면
+        // if (baseCharacter != null && baseCharacter.canAttack) //플레이어가 공격 가능한 상태라면
         // {
         //     {
         //         uiImages[2].raycastTarget = true; //버튼이 클릭 가능한 상태로
@@ -214,7 +213,7 @@ public class PlayerActionUI : MonoBehaviour
     {
         SelectActionAnim(1);
         gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Move;
-        player.ResetPreview();
+        baseCharacter.ResetPreview();
     }
 
     //건설 버튼을 눌렀을 때
@@ -222,7 +221,7 @@ public class PlayerActionUI : MonoBehaviour
     {
         SelectActionAnim(2);
         gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Build;
-        player.ResetPreview();
+        baseCharacter.ResetPreview();
     }
 
     //공격 버튼을 눌렀을 때
@@ -230,13 +229,13 @@ public class PlayerActionUI : MonoBehaviour
     {
         SelectActionAnim(3);
         gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Attack;
-        player.ResetPreview();
+        baseCharacter.ResetPreview();
     }
     public void DestroyClick()
     {
         SelectActionAnim(4);
         gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Destroy;
-        player.ResetPreview();
+        baseCharacter.ResetPreview();
     }
 
     //그 외의 것을 눌렀을 때 (이동, 건설, 공격 말고 다른걸 선택해서 전부 사라져야 할 때)

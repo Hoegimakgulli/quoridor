@@ -5,11 +5,19 @@ using CharacterDefinition;
 
 public class BaseCharacter
 {
+    /// <summary>
+    /// BaseCharacter의 기본 행동들을 도와줄때 사용할 스크립트 && 데이터 선언
+    /// 변경 X -> 불러와 사용만 가능한 데이터. CharacterController에서 바꿀 데이터가 있을 경우 해당 스크립트에서만 관리할 예정
+    /// rangeFrame 동일.
+    /// </summary>
     protected readonly CharacterController controller;
     protected readonly RangeFrame rangeFrame;
     protected private Dictionary<string, object> dataSet;
 
-    #region PlayerCharacterValues
+    /// <summary>
+    /// Player 기물의 범위 표현을 도와주는 게임 오브젝트 모음
+    /// </summary>
+    #region PreviewObjectsValues
     protected readonly PlayerPrefabs playerPrefabs; // 플레이어 관련 프리팹 모음
     private List<GameObject> playerPreviews          = new List<GameObject>();
     private List<GameObject> playerAttackPreviews    = new List<GameObject>();
@@ -21,15 +29,68 @@ public class BaseCharacter
     private GameObject previewStorage;
     #endregion
 
+    #region TokenValues
     public int maxHp;
-    public int hp;
-    public Vector2 Position;
+    public Vector2 mPosition;
     private List<Vector2> movablePositions = new List<Vector2>();
     private List<Vector2> attackablePositions = new List<Vector2>();
 
     public enum ECharacterType { Mutu = 0, Mana = 1, Machine = 2 }
     public enum EPositionType { Tanker = 0, Attacker = 1, Supporter = 2 }
-    #region LoadDataSet
+    public Sprite characterSprite;
+    private int moveCtrl = 0;
+
+    private bool bMove = true;
+    private bool bAttack = true;
+    public bool canAction = true;
+    public bool canAttack
+    {
+        get
+        {
+            return bAttack;
+        }
+        set
+        {
+            bAttack = value;
+        }
+    }
+
+    public bool canMove
+    {
+        get
+        {
+            return bMove;
+        }
+        set
+        {
+            bMove = value;
+        }
+    }
+    #endregion
+
+    #region EnemyValues
+    #endregion
+
+    #region PlayerValues
+    public bool canBuild
+    {
+        get
+        {
+            return GameManager.Instance.playerWallCount < GameManager.Instance.playerMaxBuildWallCount && moveCtrl >= 100;
+        }
+    }
+    public bool canDestroy
+    {
+        get
+        {
+            return GameManager.Instance.playerDestroyedWallCount < GameManager.Instance.playerMaxDestroyWallCount && moveCtrl >= 100;
+        }
+    }
+    public int buildInteractionDistance = 100;
+    public int destroyInteractionDistance = 100;
+    #endregion
+
+    #region LoadToDataSet
     public int id; // 고유 인덱스
     public bool playerable; // Player True, Enemy False
     public string characterName; // 캐릭터 이름
@@ -40,19 +101,19 @@ public class BaseCharacter
     {
         get
         {
-            return Position;
+            return mPosition;
         }
 
         set
         {
-            GameObject currentEnemy = controller.GetObjectToPosition(Position);
+            GameObject currentEnemy = controller.GetObjectToPosition(mPosition);
             if(currentEnemy)
                 currentEnemy.transform.position = value * GameManager.gridSize;
-            Position = value;
+            mPosition = value;
         }
     }
-    public Sprite characterSprite;
     public int attack;
+    public int hp;
     public float damageResistance; // 피해저항
     public int turnUpAction; // 증가 행동력
     public int skillIndex;
@@ -180,6 +241,11 @@ public class BaseCharacter
         baseCharacter.movablePositions = movablePositions;
         baseCharacter.attackablePositions = attackablePositions;
         return baseCharacter;
+    }
+
+    public void ResetPreview()
+    {
+
     }
 
     private void PlayerStart()
