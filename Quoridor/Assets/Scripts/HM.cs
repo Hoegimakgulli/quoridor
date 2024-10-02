@@ -122,7 +122,7 @@ namespace HM
                         FinalPathList.Add(StartNode);
                         FinalPathList.Reverse();
 
-                        foreach(Path node in FinalPathList) FinalVectorList.Add(new Vector2(node.x, node.y));
+                        foreach (Path node in FinalPathList) FinalVectorList.Add(new Vector2(node.x, node.y));
                         return FinalVectorList;
                         //for (int i = 0; i < FinalPathList.Count; i++) print(i + "번째는 " + FinalPathList[i].x + ", " + FinalPathList[i].y);
                     }
@@ -411,7 +411,6 @@ namespace HM
                 }
             }
         }
-
         public class EnemyValues
         {
             private Vector3 mPosition; // position

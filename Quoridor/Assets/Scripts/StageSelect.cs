@@ -92,33 +92,12 @@ public class StageSelect : MonoBehaviour
             for (int j = 0; j < tileCount; j++)
             {
                 Stage stage = new Stage();
-                // if (leftMidBottomIndex.Contains(i))
-                // {
-                //     stage.parentStage.Add(leftMidBottomIndex[leftMidBottomIndex.IndexOf(i) - 3]);
-                // }
+
                 stage.field = index;
                 if (index == fieldCount - 1) stage.stageType = EStageType.Boss;
                 else if (index == fieldCount - 2) stage.stageType = EStageType.Rest;
                 else stage.stageType = index < 2 ? EStageType.Normal : stageTypeProbability.GetRandomStageType();
 
-
-                /*
-                if (index != 0)
-                {
-                    if (j >= stageList[index - 1].Count())
-                    {
-                        stage.parentStage.Add(stageList[index - 1][Random.Range(0, stageList[index - 1].Count())]);
-                    }
-                    else
-                    {
-                        stage.parentStage.Add(stageList[index - 1][j]);
-                    }
-                }
-                foreach (var parentStage in stage.parentStage)
-                {
-                    parentStage.nextStage.Add(stage);
-                }
-                */
                 stage.id = stageFullCount + j;
                 if (stageList.Count() <= index) stageList.Add(new List<Stage>());
                 if (index == 0) stage.isEnable = true;
@@ -136,30 +115,6 @@ public class StageSelect : MonoBehaviour
             }
         }
         int stageCount = stageList.Count();
-        /*
-        foreach (var stageSet in stageList)
-        {
-            foreach (var stage in stageSet)
-            {
-                if (stage.nextStage.Count() == 0) stage.stageType = EStageType.Boss;
-            }
-        }
-        foreach (var stageSet in stageList)
-        {
-            foreach (var stage in stageSet)
-            {
-                if (stage.nextStage.Count > 0) if (stage.nextStage[0].stageType == EStageType.Boss) stage.stageType = EStageType.Rest;
-            }
-        }
-        for (int i = 1; i < stageCount; i++)
-        {
-            stageList[i].Sort((a, b) => a.parentStage[0].id.CompareTo(b.parentStage[0].id));
-            foreach (var stage in stageList[i])
-            {
-                stage.id = stageList[i].IndexOf(stage) + GetIndex(i);
-            }
-        }
-        */
     }
     public void InstantiateStage()
     {
@@ -176,7 +131,6 @@ public class StageSelect : MonoBehaviour
                 {
                     stageObject.GetComponent<SpriteRenderer>().color = new Color(0.5f, 0.5f, 0.5f, 0.2f);
                 }
-                // stageObject.transform.GetChild(0).GetComponent<SpriteMask>().sprite = stageImageList[(int)stage.stageType];
                 if (stage.stageType != EStageType.Boss)
                 {
                     for (int i = -1; i < 2; i++)
@@ -188,13 +142,6 @@ public class StageSelect : MonoBehaviour
                         lineObject.transform.localScale = new Vector3(direction.magnitude, 1, 1);
                     }
                 }
-                // if (stage.parentStage.Count() > 0)
-                // {
-                //     Vector2 direction = stageObject.transform.position - stage.parentStage[0].stageObject.transform.position;
-                //     GameObject lineObject = Instantiate(linePrefab, stage.parentStage[0].stageObject.transform);
-                //     lineObject.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
-                //     lineObject.transform.localScale = new Vector3(direction.magnitude, 1, 1);
-                // }
             }
         }
     }
@@ -214,8 +161,6 @@ public class StageSelect : MonoBehaviour
             foreach (var stage in stageSet)
             {
                 stageString += $"[{stage.stageType}]{stage.id}";
-                // stageString += $"(P:" + (stage.parentStage.Count() > 0 ? $"{stage.parentStage[0].id}" : "null") + ")";
-                // stageString += $"(N:" + (stage.nextStage.Count() > 0 ? $"{stage.nextStage[0].id}" : "null") + ")";
                 stageString += ",        ";
             }
             tree += stageString + '\n';
