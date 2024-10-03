@@ -1,39 +1,62 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using HM.Containers;
 
-namespace CharacterState
+namespace CharacterDefinition
 {
-    public class StateManager
+    public enum ECharacter
     {
-        //private static List<Character> playerStates;
-        //private static List<Character> enemyStates;
+        None = -1,
+        Player,
+        Enemy
+    };
 
-        //public List<Dictionary<string, object>> stateDatas = CSVReader.Read("CharacterStateDatas");
+    public enum EPlayerControlStatus
+    {
+        None = -1, 
+        Move, 
+        Build, 
+        Attack, 
+        Ability, 
+        Destroy
+    };
 
-        //// 초기 데이터 셋 저장
-        //private void Start()
-        //{
-        //    Debug.Log("Test CharacterState Start");
-        //    for(int count = 0; count < stateDatas.Count; count++)
-        //    {
-        //        if (stateDatas[count]["playerable"].ToString() == "TRUE")
-        //        {
-        //            playerStates.Add(
-        //                new Character((int)stateDatas[count]["id"], (bool)stateDatas[count]["playerable"], stateDatas[count]["ch_name"].ToString(), (Character.ECharacterType)stateDatas[count]["ch_type"]
-        //                , (Character.EPositionType)stateDatas[count]["position"], (int)stateDatas[count]["hp"], (int)stateDatas[count]["atk"], (float)stateDatas[count]["rs"]
-        //                , (int)stateDatas[count]["tia"], (int)stateDatas[count]["skill_id"], (int)stateDatas[count]["mov_rg"], (int)stateDatas[count]["atk_rg"]));
-        //        }
+    public enum EPlayerRangeField
+    {
+        None = -1,
+        Move,
+        Attack,
+        Ability
+    };
+}
 
-        //        else if (stateDatas[count]["playerable"].ToString() == "FALSE")
-        //        {
-        //            enemyStates.Add(
-        //                new Character((int)stateDatas[count]["id"], (bool)stateDatas[count]["playerable"], stateDatas[count]["ch_name"].ToString(), (Character.ECharacterType)stateDatas[count]["ch_type"]
-        //                , (Character.EPositionType)stateDatas[count]["position"], (int)stateDatas[count]["hp"], (int)stateDatas[count]["atk"], (float)stateDatas[count]["rs"]
-        //                , (int)stateDatas[count]["tia"], (int)stateDatas[count]["skill_id"], (int)stateDatas[count]["mov_rg"], (int)stateDatas[count]["atk_rg"]));
-        //        }
-        //    }
-        //}
+namespace CharacterRange
+{
+    public class MoveIndex
+    {
+        Dictionary<int, List<Vector2>> moveIndex = new Dictionary<int, List<Vector2>>();
+
+        public List<Vector2> GetMoveRange(int Index)
+        {
+            return moveIndex[Index];
+        }
+    }
+
+    public class AttackIndex
+    {
+        Dictionary<int, List<Vector2>> attackIndex = new Dictionary<int, List<Vector2>>();
+
+        public List<Vector2> GetAttackRange(int Index)
+        {
+            return attackIndex[Index];
+        }
+    }
+}
+
+namespace SpawnUtil
+{
+    public class SpawnObject : MonoBehaviour
+    {
+
     }
 }

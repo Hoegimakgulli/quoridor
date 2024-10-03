@@ -37,8 +37,12 @@ public class GameManager : MonoBehaviour
     public static List<Vector3> enemyPositions = new List<Vector3>();    // 모든 적들 위치 정보 저장      폐기처분 예정
     public static List<GameObject> enemyObjects = new List<GameObject>(); // 모든 적 기물 오브젝트 저장   폐기처분 예정
     public static List<EnemyValues> enemyValueList = new List<EnemyValues>();
-    public static List<Character> enemyCharacterList = new List<Character>(); // 새로 담을 적 리스트
-    public static List<Character> playerCharacterList = new List<Character>(); // 새로 담을 플레이어 리스트
+
+    //새롭게 제작될 캐릭터 셋
+    public List<Dictionary<string, object>> stateDatas = new List<Dictionary<string, object>>();
+    public static List<BaseCharacter> characterFields = new List<BaseCharacter>();
+    public Dictionary<CharacterDefinition.ECharacter, List<BaseCharacter>> controlCharacter = new Dictionary<CharacterDefinition.ECharacter, List<BaseCharacter>>();
+
     public static List<PlayerValues> playerValueList = new List<PlayerValues>(); // player 기물을 저장 후 사용 (player obj 존재
     [SerializeField]
     public List<Vector2Int> playeMovementCoordinates = new List<Vector2Int>();
@@ -93,6 +97,7 @@ public class GameManager : MonoBehaviour
     }
     void Awake()
     {
+        stateDatas = CSVReader.Read("CharacterDatas");
         if (DataCommunicator.TryGet("MaxWallData", out messanger))
         {
             Debug.Log("Messanger Loaded");
@@ -107,7 +112,7 @@ public class GameManager : MonoBehaviour
         playerGridPositionList = new List<Vector2Int>(); // 플레이어 위치 초기화
         wallData.Reset();
         // DebugMap();
-        PlayerSpawn();
+        //PlayerSpawn(); // player 생성부분 No.1
         //player = Instantiate(playerCharacters.players[Random.Range(1, playerCharacters.players.Count)], ChangeCoord(playerGridPosition), Quaternion.identity);
         //playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
         uiManager = GetComponent<UiManager>();
@@ -139,46 +144,46 @@ public class GameManager : MonoBehaviour
     }
     void Update()
     {
-        TouchUtil.TouchSetUp(ref touchState, ref touchPosition);
-        if (playerControlStatus == EPlayerControlStatus.None)
-        {
-            if (touchState == TouchUtil.ETouchState.Began)
-            {
-                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(touchPosition), Vector3.forward, 15f, LayerMask.GetMask("Token"));
+        //TouchUtil.TouchSetUp(ref touchState, ref touchPosition);
+        //if (playerControlStatus == EPlayerControlStatus.None)
+        //{
+        //    if (touchState == TouchUtil.ETouchState.Began)
+        //    {
+        //        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(touchPosition), Vector3.forward, 15f, LayerMask.GetMask("Token"));
 
-                if (hit.collider != null && hit.collider.gameObject.tag == "Player")
-                {
-                    player = hit.transform.gameObject;
-                    playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
-                    foreach (GameObject child in players)
-                    {
-                        if (child == player)
-                        {
-                            child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().ActiveUI();
-                        }
-                        else
-                        {
-                            child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().PassiveUI();
-                        }
-                    }
-                }
+        //        if (hit.collider != null && hit.collider.gameObject.tag == "Player")
+        //        {
+        //            player = hit.transform.gameObject;
+        //            playerActionUI = player.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
+        //            foreach (GameObject child in players)
+        //            {
+        //                if (child == player)
+        //                {
+        //                    child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().ActiveUI();
+        //                }
+        //                else
+        //                {
+        //                    child.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>().PassiveUI();
+        //                }
+        //            }
+        //        }
 
-                else if (hit.collider != null && hit.collider.gameObject.tag == "Enemy")
-                {
-                    hit.collider.gameObject.GetComponent<Enemy>().EnemyActionInfo();
-                }
+        //        else if (hit.collider != null && hit.collider.gameObject.tag == "Enemy")
+        //        {
+        //            hit.collider.gameObject.GetComponent<Enemy>().EnemyActionInfo();
+        //        }
 
-                else
-                {
-                    player = null;
-                    foreach(PlayerActionUI playerUi in playerActionUis)
-                    {
-                        playerUi.PassiveUI();
-                    }
-                    uiManager.PassiveEnemyInfoUI();
-                }
-            }
-        }
+        //        else
+        //        {
+        //            player = null;
+        //            foreach(PlayerActionUI playerUi in playerActionUis)
+        //            {
+        //                playerUi.PassiveUI();
+        //            }
+        //            uiManager.PassiveEnemyInfoUI();
+        //        }
+        //    }
+        //}
 
         if (Input.GetKeyDown(KeyCode.B))
         {

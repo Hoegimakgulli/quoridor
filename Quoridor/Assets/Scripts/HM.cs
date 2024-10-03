@@ -378,6 +378,16 @@ namespace HM
     }
     namespace Containers
     {
+        public class Define
+        {
+            public enum EField
+            {
+                None = -1,
+                Player,
+                Enemy,
+            }
+        }
+
         public class Path
         {
             // 중앙 좌표상 (0, 0) 시작으로 x, y 좌표
@@ -401,92 +411,6 @@ namespace HM
                 }
             }
         }
-
-        public class Character
-        {
-            private int mHp;
-            private Vector2 mPosition;
-
-            public enum ECharacterType { Mutu = 0, Mana = 1, Machine = 2 }
-            public enum EPositionType { Tanker = 0, Attacker = 1, Supporter = 2 }
-
-            public int id; // 고유 인덱스
-            public bool playerable; // Player True, Enemy False
-            public string characterName; // 캐릭터 이름
-            public ECharacterType characterType; // 캐릭터 타입
-            public EPositionType characterPosition; // 캐릭터 포지션
-
-            // 상성에 맞게 데미지 처리하는 과정 필요
-            public int hp
-            {
-                get
-                {
-                    return mHp;
-                }
-
-                set
-                {
-                    // 데미지를 입었을 경우 계산식
-                    if (value < mHp)
-                    {
-                        if (Random.Range(0.0f, 1.0f) < damageResistance)
-                        {
-                            Debug.LogFormat("캐릭터 이름 {0}이 공격을 회피했습니다.", characterName);
-                        }
-                        else
-                        {
-                            Debug.LogFormat("캐릭터 이름 {0}이 데미지({1})를 입었습니다. 현재 체력 : {2}", characterName, mHp - value, value);
-                            mHp = value;
-                        }
-                    }
-                }
-            }
-
-            public Vector2 position
-            {
-                get
-                {
-                    return mPosition;
-                }
-
-                set
-                {
-                    GameObject currentEnemy = EnemyManager.GetEnemyObject(mPosition);
-                    currentEnemy.transform.position = value;
-                    mPosition = value;
-                }
-            }
-
-            public int attack;
-            public float damageResistance; // 피해저항
-            public int tia; // 증가 행동력
-            public int skillIndex;
-            public int moveRange;
-            public int attackRange;
-
-            // 캐릭터 position마다 정해져있는 알고리즘에 맞게 구성
-            protected virtual void Move()
-            {
-                Debug.LogFormat("{0} 캐릭터 Move함수 실행", characterName);
-            }
-
-            protected virtual void Attack()
-            {
-                Debug.LogFormat("{0} 캐릭터 Attack함수 실행", characterName);
-            }
-
-            protected virtual void Build()
-            {
-                Debug.LogFormat("{0} 캐릭터 Build함수 실행", characterName);
-            }
-
-            protected virtual void Ability()
-            {
-                Debug.LogFormat("{0} 캐릭터 능력함수 실행", characterName);
-            }
-        }
-
-
         public class EnemyValues
         {
             private Vector3 mPosition; // position
@@ -635,69 +559,6 @@ namespace HM
                     }
                 }
                 return new bool[] { false, false, tokenHit.Length > 1 };
-            }
-        }
-    }
-
-    namespace CharacterTypeFuc
-    {
-        public static class characterTanker
-        {
-            public static void Move()
-            {
-
-            }
-            public static void Attack()
-            {
-
-            }
-            public static void Build()
-            {
-
-            }
-            public static void Ability()
-            {
-
-            }
-        }
-
-        public static class characterDealer
-        {
-            public static void Move()
-            {
-
-            }
-            public static void Attack()
-            {
-
-            }
-            public static void Build()
-            {
-
-            }
-            public static void Ability()
-            {
-
-            }
-        }
-
-        public static class characterSupporter
-        {
-            public static void Move()
-            {
-
-            }
-            public static void Attack()
-            {
-
-            }
-            public static void Build()
-            {
-
-            }
-            public static void Ability()
-            {
-
             }
         }
     }
