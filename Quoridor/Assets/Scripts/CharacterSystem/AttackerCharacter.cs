@@ -11,9 +11,9 @@ public class AttackerCharacter : BaseCharacter
         base.Attack();
     }
 
-    public override void Move(Vector2 targetPos)
+    public override void Move()
     {
-        base.Move(targetPos);
+        base.Move();
     }
 
     public override void Ability()

@@ -7,7 +7,7 @@ using CharacterDefinition;
 public class RangeSetting
 {   
     [Header ("Total Property Value")]
-    public List<Vector2> range;
+    public List<Vector2Int> range;
 }
 
 [SerializeField]
@@ -28,7 +28,7 @@ public class RangeFrame : MonoBehaviour
     [SerializeField] private List<RangeSetting> attackProperties = new List<RangeSetting>();
     [SerializeField] private List<RangeSetting> abilityProperties = new List<RangeSetting>();
 
-    public List<Vector2> SelectFieldProperty(EPlayerRangeField field = EPlayerRangeField.None, int Property = 0)
+    public List<Vector2Int> SelectFieldProperty(EPlayerRangeField field = EPlayerRangeField.None, int Property = 0)
     {
         RangeSetting currentField = null;
         switch (field)

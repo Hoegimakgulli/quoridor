@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using CharacterDefinition;
 
 public class PlayerActionUI : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class PlayerActionUI : MonoBehaviour
     public float uiMoveDistance = 50f;
     GameManager gameManager;
     public BaseCharacter baseCharacter;
+    private CharacterController characterController;
     List<Tweener> activeTweens = new List<Tweener>();
 
     // Start is called before the first frame update
@@ -32,7 +34,7 @@ public class PlayerActionUI : MonoBehaviour
     }
     private void Start()
     {
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        characterController = GameObject.Find("GameManager").GetComponent<CharacterController>();
     }
 
     // Update is called once per frame
@@ -212,7 +214,7 @@ public class PlayerActionUI : MonoBehaviour
     public void MoveClick()
     {
         SelectActionAnim(1);
-        gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Move;
+        characterController.playerControlStatus = EPlayerControlStatus.Move;
         baseCharacter.ResetPreview();
     }
 
@@ -220,7 +222,7 @@ public class PlayerActionUI : MonoBehaviour
     public void BuildClick()
     {
         SelectActionAnim(2);
-        gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Build;
+        characterController.playerControlStatus = EPlayerControlStatus.Build;
         baseCharacter.ResetPreview();
     }
 
@@ -228,13 +230,13 @@ public class PlayerActionUI : MonoBehaviour
     public void AttackClick()
     {
         SelectActionAnim(3);
-        gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Attack;
+        characterController.playerControlStatus = EPlayerControlStatus.Attack;
         baseCharacter.ResetPreview();
     }
     public void DestroyClick()
     {
         SelectActionAnim(4);
-        gameManager.playerControlStatus = GameManager.EPlayerControlStatus.Destroy;
+        characterController.playerControlStatus = EPlayerControlStatus.Destroy;
         baseCharacter.ResetPreview();
     }
 

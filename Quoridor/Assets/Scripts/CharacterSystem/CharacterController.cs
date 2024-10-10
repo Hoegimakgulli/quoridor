@@ -37,16 +37,17 @@ public class CharacterController : MonoBehaviour
     /// 실제로 사용할 데이터는 playerControlStatus이고 나머지는 playerControlStatus <- 어떤 상태인지 결정하는 변수라고 생각하면 됨 
     /// </summary>
     public EPlayerControlStatus playerControlStatus = EPlayerControlStatus.None;
+    public Vector2 touchPos = new Vector2(0, 0);
     private TouchUtil.ETouchState touchState = TouchUtil.ETouchState.None;
-    private Vector2 touchPos = new Vector2(0, 0);
 
     /// <summary>
     /// characters 변수는 타일에 돌입했을때 화면에 보이는 "모든"기물을 오브젝트 형태로 저장했다고 생각
     /// playerActionUis는 player 기물들의 행동을 결정하는 UI 모음이라고 생각 (currentCtrlCharacter && playerControlStatus에 따라 선택)
     /// </summary>
+    public GameObject currentCtrlCharacter = null;
     private List<GameObject> characters = new List<GameObject>();
-    private List<PlayerActionUI> playerActionUis;
-    private GameObject currentCtrlCharacter;
+    private List<PlayerActionUI> playerActionUis = new List<PlayerActionUI>();
+    private BaseCharacter currentCtrlBaseCharacter = null;
 
     private void Start()
     {
@@ -75,6 +76,11 @@ public class CharacterController : MonoBehaviour
     {
         // 마우스 상태에 따라 화면에 "모든 기물" 선택 확인 (아직 Player만 설정)
         GetCilckObject();
+        if (currentCtrlBaseCharacter != null)
+        {
+            currentCtrlBaseCharacter.Update();
+        }
+        
     }
 
     private void GetCilckObject()
@@ -94,6 +100,16 @@ public class CharacterController : MonoBehaviour
                 if (hit.collider != null && hit.collider.gameObject.tag == "Player")
                 {
                     currentCtrlCharacter = hit.transform.gameObject;
+                    // 클릭한 캐릭터 + _ + id  형태에서 고유한 값 id만 추출
+                    int correctID = int.Parse(currentCtrlCharacter.name.Substring(currentCtrlCharacter.name.IndexOf("_") + 1).Trim());
+                    // player 캐릭터 중에서 알맞은 id 찾기
+                    foreach(BaseCharacter child in controlCharacter[ECharacter.Player])
+                    {
+                        if(child.id == correctID)
+                        {
+                            currentCtrlBaseCharacter = child;
+                        }
+                    }
                     //playerActionUI = currentCtrlCharacter.transform.GetChild(0).GetChild(0).GetComponent<PlayerActionUI>();
                     foreach (GameObject child in characters)
                     {
@@ -117,6 +133,7 @@ public class CharacterController : MonoBehaviour
                 // 어떤 기물도 선택되지 않았을 때 -> 비어있는 화면을 눌렀을때 화면에 보이는 모든 UI 제거 (기본 UI 제외)
                 else
                 {
+                    currentCtrlBaseCharacter = null;
                     currentCtrlCharacter = null;
                     foreach (PlayerActionUI playerUi in playerActionUis)
                     {
@@ -197,7 +214,7 @@ public class CharacterController : MonoBehaviour
             playerActionUI.baseCharacter = controlCharacter[ECharacter.Player][playerCount];
 
             spawnObject.GetComponent<SpriteRenderer>().sprite = baseCharacter.characterSprite;
-            spawnObject.name = baseCharacter.characterName + playerCount;
+            spawnObject.name = baseCharacter.characterName + "_" + playerCount;
             characters.Add(spawnObject);
             playerActionUis.Add(playerActionUI);
         }

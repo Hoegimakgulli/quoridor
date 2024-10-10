@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using CharacterDefinition;
+using HM.Physics;
 
 public class BaseCharacter
 {
@@ -29,11 +30,12 @@ public class BaseCharacter
     private GameObject previewStorage;
     #endregion
 
+    // 적 플레이어 공용 변수 모음 (변경될 수 있음 아직 미정) -> 기획에 따라 변경될 예정
     #region TokenValues
     public int maxHp;
     public Vector2 mPosition;
-    private List<Vector2> movablePositions = new List<Vector2>();
-    private List<Vector2> attackablePositions = new List<Vector2>();
+    private List<Vector2Int> movablePositions = new List<Vector2Int>();
+    private List<Vector2Int> attackablePositions = new List<Vector2Int>();
 
     public enum ECharacterType { Mutu = 0, Mana = 1, Machine = 2 }
     public enum EPositionType { Tanker = 0, Attacker = 1, Supporter = 2 }
@@ -68,9 +70,11 @@ public class BaseCharacter
     }
     #endregion
 
+    // 적 해당 변수 모음 (변경될 수 있음 아직 미정) -> 기획에 따라 변경될 예정
     #region EnemyValues
     #endregion
 
+    // 플레어만 사용되는 변수 모음 (변경될 수 있음 아직 미정) -> 기획에 따라 변경될 예정
     #region PlayerValues
     public bool canBuild
     {
@@ -88,6 +92,7 @@ public class BaseCharacter
     }
     public int buildInteractionDistance = 100;
     public int destroyInteractionDistance = 100;
+    private Vector2 touchPosition = new Vector2(0, 0);
     #endregion
 
     #region LoadToDataSet
@@ -140,7 +145,7 @@ public class BaseCharacter
 
     public virtual void Update()
     {
-        
+        if (playerable) PlayerUpdate();
     }
 
     public virtual void Reset()
@@ -148,7 +153,7 @@ public class BaseCharacter
 
     }
 
-    public virtual void Move(Vector2 targetPos)
+    public virtual void Move()
     {
         Debug.LogFormat("{0} 캐릭터 Move함수 실행", characterName);
     }
@@ -286,5 +291,70 @@ public class BaseCharacter
         }
         playerWallPreview = controller.SetObjectToParent(playerPrefabs.wallPreview, null, position); // 플레이어 벽 미리보기 -> 미리소환하여 비활성화 해놓기
         playerWallPreview.SetActive(false);
+    }
+
+    // CharacterController에서 currentPlayer가 누군지에 따라 해당 BaseCharacter 스크립트안에 실행되는 playerUpdate 결정
+    // BaseCharacter에서 결정 X
+    private void PlayerUpdate()
+    {
+        touchPosition = controller.touchPos;
+        switch (controller.playerControlStatus)
+        {
+            case EPlayerControlStatus.Move:
+                if (canMove) Move();
+                else ResetPreview();
+                break;
+            case EPlayerControlStatus.Build:
+                if (canBuild) Build();
+                else ResetPreview();
+                break;
+            case EPlayerControlStatus.Attack:
+                if (canAttack) Attack();
+                else ResetPreview();
+                break;
+            // case GameManager.EPlayerControlStatus.Ability:
+            //     if (abilityCount > 0) UseAbility();
+            //     else ResetPreview();
+            //     break;
+            //case EPlayerControlStatus.Destroy:
+            //    if (canDestroy) Destroy();
+            //    else ResetPreview();
+            //    break;
+
+            default:
+                break;
+        }
+    }
+
+    
+    private void SetPreviewPlayer()
+    {
+        for (int i = 0; i < movablePositions.Count; i++)
+        {
+            bool[] result = HMPhysics.CheckRay(controller.currentCtrlCharacter.transform.position, (Vector2)movablePositions[i]);
+            if (result[0])
+            {
+                playerPreviews[i].SetActive(false);
+                continue;
+            }
+            if (result[1])
+            {
+                if (!result[2])
+                {
+                    Debug.DrawRay(controller.currentCtrlCharacter.transform.position, (Vector2)movablePositions[i] * GameManager.gridSize, Color.green, 0.1f);
+                    playerPreviews[i].transform.position = controller.currentCtrlCharacter.transform.position + GameManager.ChangeCoord(movablePositions[i]);
+                    playerPreviews[i].SetActive(true);
+                }
+                else
+                {
+                    Debug.DrawRay(controller.currentCtrlCharacter.transform.position, (Vector2)movablePositions[i] * GameManager.gridSize, Color.yellow, 0.1f);
+                }
+                continue;
+            }
+            else
+            {
+                Debug.DrawRay(controller.currentCtrlCharacter.transform.position, (Vector2)movablePositions[i] * GameManager.gridSize, Color.red, 0.1f);
+            }
+        }
     }
 }
